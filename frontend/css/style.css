@@ -1,25 +1,36 @@
 /* ==============================================================
    style.css - SIGEM
-   Paleta: azul, branco, cinza (base) + verde/amarelo/vermelho
-   (status). Layout simples, responsivo, sem exagero de animacao.
+   Paleta baseada na identidade visual do logo (azul marinho +
+   azul vibrante), com branco/cinza de base e cores de status
+   (verde/amarelo/vermelho). Layout responsivo, sombras suaves,
+   sem exagero de animacao.
    ============================================================== */
 
-:root {
-    --azul: #1d4ed8;
-    --azul-escuro: #1e3a8a;
-    --azul-claro: #dbeafe;
-    --branco: #ffffff;
-    --cinza-claro: #f3f4f6;
-    --cinza: #6b7280;
-    --cinza-borda: #e5e7eb;
-    --texto: #1f2937;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    --verde: #16a34a;
+:root {
+    --azul-marinho: #0f1f4d;
+    --azul-marinho-2: #16296b;
+    --azul: #2f5fe0;
+    --azul-claro: #e8eefd;
+    --azul-hover: #1f4bc7;
+
+    --branco: #ffffff;
+    --cinza-fundo: #f4f6fb;
+    --cinza-borda: #e6e9f2;
+    --cinza: #6b7280;
+    --cinza-escuro: #374151;
+    --texto: #1c2333;
+
+    --verde: #15803d;
     --verde-bg: #dcfce7;
-    --amarelo: #d97706;
+    --amarelo: #b45309;
     --amarelo-bg: #fef3c7;
-    --vermelho: #dc2626;
+    --vermelho: #b91c1c;
     --vermelho-bg: #fee2e2;
+
+    --sombra: 0 1px 2px rgba(15, 31, 77, 0.06), 0 8px 24px rgba(15, 31, 77, 0.06);
+    --raio: 14px;
 }
 
 * {
@@ -28,59 +39,112 @@
 
 body {
     margin: 0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: var(--cinza-claro);
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: var(--cinza-fundo);
     color: var(--texto);
+    -webkit-font-smoothing: antialiased;
 }
 
 /* ---------- Topo / navegacao ---------- */
 header.topo {
-    background: var(--azul-escuro);
+    background: linear-gradient(135deg, var(--azul-marinho) 0%, var(--azul-marinho-2) 100%);
     color: var(--branco);
-    padding: 16px 24px;
+    padding: 14px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 2px 12px rgba(15, 31, 77, 0.25);
+}
+
+.marca {
+    display: flex;
+    align-items: center;
     gap: 12px;
 }
 
-header.topo h1 {
-    margin: 0;
-    font-size: 20px;
+.marca .logo-badge {
+    background: var(--branco);
+    border-radius: 10px;
+    padding: 4px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-header.topo h1 span {
+.marca .logo-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.marca .marca-texto h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.marca .marca-texto span {
     font-weight: 400;
-    font-size: 14px;
-    opacity: 0.85;
+    font-size: 12.5px;
+    opacity: 0.75;
     display: block;
 }
 
 nav.menu {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 nav.menu a {
     color: var(--branco);
     text-decoration: none;
-    padding: 8px 14px;
-    border-radius: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
     font-size: 14px;
+    font-weight: 500;
     transition: background 0.15s;
 }
 
-nav.menu a:hover,
+nav.menu a:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
 nav.menu a.ativo {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--azul);
+    font-weight: 600;
 }
 
 main {
-    max-width: 1100px;
+    max-width: 1140px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 28px 24px 60px;
+}
+
+/* ---------- Banner / hero (so no dashboard) ---------- */
+.hero-banner {
+    width: 100%;
+    border-radius: var(--raio);
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: var(--sombra);
+    line-height: 0;
+}
+
+.hero-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 /* ---------- Cards do dashboard ---------- */
@@ -94,20 +158,30 @@ main {
 .card {
     background: var(--branco);
     border: 1px solid var(--cinza-borda);
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: var(--raio);
+    padding: 20px;
+    box-shadow: var(--sombra);
+    transition: transform 0.15s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
 }
 
 .card .card-titulo {
-    font-size: 13px;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--cinza);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
 .card .card-valor {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--azul-escuro);
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--azul-marinho);
+    line-height: 1;
 }
 
 .card.alerta-vermelho .card-valor { color: var(--vermelho); }
@@ -118,30 +192,36 @@ main {
 section.bloco {
     background: var(--branco);
     border: 1px solid var(--cinza-borda);
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: var(--raio);
+    padding: 22px;
     margin-bottom: 20px;
+    box-shadow: var(--sombra);
 }
 
 section.bloco h2 {
     margin-top: 0;
-    font-size: 16px;
-    color: var(--azul-escuro);
+    margin-bottom: 16px;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--azul-marinho);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* ---------- Badges de status ---------- */
 .badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 999px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .badge-vermelho { background: var(--vermelho-bg); color: var(--vermelho); }
 .badge-amarelo { background: var(--amarelo-bg); color: var(--amarelo); }
 .badge-verde { background: var(--verde-bg); color: var(--verde); }
-.badge-azul { background: var(--azul-claro); color: var(--azul-escuro); }
+.badge-azul { background: var(--azul-claro); color: var(--azul-marinho); }
 
 /* ---------- Tabelas ---------- */
 table {
@@ -152,72 +232,90 @@ table {
 
 th, td {
     text-align: left;
-    padding: 10px 8px;
+    padding: 12px 10px;
     border-bottom: 1px solid var(--cinza-borda);
 }
 
 th {
     color: var(--cinza);
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: 700;
+    font-size: 11.5px;
     text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+tbody tr {
+    transition: background 0.1s;
 }
 
 tbody tr:hover {
-    background: var(--cinza-claro);
+    background: var(--cinza-fundo);
 }
 
 .tabela-vazia {
     color: var(--cinza);
     font-style: italic;
-    padding: 12px 0;
+    padding: 14px 0;
 }
 
 /* ---------- Formularios ---------- */
 form.form-cadastro {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
+    gap: 16px;
 }
 
 .campo {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .campo label {
-    font-size: 13px;
-    color: var(--cinza);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--cinza-escuro);
 }
 
 .campo input,
 .campo select {
-    padding: 9px 10px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 8px;
     font-size: 14px;
+    font-family: inherit;
+    background: var(--branco);
+    color: var(--texto);
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .campo input:focus,
 .campo select:focus {
     outline: none;
     border-color: var(--azul);
+    box-shadow: 0 0 0 3px var(--azul-claro);
 }
 
 .form-acoes {
     grid-column: 1 / -1;
     display: flex;
     gap: 10px;
+    margin-top: 4px;
 }
 
 button {
     cursor: pointer;
     border: none;
-    border-radius: 6px;
-    padding: 10px 18px;
+    border-radius: 8px;
+    padding: 11px 20px;
     font-size: 14px;
     font-weight: 600;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+}
+
+button:active {
+    transform: scale(0.98);
 }
 
 button.btn-primario {
@@ -226,36 +324,37 @@ button.btn-primario {
 }
 
 button.btn-primario:hover {
-    background: var(--azul-escuro);
+    background: var(--azul-hover);
 }
 
 button.btn-secundario {
-    background: var(--cinza-claro);
+    background: var(--cinza-fundo);
     color: var(--texto);
-    border: 1px solid var(--cinza-borda);
+    border: 1.5px solid var(--cinza-borda);
 }
 
 button.btn-perigo {
     background: var(--vermelho-bg);
     color: var(--vermelho);
-    padding: 6px 12px;
+    padding: 7px 14px;
     font-size: 13px;
 }
 
 button.btn-editar {
     background: var(--azul-claro);
-    color: var(--azul-escuro);
-    padding: 6px 12px;
+    color: var(--azul-marinho);
+    padding: 7px 14px;
     font-size: 13px;
     margin-right: 6px;
 }
 
 /* ---------- Mensagens ---------- */
 .mensagem {
-    padding: 10px 14px;
-    border-radius: 6px;
-    margin-bottom: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
     font-size: 14px;
+    font-weight: 500;
 }
 
 .mensagem-erro {
@@ -268,8 +367,16 @@ button.btn-editar {
     color: var(--verde);
 }
 
+/* ---------- Rodape ---------- */
+footer.rodape {
+    text-align: center;
+    padding: 20px;
+    color: var(--cinza);
+    font-size: 13px;
+}
+
 /* ---------- Responsivo ---------- */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
     header.topo {
         flex-direction: column;
         align-items: flex-start;
@@ -282,17 +389,17 @@ button.btn-editar {
     }
     tbody tr {
         border: 1px solid var(--cinza-borda);
-        border-radius: 8px;
-        margin-bottom: 10px;
-        padding: 8px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        padding: 10px;
     }
     td {
         border: none;
-        padding: 4px 4px;
+        padding: 5px 4px;
     }
     td::before {
         content: attr(data-rotulo);
-        font-weight: 600;
+        font-weight: 700;
         color: var(--cinza);
         display: block;
         font-size: 11px;
