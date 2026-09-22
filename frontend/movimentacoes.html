@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGEM - Movimentacoes</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="topo">
+        <h1>SIGEM
+            <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+        </h1>
+        <nav class="menu">
+            <a href="index.html">Dashboard</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="movimentacoes.html" class="ativo">Movimentacoes</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="mensagem-area"></div>
+
+        <section class="bloco">
+            <h2>Registrar movimentacao</h2>
+            <form class="form-cadastro" id="form-movimentacao">
+                <div class="campo">
+                    <label for="mov-medicamento">Medicamento</label>
+                    <select id="mov-medicamento" required></select>
+                </div>
+                <div class="campo">
+                    <label for="mov-lote">Lote</label>
+                    <select id="mov-lote" required></select>
+                </div>
+                <div class="campo">
+                    <label for="mov-tipo">Tipo</label>
+                    <select id="mov-tipo" required>
+                        <option value="ENTRADA">ENTRADA</option>
+                        <option value="SAIDA">SAIDA</option>
+                    </select>
+                </div>
+                <div class="campo" id="campo-setor">
+                    <label for="mov-setor">Setor (obrigatorio em saida)</label>
+                    <select id="mov-setor">
+                        <option value="">-- nenhum --</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="mov-quantidade">Quantidade</label>
+                    <input type="number" id="mov-quantidade" min="1" required>
+                </div>
+                <div class="campo">
+                    <label for="mov-motivo">Motivo</label>
+                    <input type="text" id="mov-motivo" placeholder="Ex: Compra, Atendimento">
+                </div>
+                <div class="form-acoes">
+                    <button type="submit" class="btn-primario">Registrar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bloco">
+            <h2>Historico de movimentacoes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Setor</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-movimentacoes"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/movimentacoes.js"></script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+/* ==============================================================
+   style.css - SIGEM
+   Paleta: azul, branco, cinza (base) + verde/amarelo/vermelho
+   (status). Layout simples, responsivo, sem exagero de animacao.
+   ============================================================== */
+
+:root {
+    --azul: #1d4ed8;
+    --azul-escuro: #1e3a8a;
+    --azul-claro: #dbeafe;
+    --branco: #ffffff;
+    --cinza-claro: #f3f4f6;
+    --cinza: #6b7280;
+    --cinza-borda: #e5e7eb;
+    --texto: #1f2937;
+
+    --verde: #16a34a;
+    --verde-bg: #dcfce7;
+    --amarelo: #d97706;
+    --amarelo-bg: #fef3c7;
+    --vermelho: #dc2626;
+    --vermelho-bg: #fee2e2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--cinza-claro);
+    color: var(--texto);
+}
+
+/* ---------- Topo / navegacao ---------- */
+header.topo {
+    background: var(--azul-escuro);
+    color: var(--branco);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+header.topo h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+header.topo h1 span {
+    font-weight: 400;
+    font-size: 14px;
+    opacity: 0.85;
+    display: block;
+}
+
+nav.menu {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+nav.menu a {
+    color: var(--branco);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.15s;
+}
+
+nav.menu a:hover,
+nav.menu a.ativo {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* ---------- Cards do dashboard ---------- */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.card {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.card .card-titulo {
+    font-size: 13px;
+    color: var(--cinza);
+    margin-bottom: 6px;
+}
+
+.card .card-valor {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--azul-escuro);
+}
+
+.card.alerta-vermelho .card-valor { color: var(--vermelho); }
+.card.alerta-amarelo .card-valor { color: var(--amarelo); }
+.card.alerta-verde .card-valor { color: var(--verde); }
+
+/* ---------- Secoes ---------- */
+section.bloco {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+section.bloco h2 {
+    margin-top: 0;
+    font-size: 16px;
+    color: var(--azul-escuro);
+}
+
+/* ---------- Badges de status ---------- */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-vermelho { background: var(--vermelho-bg); color: var(--vermelho); }
+.badge-amarelo { background: var(--amarelo-bg); color: var(--amarelo); }
+.badge-verde { background: var(--verde-bg); color: var(--verde); }
+.badge-azul { background: var(--azul-claro); color: var(--azul-escuro); }
+
+/* ---------- Tabelas ---------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th, td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+
+th {
+    color: var(--cinza);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+tbody tr:hover {
+    background: var(--cinza-claro);
+}
+
+.tabela-vazia {
+    color: var(--cinza);
+    font-style: italic;
+    padding: 12px 0;
+}
+
+/* ---------- Formularios ---------- */
+form.form-cadastro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.campo label {
+    font-size: 13px;
+    color: var(--cinza);
+}
+
+.campo input,
+.campo select {
+    padding: 9px 10px;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.campo input:focus,
+.campo select:focus {
+    outline: none;
+    border-color: var(--azul);
+}
+
+.form-acoes {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+button.btn-primario {
+    background: var(--azul);
+    color: var(--branco);
+}
+
+button.btn-primario:hover {
+    background: var(--azul-escuro);
+}
+
+button.btn-secundario {
+    background: var(--cinza-claro);
+    color: var(--texto);
+    border: 1px solid var(--cinza-borda);
+}
+
+button.btn-perigo {
+    background: var(--vermelho-bg);
+    color: var(--vermelho);
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+button.btn-editar {
+    background: var(--azul-claro);
+    color: var(--azul-escuro);
+    padding: 6px 12px;
+    font-size: 13px;
+    margin-right: 6px;
+}
+
+/* ---------- Mensagens ---------- */
+.mensagem {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+.mensagem-erro {
+    background: var(--vermelho-bg);
+    color: var(--vermelho);
+}
+
+.mensagem-sucesso {
+    background: var(--verde-bg);
+    color: var(--verde);
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 600px) {
+    header.topo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    thead {
+        display: none;
+    }
+    tbody tr {
+        border: 1px solid var(--cinza-borda);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 8px;
+    }
+    td {
+        border: none;
+        padding: 4px 4px;
+    }
+    td::before {
+        content: attr(data-rotulo);
+        font-weight: 600;
+        color: var(--cinza);
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+}
