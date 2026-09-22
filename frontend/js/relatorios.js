@@ -181,6 +181,44 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
         .filter(item => item.tipo === 'SAIDA')
         .reduce((soma, item) => soma + item.quantidade, 0);
 
+    // ---------- Total de SAIDAS por setor ----------
+    //
+    // Reduce() percorre a lista e vai "acumulando" um resultado.
+    // Aqui, o resultado acumulado e um objeto tipo:
+    //   { "UTI": 45, "Pronto Atendimento": 20 }
+    // Cada saida soma no setor correspondente.
+    const totaisPorSetor = ultimoRelatorio
+        .filter(item => item.tipo === 'SAIDA' && item.setor_nome)
+        .reduce((acumulado, item) => {
+            acumulado[item.setor_nome] = (acumulado[item.setor_nome] || 0) + item.quantidade;
+            return acumulado;
+        }, {});
+
+    // Transforma o objeto em uma lista ordenada do setor que mais
+    // recebeu medicamento para o que menos recebeu.
+    const rankingSetores = Object.entries(totaisPorSetor)
+        .sort((a, b) => b[1] - a[1]);
+
+    // ---------- Medicamento mais movimentado ----------
+    //
+    // Soma ENTRADA + SAIDA de cada medicamento (quantidade total
+    // que passou por ele no periodo), e pega o maior.
+    const totaisPorMedicamento = ultimoRelatorio.reduce((acumulado, item) => {
+        acumulado[item.medicamento_nome] = (acumulado[item.medicamento_nome] || 0) + item.quantidade;
+        return acumulado;
+    }, {});
+
+    const medicamentoDestaque = Object.entries(totaisPorMedicamento)
+        .sort((a, b) => b[1] - a[1])[0]; // [0] = o primeiro depois de ordenado = o maior
+
+    // ---------- Quem gerou o relatorio ----------
+    const sessao = obterSessao();
+    const nomeUsuario = sessao ? sessao.nome : 'Convidado';
+
+    const linhasRankingSetores = rankingSetores.length > 0
+        ? rankingSetores.map(([setor, total]) => `<li>${setor}: <strong>${total}</strong> unidades</li>`).join('')
+        : '<li>Nenhuma saida com setor informado neste periodo.</li>';
+
     const htmlRelatorio = `
         <!DOCTYPE html>
         <html lang="pt-br">
@@ -271,6 +309,34 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
                     font-size: 17px;
                     color: #0f1f4d;
                 }
+                .destaques {
+                    display: flex;
+                    gap: 24px;
+                    margin-bottom: 22px;
+                }
+                .destaque-card {
+                    flex: 1;
+                    background: #f4f6fb;
+                    border: 1px solid #e6e9f2;
+                    border-radius: 8px;
+                    padding: 12px 16px;
+                }
+                .destaque-card h3 {
+                    margin: 0 0 8px;
+                    font-size: 12px;
+                    color: #6b7280;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+                .destaque-card p {
+                    margin: 0;
+                    font-size: 14px;
+                }
+                .destaque-card ul {
+                    margin: 0;
+                    padding-left: 18px;
+                    font-size: 12.5px;
+                }
                 .rodape {
                     margin-top: 28px;
                     padding-top: 12px;
@@ -303,6 +369,17 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
                 <div>Unidades em saidas<strong>${totalSaidas}</strong></div>
             </div>
 
+            <div class="destaques">
+                <div class="destaque-card">
+                    <h3>Medicamento mais movimentado</h3>
+                    <p>${medicamentoDestaque ? `${medicamentoDestaque[0]} &mdash; ${medicamentoDestaque[1]} unidades` : 'Sem dados no periodo'}</p>
+                </div>
+                <div class="destaque-card">
+                    <h3>Saidas por setor</h3>
+                    <ul>${linhasRankingSetores}</ul>
+                </div>
+            </div>
+
             <table>
                 <thead>
                     <tr>
@@ -318,7 +395,7 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
                 <tbody>${linhasTabela}</tbody>
             </table>
 
-            <p class="rodape">Relatorio gerado pelo SIGEM em ${dataGeracao}</p>
+            <p class="rodape">Relatorio gerado por ${nomeUsuario} &middot; SIGEM em ${dataGeracao}</p>
         </body>
         </html>
     `;
