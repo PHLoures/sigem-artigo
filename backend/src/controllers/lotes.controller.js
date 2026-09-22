@@ -11,13 +11,13 @@ const pool = require('../database/pool');
 // junto (por isso o JOIN).
 async function listar(req, res) {
     try {
-        const resultado = await pool.query(
+        const [linhas] = await pool.query(
             `SELECT l.*, m.nome AS medicamento_nome
              FROM lotes l
              JOIN medicamentos m ON m.id = l.medicamento_id
              ORDER BY l.data_validade`
         );
-        res.json(resultado.rows);
+        res.json(linhas);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao buscar lotes.' });
@@ -29,11 +29,11 @@ async function listar(req, res) {
 async function listarPorMedicamento(req, res) {
     const { medicamentoId } = req.params;
     try {
-        const resultado = await pool.query(
-            `SELECT * FROM lotes WHERE medicamento_id = $1 ORDER BY data_validade`,
+        const [linhas] = await pool.query(
+            `SELECT * FROM lotes WHERE medicamento_id = ? ORDER BY data_validade`,
             [medicamentoId]
         );
-        res.json(resultado.rows);
+        res.json(linhas);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao buscar lotes do medicamento.' });
@@ -50,18 +50,20 @@ async function criar(req, res) {
     }
 
     try {
-        const resultado = await pool.query(
+        const [resultado] = await pool.query(
             `INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade)
-             VALUES ($1, $2, $3, $4)
-             RETURNING *`,
+             VALUES (?, ?, ?, ?)`,
             [medicamento_id, numero_lote, quantidade, data_validade]
         );
-        res.status(201).json(resultado.rows[0]);
+
+        const [linhas] = await pool.query('SELECT * FROM lotes WHERE id = ?', [resultado.insertId]);
+        res.status(201).json(linhas[0]);
     } catch (erro) {
         console.error(erro);
         // Erro comum: numero_lote repetido para o mesmo medicamento
         // (viola a UNIQUE (medicamento_id, numero_lote) do schema).
-        if (erro.code === '23505') {
+        // No MySQL, esse erro tem o codigo 'ER_DUP_ENTRY'.
+        if (erro.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({ erro: 'Ja existe um lote com esse numero para este medicamento.' });
         }
         res.status(500).json({ erro: 'Erro ao criar lote.' });
@@ -74,17 +76,17 @@ async function atualizar(req, res) {
     const { numero_lote, quantidade, data_validade } = req.body;
 
     try {
-        const resultado = await pool.query(
+        const [resultado] = await pool.query(
             `UPDATE lotes
-             SET numero_lote = $1, quantidade = $2, data_validade = $3
-             WHERE id = $4
-             RETURNING *`,
+             SET numero_lote = ?, quantidade = ?, data_validade = ?
+             WHERE id = ?`,
             [numero_lote, quantidade, data_validade, id]
         );
-        if (resultado.rows.length === 0) {
+        if (resultado.affectedRows === 0) {
             return res.status(404).json({ erro: 'Lote nao encontrado.' });
         }
-        res.json(resultado.rows[0]);
+        const [linhas] = await pool.query('SELECT * FROM lotes WHERE id = ?', [id]);
+        res.json(linhas[0]);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao atualizar lote.' });
@@ -95,17 +97,17 @@ async function atualizar(req, res) {
 async function remover(req, res) {
     const { id } = req.params;
     try {
-        const resultado = await pool.query(
-            'DELETE FROM lotes WHERE id = $1 RETURNING *',
+        const [resultado] = await pool.query(
+            'DELETE FROM lotes WHERE id = ?',
             [id]
         );
-        if (resultado.rows.length === 0) {
+        if (resultado.affectedRows === 0) {
             return res.status(404).json({ erro: 'Lote nao encontrado.' });
         }
         res.json({ mensagem: 'Lote removido com sucesso.' });
     } catch (erro) {
         console.error(erro);
-        if (erro.code === '23503') {
+        if (erro.code === 'ER_ROW_IS_REFERENCED_2') {
             return res.status(409).json({ erro: 'Nao e possivel excluir: existem movimentacoes vinculadas a este lote.' });
         }
         res.status(500).json({ erro: 'Erro ao remover lote.' });

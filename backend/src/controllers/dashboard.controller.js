@@ -14,19 +14,19 @@ async function resumo(req, res) {
     try {
         // Total de medicamentos cadastrados (tipos diferentes,
         // nao soma de quantidade).
-        const totalMedicamentos = await pool.query(
+        const [totalMedicamentosLinhas] = await pool.query(
             'SELECT COUNT(*) AS total FROM medicamentos'
         );
 
         // Soma de todas as quantidades de todos os lotes = total
         // de unidades fisicas em estoque no hospital.
-        const totalEstoque = await pool.query(
+        const [totalEstoqueLinhas] = await pool.query(
             'SELECT COALESCE(SUM(quantidade), 0) AS total FROM lotes'
         );
 
         // Medicamentos com estoque baixo: soma dos lotes de cada
         // medicamento <= estoque_minimo dele.
-        const estoqueBaixo = await pool.query(`
+        const [estoqueBaixo] = await pool.query(`
             SELECT m.id, m.nome, m.estoque_minimo,
                    COALESCE(SUM(l.quantidade), 0) AS quantidade_total
             FROM medicamentos m
@@ -38,27 +38,31 @@ async function resumo(req, res) {
 
         // Lotes proximos do vencimento (dentro dos proximos X dias,
         // mas ainda nao vencidos).
-        const proximosVencimento = await pool.query(
+        //
+        // No PostgreSQL fazíamos "CURRENT_DATE + $1::INTEGER * INTERVAL '1 day'".
+        // No MySQL, usamos a funcao DATE_ADD(data, INTERVAL x DAY),
+        // que soma X dias a uma data.
+        const [proximosVencimento] = await pool.query(
             `SELECT l.id, l.numero_lote, l.quantidade, l.data_validade, m.nome AS medicamento_nome
              FROM lotes l
              JOIN medicamentos m ON m.id = l.medicamento_id
-             WHERE l.data_validade >= CURRENT_DATE
-               AND l.data_validade <= CURRENT_DATE + $1::INTEGER * INTERVAL '1 day'
+             WHERE l.data_validade >= CURDATE()
+               AND l.data_validade <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
              ORDER BY l.data_validade`,
             [DIAS_ALERTA_VENCIMENTO]
         );
 
         // Lotes ja vencidos.
-        const vencidos = await pool.query(
+        const [vencidos] = await pool.query(
             `SELECT l.id, l.numero_lote, l.quantidade, l.data_validade, m.nome AS medicamento_nome
              FROM lotes l
              JOIN medicamentos m ON m.id = l.medicamento_id
-             WHERE l.data_validade < CURRENT_DATE
+             WHERE l.data_validade < CURDATE()
              ORDER BY l.data_validade`
         );
 
         // Ultimas 10 movimentacoes.
-        const ultimasMovimentacoes = await pool.query(
+        const [ultimasMovimentacoes] = await pool.query(
             `SELECT mv.tipo, mv.quantidade, mv.data_movimentacao,
                     m.nome AS medicamento_nome, l.numero_lote, s.nome AS setor_nome
              FROM movimentacoes mv
@@ -70,12 +74,12 @@ async function resumo(req, res) {
         );
 
         res.json({
-            totalMedicamentos: Number(totalMedicamentos.rows[0].total),
-            totalEstoque: Number(totalEstoque.rows[0].total),
-            estoqueBaixo: estoqueBaixo.rows,
-            proximosVencimento: proximosVencimento.rows,
-            vencidos: vencidos.rows,
-            ultimasMovimentacoes: ultimasMovimentacoes.rows,
+            totalMedicamentos: Number(totalMedicamentosLinhas[0].total),
+            totalEstoque: Number(totalEstoqueLinhas[0].total),
+            estoqueBaixo,
+            proximosVencimento,
+            vencidos,
+            ultimasMovimentacoes,
         });
     } catch (erro) {
         console.error(erro);

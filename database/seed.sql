@@ -1,6 +1,6 @@
 -- ============================================================
 -- SIGEM - Sistema de Gestao de Medicamentos Hospitalares
--- seed.sql
+-- seed.sql (versao MySQL)
 --
 -- Este arquivo insere dados FICTICIOS para testar o sistema.
 -- "Seed" significa "semente" - e o dado inicial para o banco
@@ -20,7 +20,7 @@
 -- INSERT INTO tabela (colunas) VALUES (valores);
 -- Cada linha dentro de VALUES (...) e um medicamento novo.
 -- Nao precisamos informar "id" nem "criado_em": o id e gerado
--- sozinho (SERIAL) e criado_em usa o DEFAULT NOW() do schema.
+-- sozinho (AUTO_INCREMENT) e criado_em usa o DEFAULT do schema.
 -- ------------------------------------------------------------
 INSERT INTO medicamentos
     (nome, principio_ativo, dosagem, forma_farmaceutica, fabricante, estoque_minimo)
@@ -52,34 +52,36 @@ INSERT INTO setores (nome) VALUES
 -- Exemplo: (SELECT id FROM medicamentos WHERE nome = 'Dipirona')
 -- retorna o id da Dipirona, seja ele 1, 2 ou qualquer outro.
 --
--- CURRENT_DATE e uma funcao do PostgreSQL que retorna a data
--- de hoje. Somando ou subtraindo "INTERVAL 'X days'" a gente
--- calcula datas passadas ou futuras.
+-- CURDATE() e uma funcao do MySQL que retorna a data de hoje
+-- (equivalente ao CURRENT_DATE do PostgreSQL). Somando ou
+-- subtraindo "INTERVAL X DAY" calculamos datas passadas/futuras.
+-- Repare que no MySQL o numero de dias NAO fica entre aspas
+-- (INTERVAL 30 DAY, e nao INTERVAL '30 days' como no Postgres).
 -- ------------------------------------------------------------
 
 -- Dipirona: um lote com estoque OK e validade distante,
 -- e um lote JA VENCIDO (para testar o alerta de vencido).
 INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade) VALUES
-    ((SELECT id FROM medicamentos WHERE nome = 'Dipirona'), 'DIP2026A', 480, CURRENT_DATE + INTERVAL '365 days'),
-    ((SELECT id FROM medicamentos WHERE nome = 'Dipirona'), 'DIP2024B', 40,  CURRENT_DATE - INTERVAL '30 days');
+    ((SELECT id FROM medicamentos WHERE nome = 'Dipirona'), 'DIP2026A', 480, CURDATE() + INTERVAL 365 DAY),
+    ((SELECT id FROM medicamentos WHERE nome = 'Dipirona'), 'DIP2024B', 40,  CURDATE() - INTERVAL 30 DAY);
 
 -- Paracetamol: estoque baixo (abaixo do estoque_minimo = 80)
 -- e validade proxima (dentro de 15 dias, para testar o alerta
 -- de "proximo do vencimento").
 INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade) VALUES
-    ((SELECT id FROM medicamentos WHERE nome = 'Paracetamol'), 'PCT2026A', 25, CURRENT_DATE + INTERVAL '15 days');
+    ((SELECT id FROM medicamentos WHERE nome = 'Paracetamol'), 'PCT2026A', 25, CURDATE() + INTERVAL 15 DAY);
 
 -- Amoxicilina: estoque normal e validade normal.
 INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade) VALUES
-    ((SELECT id FROM medicamentos WHERE nome = 'Amoxicilina'), 'AMX2026A', 200, CURRENT_DATE + INTERVAL '180 days');
+    ((SELECT id FROM medicamentos WHERE nome = 'Amoxicilina'), 'AMX2026A', 200, CURDATE() + INTERVAL 180 DAY);
 
 -- Azitromicina: estoque baixo (abaixo do estoque_minimo = 30).
 INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade) VALUES
-    ((SELECT id FROM medicamentos WHERE nome = 'Azitromicina'), 'AZI2026A', 10, CURRENT_DATE + INTERVAL '200 days');
+    ((SELECT id FROM medicamentos WHERE nome = 'Azitromicina'), 'AZI2026A', 10, CURDATE() + INTERVAL 200 DAY);
 
 -- Ibuprofeno: estoque normal, validade normal.
 INSERT INTO lotes (medicamento_id, numero_lote, quantidade, data_validade) VALUES
-    ((SELECT id FROM medicamentos WHERE nome = 'Ibuprofeno'), 'IBU2026A', 150, CURRENT_DATE + INTERVAL '300 days');
+    ((SELECT id FROM medicamentos WHERE nome = 'Ibuprofeno'), 'IBU2026A', 150, CURDATE() + INTERVAL 300 DAY);
 
 
 -- ------------------------------------------------------------

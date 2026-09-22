@@ -9,7 +9,7 @@ desperdicios e vencimentos.
 
 - **Frontend**: HTML5, CSS3, JavaScript puro (sem frameworks)
 - **Backend**: Node.js + Express.js
-- **Banco de dados**: PostgreSQL
+- **Banco de dados**: MySQL
 
 ## Estrutura do projeto
 
@@ -25,7 +25,7 @@ sigem-artigo/
 │   ├── src/
 │   │   ├── controllers/     (logica de cada operacao)
 │   │   ├── routes/          (enderecos da API)
-│   │   ├── database/pool.js (conexao com o PostgreSQL)
+│   │   ├── database/pool.js (conexao com o MySQL)
 │   │   └── app.js           (arquivo principal)
 │   ├── package.json
 │   └── .env              (NAO vai para o Git — veja .gitignore)
@@ -37,28 +37,28 @@ sigem-artigo/
 
 ## Como rodar o projeto do zero
 
-### 1) Banco de dados (PostgreSQL)
+### 1) Banco de dados (MySQL)
 
-Instale o PostgreSQL (no macOS, com Homebrew):
+Instale o MySQL (no macOS, com Homebrew):
 
 ```bash
-brew install postgresql@16
-brew services start postgresql@16
+brew install mysql
+brew services start mysql
 ```
 
 Crie o banco e rode os scripts:
 
 ```bash
-createdb sigem
-psql -d sigem -f database/schema.sql
-psql -d sigem -f database/seed.sql
+mysql -u root -e "CREATE DATABASE sigem CHARACTER SET utf8mb4;"
+mysql -u root sigem < database/schema.sql
+mysql -u root sigem < database/seed.sql
 ```
 
 Para conferir se deu certo:
 
 ```bash
-psql -d sigem -c "\dt"
-psql -d sigem -c "SELECT * FROM medicamentos;"
+mysql -u root sigem -e "SHOW TABLES;"
+mysql -u root sigem -e "SELECT * FROM medicamentos;"
 ```
 
 ### 2) Backend (API)
@@ -72,9 +72,9 @@ Copie o arquivo `.env` de exemplo (ou crie um) com:
 
 ```
 DB_HOST=localhost
-DB_PORT=5432
+DB_PORT=3306
 DB_NAME=sigem
-DB_USER=seu_usuario_do_postgres
+DB_USER=root
 DB_PASSWORD=sua_senha
 PORT=3000
 ```

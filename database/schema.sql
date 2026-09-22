@@ -1,6 +1,6 @@
 -- ============================================================
 -- SIGEM - Sistema de Gestao de Medicamentos Hospitalares
--- schema.sql
+-- schema.sql (versao MySQL)
 --
 -- Este arquivo cria todas as tabelas do sistema.
 -- Ele NAO cria o banco de dados em si (isso e feito com
@@ -17,30 +17,34 @@
 -- diferentes chegando em datas diferentes.
 -- ------------------------------------------------------------
 CREATE TABLE medicamentos (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     principio_ativo VARCHAR(150) NOT NULL,
     dosagem VARCHAR(50) NOT NULL,
     forma_farmaceutica VARCHAR(50) NOT NULL,
     fabricante VARCHAR(150) NOT NULL,
-    estoque_minimo INTEGER NOT NULL DEFAULT 0 CHECK (estoque_minimo >= 0),
-    criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+    estoque_minimo INT NOT NULL DEFAULT 0 CHECK (estoque_minimo >= 0),
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Explicando as colunas:
---   id SERIAL PRIMARY KEY
---     -> SERIAL cria um numero inteiro que aumenta sozinho
---        (1, 2, 3, 4...) a cada novo medicamento inserido.
+-- Explicando as colunas (diferencas do MySQL para o PostgreSQL):
+--   id INT AUTO_INCREMENT PRIMARY KEY
+--     -> No PostgreSQL usavamos "SERIAL". No MySQL o equivalente
+--        e "INT AUTO_INCREMENT": um numero inteiro que aumenta
+--        sozinho (1, 2, 3, 4...) a cada nova linha inserida.
 --        PRIMARY KEY diz que essa coluna identifica a linha
 --        de forma unica.
 --   estoque_minimo ... DEFAULT 0 CHECK (estoque_minimo >= 0)
 --     -> Se ninguem informar um valor, o banco usa 0.
 --        O CHECK impede que alguem cadastre um estoque minimo
---        negativo (isso nao faria sentido).
---   criado_em TIMESTAMP NOT NULL DEFAULT NOW()
---     -> NOW() e uma funcao do PostgreSQL que retorna a data
---        e hora atuais. Assim, sempre que um medicamento for
---        criado, essa coluna e preenchida automaticamente.
+--        negativo. (O MySQL so passou a aplicar CHECK de verdade
+--        a partir da versao 8 - versoes antigas aceitavam o
+--        comando mas ignoravam a regra.)
+--   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+--     -> No PostgreSQL usavamos a funcao NOW(). No MySQL o
+--        equivalente mais comum e CURRENT_TIMESTAMP. As duas
+--        fazem a mesma coisa: preenchem a data/hora atual
+--        automaticamente quando a linha e criada.
 
 
 -- ------------------------------------------------------------
@@ -51,7 +55,7 @@ CREATE TABLE medicamentos (
 -- UTI, Centro Cirurgico).
 -- ------------------------------------------------------------
 CREATE TABLE setores (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE
 );
 
@@ -69,27 +73,33 @@ CREATE TABLE setores (
 -- varios lotes, cada um com sua propria validade e quantidade.
 -- ------------------------------------------------------------
 CREATE TABLE lotes (
-    id SERIAL PRIMARY KEY,
-    medicamento_id INTEGER NOT NULL REFERENCES medicamentos(id),
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medicamento_id INT NOT NULL,
     numero_lote VARCHAR(50) NOT NULL,
-    quantidade INTEGER NOT NULL DEFAULT 0 CHECK (quantidade >= 0),
+    quantidade INT NOT NULL DEFAULT 0 CHECK (quantidade >= 0),
     data_validade DATE NOT NULL,
-    criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- Um mesmo medicamento nao pode ter dois lotes com o
     -- mesmo numero (mas medicamentos diferentes podem ter
     -- lotes com numeros iguais por coincidencia).
-    UNIQUE (medicamento_id, numero_lote)
+    UNIQUE (medicamento_id, numero_lote),
+
+    -- FOREIGN KEY no MySQL precisa ser declarada com a palavra
+    -- "CONSTRAINT ... FOREIGN KEY ... REFERENCES", diferente do
+    -- PostgreSQL que aceita "REFERENCES" direto na coluna.
+    CONSTRAINT fk_lotes_medicamento
+        FOREIGN KEY (medicamento_id) REFERENCES medicamentos(id)
 );
 
 -- Explicando as partes novas:
---   medicamento_id INTEGER NOT NULL REFERENCES medicamentos(id)
+--   CONSTRAINT fk_lotes_medicamento FOREIGN KEY (medicamento_id)
+--   REFERENCES medicamentos(id)
 --     -> Isso e uma FOREIGN KEY. A coluna medicamento_id guarda
---        o "id" de uma linha da tabela medicamentos. REFERENCES
---        diz "essa coluna aponta para a tabela medicamentos,
---        coluna id". E assim que ligamos as duas tabelas.
---        NOT NULL porque todo lote TEM que pertencer a um
---        medicamento - nao existe lote "sem dono".
+--        o "id" de uma linha da tabela medicamentos. Damos um
+--        NOME para essa restricao (fk_lotes_medicamento) porque
+--        o MySQL exige/recomenda nomear FOREIGN KEYs quando
+--        declaradas dessa forma. E assim que ligamos as tabelas.
 --   UNIQUE (medicamento_id, numero_lote)
 --     -> Essa e uma UNIQUE composta (envolve 2 colunas ao
 --        mesmo tempo). Ela garante que a COMBINACAO das duas
@@ -103,27 +113,34 @@ CREATE TABLE lotes (
 -- E o "historico" do sistema.
 -- ------------------------------------------------------------
 CREATE TABLE movimentacoes (
-    id SERIAL PRIMARY KEY,
-    medicamento_id INTEGER NOT NULL REFERENCES medicamentos(id),
-    lote_id INTEGER NOT NULL REFERENCES lotes(id),
-    setor_id INTEGER REFERENCES setores(id),
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medicamento_id INT NOT NULL,
+    lote_id INT NOT NULL,
+    setor_id INT NULL,
     tipo VARCHAR(10) NOT NULL CHECK (tipo IN ('ENTRADA', 'SAIDA')),
-    quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+    quantidade INT NOT NULL CHECK (quantidade > 0),
     motivo VARCHAR(255),
-    data_movimentacao TIMESTAMP NOT NULL DEFAULT NOW()
+    data_movimentacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_mov_medicamento
+        FOREIGN KEY (medicamento_id) REFERENCES medicamentos(id),
+    CONSTRAINT fk_mov_lote
+        FOREIGN KEY (lote_id) REFERENCES lotes(id),
+    CONSTRAINT fk_mov_setor
+        FOREIGN KEY (setor_id) REFERENCES setores(id)
 );
 
 -- Explicando as partes novas:
---   setor_id INTEGER REFERENCES setores(id)
---     -> Repare que aqui NAO tem NOT NULL. Isso e proposital:
---        numa ENTRADA de estoque (ex: compra de medicamento),
---        normalmente nao existe um "setor" envolvido, entao
---        deixamos essa coluna opcional.
+--   setor_id INT NULL
+--     -> Repare que aqui e NULL (opcional), nao NOT NULL. Isso e
+--        proposital: numa ENTRADA de estoque (ex: compra de
+--        medicamento), normalmente nao existe um "setor"
+--        envolvido, entao deixamos essa coluna opcional.
 --   tipo VARCHAR(10) NOT NULL CHECK (tipo IN ('ENTRADA', 'SAIDA'))
 --     -> O CHECK aqui funciona como uma "lista de valores
 --        permitidos". So aceita o texto 'ENTRADA' ou 'SAIDA' -
 --        qualquer outro valor e rejeitado pelo banco.
---   quantidade INTEGER NOT NULL CHECK (quantidade > 0)
+--   quantidade INT NOT NULL CHECK (quantidade > 0)
 --     -> Diferente do estoque_minimo (que pode ser 0), aqui
 --        exigimos maior que 0, porque nao faz sentido registrar
 --        uma movimentacao de 0 unidades.
@@ -133,9 +150,7 @@ CREATE TABLE movimentacoes (
 -- INDICES (opcional, mas recomendado)
 --
 -- Indices aceleram buscas nas colunas mais consultadas.
--- Nao sao obrigatorios para o projeto funcionar, mas sao uma
--- boa pratica que vale a pena citar no trabalho.
+-- No MySQL, toda FOREIGN KEY ja cria um indice automaticamente,
+-- entao aqui criamos so os que achamos uteis a mais.
 -- ------------------------------------------------------------
-CREATE INDEX idx_lotes_medicamento_id ON lotes(medicamento_id);
-CREATE INDEX idx_movimentacoes_medicamento_id ON movimentacoes(medicamento_id);
-CREATE INDEX idx_movimentacoes_lote_id ON movimentacoes(lote_id);
+CREATE INDEX idx_movimentacoes_data ON movimentacoes(data_movimentacao);
