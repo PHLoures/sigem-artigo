@@ -468,3 +468,64 @@ main.abertura {
         text-transform: uppercase;
     }
 }
+
+/* ---------- Relatorios ---------- */
+.relatorio-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.relatorio-subtitulo {
+    margin: 0;
+    font-size: 13px;
+    color: var(--cinza);
+}
+
+.relatorio-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+/* Escondido na tela normal, aparece so quando o usuario imprime
+   (ou exporta em PDF, que usa a mesma funcao de impressao). */
+.no-screen {
+    display: none;
+}
+
+/* ---------- Impressao / Exportacao em PDF ----------
+   Quando o navegador imprime a pagina (Cmd+P ou o botao
+   "Exportar PDF"), estas regras entram em acao: escondemos
+   cabecalho, menu, formularios e rodape, deixando so a tabela
+   do relatorio - um "modo relatorio limpo". */
+@media print {
+    body {
+        background: var(--branco);
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .no-screen {
+        display: block;
+    }
+
+    main {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    section.bloco {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+
+    table {
+        font-size: 12px;
+    }
+}

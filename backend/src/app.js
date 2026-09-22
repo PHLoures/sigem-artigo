@@ -16,6 +16,7 @@ const lotesRoutes = require('./routes/lotes.routes');
 const movimentacoesRoutes = require('./routes/movimentacoes.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const setoresRoutes = require('./routes/setores.routes');
+const relatoriosRoutes = require('./routes/relatorios.routes');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/lotes', lotesRoutes);
 app.use('/api/movimentacoes', movimentacoesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/setores', setoresRoutes);
+app.use('/api/relatorios', relatoriosRoutes);
 
 // Rota simples so para confirmar que a API esta no ar.
 app.get('/', (req, res) => {

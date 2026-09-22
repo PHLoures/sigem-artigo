@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGEM - Relatorios</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="topo no-print">
+        <div class="marca">
+            <div class="logo-badge">
+                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+            </div>
+            <div class="marca-texto">
+                <h1>SIGEM</h1>
+                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="movimentacoes.html">Movimentacoes</a>
+            <a href="relatorios.html" class="ativo">Relatorios</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="mensagem-area" class="no-print"></div>
+
+        <section class="bloco no-print">
+            <h2>Filtrar historico de movimentacoes</h2>
+            <form class="form-cadastro" id="form-filtro">
+                <div class="campo">
+                    <label for="filtro-data-inicio">Data inicial</label>
+                    <input type="date" id="filtro-data-inicio">
+                </div>
+                <div class="campo">
+                    <label for="filtro-data-fim">Data final</label>
+                    <input type="date" id="filtro-data-fim">
+                </div>
+                <div class="campo">
+                    <label for="filtro-tipo">Tipo</label>
+                    <select id="filtro-tipo">
+                        <option value="">Todos</option>
+                        <option value="ENTRADA">ENTRADA</option>
+                        <option value="SAIDA">SAIDA</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="filtro-medicamento">Medicamento</label>
+                    <select id="filtro-medicamento">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="form-acoes">
+                    <button type="submit" class="btn-primario">Filtrar</button>
+                    <button type="button" class="btn-secundario" id="btn-limpar-filtro">Limpar filtros</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bloco" id="bloco-resultado">
+            <div class="relatorio-cabecalho">
+                <div>
+                    <h2 style="margin-bottom:2px;">Relatorio de movimentacoes</h2>
+                    <p class="relatorio-subtitulo" id="relatorio-periodo">Periodo: todos os registros</p>
+                </div>
+                <div class="relatorio-acoes no-print">
+                    <button type="button" class="btn-secundario" id="btn-exportar-csv">Exportar CSV</button>
+                    <button type="button" class="btn-primario" id="btn-exportar-pdf">Exportar PDF</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Setor</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-relatorio"></tbody>
+            </table>
+
+            <p class="relatorio-rodape-impressao no-screen">
+                Relatorio gerado pelo SIGEM em <span id="relatorio-data-geracao"></span>
+            </p>
+        </section>
+    </main>
+
+    <footer class="rodape no-print">
+        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/relatorios.js"></script>
+</body>
+</html>
