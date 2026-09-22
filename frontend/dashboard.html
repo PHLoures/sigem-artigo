@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGEM - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-badge">
+                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+            </div>
+            <div class="marca-texto">
+                <h1>SIGEM</h1>
+                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="dashboard.html" class="ativo">Dashboard</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="movimentacoes.html">Movimentacoes</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="hero-banner">
+            <img src="assets/img/banner.png" alt="SIGEM - Mais controle, seguranca e eficiencia no gerenciamento de medicamentos">
+        </div>
+
+        <div id="mensagem-area"></div>
+
+        <!-- Cards de resumo -->
+        <section class="cards" id="cards-resumo">
+            <!-- preenchido via JavaScript -->
+        </section>
+
+        <!-- Alertas: vencidos -->
+        <section class="bloco">
+            <h2>🔴 Medicamentos vencidos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Quantidade</th>
+                        <th>Validade</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-vencidos"></tbody>
+            </table>
+        </section>
+
+        <!-- Alertas: proximo do vencimento -->
+        <section class="bloco">
+            <h2>🟠 Proximos do vencimento (30 dias)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Quantidade</th>
+                        <th>Validade</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-vencimento"></tbody>
+            </table>
+        </section>
+
+        <!-- Alertas: estoque baixo -->
+        <section class="bloco">
+            <h2>🔴 Estoque baixo</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Estoque minimo</th>
+                        <th>Quantidade atual</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-estoque-baixo"></tbody>
+            </table>
+        </section>
+
+        <!-- Ultimas movimentacoes -->
+        <section class="bloco">
+            <h2>Ultimas movimentacoes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Setor</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-ultimas-movimentacoes"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
