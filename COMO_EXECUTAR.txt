@@ -18,7 +18,7 @@ PASSO 2 - Ligar o BACKEND (API)
 -------------------------------------------------------------
 Ainda no Terminal, cole:
 
-cd ~/Documents/sigem-artigo/backend && node src/app.js
+cd ~/Desktop/SIGEM/sigem-artigo/backend && node src/app.js
 
 Espere aparecer a mensagem:
 Servidor SIGEM rodando em http://localhost:3000
@@ -30,7 +30,7 @@ PASSO 3 - Ligar o FRONTEND (site)
 -------------------------------------------------------------
 Abra uma NOVA ABA do terminal (atalho: Cmd + T) e cole:
 
-cd ~/Documents/sigem-artigo/frontend && python3 -m http.server 5500
+cd ~/Desktop/SIGEM/sigem-artigo/frontend && python3 -m http.server 5500
 
 Espere aparecer a mensagem:
 Serving HTTP on :: port 5500
