@@ -1,0 +1,82 @@
+===========================================================
+ SIGEM - COMO EXECUTAR O PROJETO
+===========================================================
+
+Toda vez que for usar o sistema, siga esta ordem:
+
+
+PASSO 1 - Garantir que o banco de dados (MySQL) esta ligado
+-------------------------------------------------------------
+Abra o Terminal e cole:
+
+brew services start mysql
+
+(Se ja estiver ligado, ele so avisa "already started" - sem problema.)
+
+
+PASSO 2 - Ligar o BACKEND (API)
+-------------------------------------------------------------
+Ainda no Terminal, cole:
+
+cd ~/Documents/sigem-artigo/backend && node src/app.js
+
+Espere aparecer a mensagem:
+Servidor SIGEM rodando em http://localhost:3000
+
+NAO FECHE essa aba nem digite mais nada nela.
+
+
+PASSO 3 - Ligar o FRONTEND (site)
+-------------------------------------------------------------
+Abra uma NOVA ABA do terminal (atalho: Cmd + T) e cole:
+
+cd ~/Documents/sigem-artigo/frontend && python3 -m http.server 5500
+
+Espere aparecer a mensagem:
+Serving HTTP on :: port 5500
+
+NAO FECHE essa aba tambem.
+
+
+PASSO 4 - Abrir o site no navegador
+-------------------------------------------------------------
+Abra o Chrome ou Safari e acesse este endereco:
+
+http://localhost:5500/index.html
+
+Essa e a tela de abertura. Clique em "Iniciar Sistema" para
+entrar no dashboard.
+
+
+===========================================================
+ PARA ENCERRAR
+===========================================================
+Volte em cada aba do terminal (backend e frontend) e aperte
+Ctrl + C para parar os servidores.
+
+
+===========================================================
+ SE ALGO DER ERRADO
+===========================================================
+- Erro "Address already in use" ao rodar o frontend ou backend:
+  significa que ja tem um servidor rodando naquela porta. Pode
+  ignorar e so acessar o site normalmente, ou fechar a aba antiga
+  antes de abrir outra.
+
+- Pagina abre mas sem estilo bonito (logo gigante, sem cor):
+  de um "hard refresh" no navegador: Cmd + Shift + R
+
+- Pagina do dashboard aparece vazia ou com erro vermelho:
+  o backend nao esta rodando. Confira o Passo 2.
+
+
+===========================================================
+ ENDERECOS DO SITE (LINKS)
+===========================================================
+Tela de abertura (comeco):  http://localhost:5500/index.html
+Dashboard:                  http://localhost:5500/dashboard.html
+Medicamentos:                http://localhost:5500/medicamentos.html
+Movimentacoes:                http://localhost:5500/movimentacoes.html
+
+API (backend, so para conferir se esta no ar):
+http://localhost:3000/api/dashboard
