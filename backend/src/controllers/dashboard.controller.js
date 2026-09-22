@@ -73,6 +73,26 @@ async function resumo(req, res) {
              LIMIT 10`
         );
 
+        // ---------- Dados para os GRAFICOS do dashboard ----------
+
+        // Quantidade total em estoque de CADA medicamento (todos,
+        // nao so os com estoque baixo) - usado no grafico de barras.
+        const [estoquePorMedicamento] = await pool.query(`
+            SELECT m.nome, COALESCE(SUM(l.quantidade), 0) AS quantidade_total
+            FROM medicamentos m
+            LEFT JOIN lotes l ON l.medicamento_id = m.id
+            GROUP BY m.id, m.nome
+            ORDER BY m.nome
+        `);
+
+        // Soma de unidades movimentadas, separada por ENTRADA e
+        // SAIDA - usado no grafico de rosca (doughnut).
+        const [movimentacoesPorTipo] = await pool.query(`
+            SELECT tipo, COALESCE(SUM(quantidade), 0) AS total
+            FROM movimentacoes
+            GROUP BY tipo
+        `);
+
         res.json({
             totalMedicamentos: Number(totalMedicamentosLinhas[0].total),
             totalEstoque: Number(totalEstoqueLinhas[0].total),
@@ -80,6 +100,8 @@ async function resumo(req, res) {
             proximosVencimento,
             vencidos,
             ultimasMovimentacoes,
+            estoquePorMedicamento,
+            movimentacoesPorTipo,
         });
     } catch (erro) {
         console.error(erro);

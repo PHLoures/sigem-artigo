@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <script>
+        if (!localStorage.getItem('sigem_sessao')) {
+            window.location.href = 'index.html';
+        }
+    </script>
 
     <header class="topo">
         <div class="marca">
@@ -23,6 +28,7 @@
             <a href="medicamentos.html" class="ativo">Medicamentos</a>
             <a href="movimentacoes.html">Movimentacoes</a>
             <a href="relatorios.html">Relatorios</a>
+        <span id="usuario-logado"></span>
         </nav>
     </header>
 
@@ -129,6 +135,7 @@
         SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
     </footer>
 
+    <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
     <script src="js/medicamentos.js"></script>
 </body>

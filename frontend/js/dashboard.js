@@ -10,9 +10,71 @@ async function carregarDashboard() {
         renderizarProximosVencimento(dados.proximosVencimento);
         renderizarEstoqueBaixo(dados.estoqueBaixo);
         renderizarUltimasMovimentacoes(dados.ultimasMovimentacoes);
+        renderizarGraficoEstoque(dados.estoquePorMedicamento);
+        renderizarGraficoMovimentacoes(dados.movimentacoesPorTipo);
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
+}
+
+// ---------- GRAFICOS (biblioteca Chart.js) ----------
+//
+// Chart.js e uma biblioteca so de GRAFICOS (nao e um framework
+// de frontend como React/Vue - continua sendo so HTML/CSS/JS
+// puro por baixo). Ela desenha o grafico dentro de uma tag
+// <canvas>, que e como uma "tela de pintura" do navegador.
+
+function renderizarGraficoEstoque(lista) {
+    const ctx = document.getElementById('grafico-estoque');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: lista.map(item => item.nome),
+            datasets: [{
+                label: 'Unidades em estoque',
+                data: lista.map(item => Number(item.quantidade_total)),
+                backgroundColor: '#2f5fe0',
+                borderRadius: 6,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+function renderizarGraficoMovimentacoes(lista) {
+    const ctx = document.getElementById('grafico-movimentacoes');
+
+    // Garante que sempre existam os dois tipos no grafico, mesmo
+    // que ainda nao tenha nenhuma ENTRADA ou SAIDA registrada.
+    const totalEntrada = lista.find(item => item.tipo === 'ENTRADA')?.total || 0;
+    const totalSaida = lista.find(item => item.tipo === 'SAIDA')?.total || 0;
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Entradas', 'Saidas'],
+            datasets: [{
+                data: [Number(totalEntrada), Number(totalSaida)],
+                backgroundColor: ['#15803d', '#2f5fe0'],
+                borderWidth: 0,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+            },
+        },
+    });
 }
 
 function mostrarMensagem(texto, tipo) {

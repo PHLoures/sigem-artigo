@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGEM - Bem-vindo</title>
+    <title>SIGEM - Entrar</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="pagina-abertura">
@@ -17,7 +17,21 @@
                 de medicamentos hospitalares.
             </p>
 
-            <a href="dashboard.html" class="btn-primario btn-iniciar">Iniciar Sistema</a>
+            <div id="mensagem-login"></div>
+
+            <!-- Login com nome, guardado como "convidado" na sessao.
+                 Um login com Google pode ser adicionado depois aqui,
+                 sem precisar mudar o resto do sistema (veja js/auth.js). -->
+            <form id="form-login" class="form-login">
+                <input
+                    type="text"
+                    id="nome-usuario"
+                    placeholder="Seu nome"
+                    autocomplete="name"
+                    required
+                >
+                <button type="submit" class="btn-primario btn-iniciar">Entrar como Convidado</button>
+            </form>
         </div>
     </main>
 
@@ -25,5 +39,7 @@
         SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
     </footer>
 
+    <script src="js/auth.js"></script>
+    <script src="js/login.js"></script>
 </body>
 </html>
