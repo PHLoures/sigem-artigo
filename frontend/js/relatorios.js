@@ -139,22 +139,213 @@ document.getElementById('btn-exportar-csv').addEventListener('click', () => {
 
 // ---------- EXPORTAR PDF ----------
 //
-// Nao usamos nenhuma biblioteca extra para gerar PDF. Em vez
-// disso, usamos a funcao de impressao do proprio navegador
-// (window.print()), combinada com uma folha de estilo especial
-// "@media print" (em css/style.css) que esconde o cabecalho, o
-// menu e os formularios, mostrando so a tabela do relatorio.
-// Ao imprimir, o usuario escolhe "Salvar como PDF" em vez de
-// uma impressora física.
+// Nao usamos nenhuma biblioteca extra para gerar PDF. Em vez de
+// tentar "escondar" pedacos da pagina atual na hora de imprimir
+// (o que depende de toda a folha de estilo do site carregar
+// certinho), abrimos uma JANELA NOVA, totalmente em branco, e
+// escrevemos nela SO o conteudo do relatorio, com seu proprio
+// HTML e CSS embutidos (sem depender de nada externo). Assim,
+// nao tem como o menu, os formularios ou qualquer outra coisa
+// da pagina principal aparecer na impressao - a janela nova
+// simplesmente nao tem esse conteudo.
+//
+// Depois de escrever o conteudo, chamamos print() nessa janela,
+// e o usuario escolhe "Salvar como PDF" na caixa de impressao
+// do sistema, em vez de uma impressora fisica.
 
 document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
     if (ultimoRelatorio.length === 0) {
         mostrarMensagem('Nao ha dados para exportar.', 'erro');
         return;
     }
-    document.getElementById('relatorio-data-geracao').textContent =
-        new Date().toLocaleString('pt-BR');
-    window.print();
+
+    const periodo = document.getElementById('relatorio-periodo').textContent;
+    const dataGeracao = new Date().toLocaleString('pt-BR');
+
+    const linhasTabela = ultimoRelatorio.map(item => `
+        <tr>
+            <td>${formatarData(item.data_movimentacao)}</td>
+            <td>${item.medicamento_nome}</td>
+            <td>${item.numero_lote}</td>
+            <td><span class="badge-imp ${item.tipo === 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}">${item.tipo}</span></td>
+            <td class="col-numero">${item.quantidade}</td>
+            <td>${item.setor_nome || '-'}</td>
+            <td>${item.motivo || '-'}</td>
+        </tr>
+    `).join('');
+
+    const totalEntradas = ultimoRelatorio
+        .filter(item => item.tipo === 'ENTRADA')
+        .reduce((soma, item) => soma + item.quantidade, 0);
+    const totalSaidas = ultimoRelatorio
+        .filter(item => item.tipo === 'SAIDA')
+        .reduce((soma, item) => soma + item.quantidade, 0);
+
+    const htmlRelatorio = `
+        <!DOCTYPE html>
+        <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>Relatorio SIGEM - Movimentacoes</title>
+            <style>
+                * { box-sizing: border-box; }
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    color: #1c2333;
+                    margin: 32px 40px;
+                }
+                .cabecalho {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    border-bottom: 3px solid #0f1f4d;
+                    padding-bottom: 16px;
+                    margin-bottom: 20px;
+                }
+                .cabecalho img {
+                    width: 52px;
+                    height: 52px;
+                    object-fit: contain;
+                }
+                .cabecalho h1 {
+                    margin: 0;
+                    font-size: 20px;
+                    color: #0f1f4d;
+                }
+                .cabecalho p {
+                    margin: 2px 0 0;
+                    font-size: 12.5px;
+                    color: #6b7280;
+                }
+                h2.titulo-relatorio {
+                    font-size: 16px;
+                    margin: 0 0 4px;
+                    color: #0f1f4d;
+                }
+                .subtitulo {
+                    font-size: 13px;
+                    color: #6b7280;
+                    margin: 0 0 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                }
+                th {
+                    background: #0f1f4d;
+                    color: #ffffff;
+                    text-align: left;
+                    padding: 8px 10px;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+                td {
+                    padding: 7px 10px;
+                    border-bottom: 1px solid #e6e9f2;
+                }
+                tbody tr:nth-child(even) {
+                    background: #f4f6fb;
+                }
+                .col-numero {
+                    text-align: right;
+                }
+                .badge-imp {
+                    display: inline-block;
+                    padding: 2px 9px;
+                    border-radius: 999px;
+                    font-size: 10.5px;
+                    font-weight: 700;
+                }
+                .badge-entrada { background: #dcfce7; color: #15803d; }
+                .badge-saida { background: #e8eefd; color: #0f1f4d; }
+                .resumo {
+                    display: flex;
+                    gap: 24px;
+                    margin: 18px 0 22px;
+                    font-size: 13px;
+                }
+                .resumo strong {
+                    display: block;
+                    font-size: 17px;
+                    color: #0f1f4d;
+                }
+                .rodape {
+                    margin-top: 28px;
+                    padding-top: 12px;
+                    border-top: 1px solid #e6e9f2;
+                    font-size: 11px;
+                    color: #9ca3af;
+                    text-align: center;
+                }
+                @page {
+                    size: A4 landscape;
+                    margin: 14mm 16mm;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="cabecalho">
+                <img src="${window.location.origin}/assets/img/logo.png" alt="Logo SIGEM">
+                <div>
+                    <h1>SIGEM</h1>
+                    <p>Sistema de Gestao de Medicamentos Hospitalares</p>
+                </div>
+            </div>
+
+            <h2 class="titulo-relatorio">Relatorio de Movimentacoes</h2>
+            <p class="subtitulo">${periodo}</p>
+
+            <div class="resumo">
+                <div>Total de registros<strong>${ultimoRelatorio.length}</strong></div>
+                <div>Unidades em entradas<strong>${totalEntradas}</strong></div>
+                <div>Unidades em saidas<strong>${totalSaidas}</strong></div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Medicamento</th>
+                        <th>Lote</th>
+                        <th>Tipo</th>
+                        <th class="col-numero">Quantidade</th>
+                        <th>Setor</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>${linhasTabela}</tbody>
+            </table>
+
+            <p class="rodape">Relatorio gerado pelo SIGEM em ${dataGeracao}</p>
+        </body>
+        </html>
+    `;
+
+    // Abre uma janela nova em branco, escreve o HTML do relatorio
+    // dentro dela, espera a logo carregar, e manda imprimir.
+    const janelaRelatorio = window.open('', '_blank', 'width=900,height=700');
+
+    // Se o navegador bloquear a abertura (bloqueador de pop-up),
+    // window.open devolve "null" em vez de lancar um erro - por
+    // isso essa checagem e necessaria antes de usar a janela.
+    if (!janelaRelatorio) {
+        mostrarMensagem(
+            'O navegador bloqueou a abertura do relatorio. Permita pop-ups para este site e tente novamente.',
+            'erro'
+        );
+        return;
+    }
+
+    janelaRelatorio.document.open();
+    janelaRelatorio.document.write(htmlRelatorio);
+    janelaRelatorio.document.close();
+
+    janelaRelatorio.onload = () => {
+        janelaRelatorio.focus();
+        janelaRelatorio.print();
+    };
 });
 
 function mostrarMensagem(texto, tipo) {
