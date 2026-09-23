@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Hospitalar - Escolha o sistema</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script>
+        if (!localStorage.getItem('sigem_sessao')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-badge">
+                <img src="assets/img/logo.png" alt="Logo" width="40" height="40">
+            </div>
+            <div class="marca-texto">
+                <h1>Portal Hospitalar</h1>
+                <span>Sistemas de apoio a gestao hospitalar</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <span id="usuario-logado"></span>
+        </nav>
+    </header>
+
+    <main>
+        <section class="bloco">
+            <h2>Escolha o sistema que deseja acessar</h2>
+            <p style="color:#6b7280; font-size:14px; margin-top:-8px;">
+                Cada sistema representa uma solucao para um problema
+                diferente relacionado a precariedade hospitalar no Brasil.
+            </p>
+
+            <div class="portal-grid">
+                <a href="dashboard.html" class="portal-card">
+                    <div class="portal-selo portal-selo-azul">SIGEM</div>
+                    <h3>Gestao de Medicamentos</h3>
+                    <p>Estoque, lotes, validade e movimentacoes de medicamentos.</p>
+                </a>
+
+                <a href="leitos.html" class="portal-card">
+                    <div class="portal-selo portal-selo-verde">SIGLE</div>
+                    <h3>Gestao de Leitos</h3>
+                    <p>Ocupacao, disponibilidade e manutencao de leitos hospitalares.</p>
+                </a>
+
+                <a href="escala.html" class="portal-card">
+                    <div class="portal-selo portal-selo-amarelo">SIGEP</div>
+                    <h3>Escala de Profissionais</h3>
+                    <p>Cadastro e escala de turnos de medicos, enfermeiros e tecnicos.</p>
+                </a>
+
+                <a href="fila.html" class="portal-card">
+                    <div class="portal-selo portal-selo-vermelho">SIFEC</div>
+                    <h3>Fila de Cirurgias</h3>
+                    <p>Fila de espera para procedimentos cirurgicos, por prioridade clinica.</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        Portal Hospitalar &middot; Projeto academico
+    </footer>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

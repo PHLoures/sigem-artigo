@@ -45,8 +45,9 @@ Abra o Chrome ou Safari e acesse este endereco:
 
 http://localhost:5500/index.html
 
-Essa e a tela de abertura. Clique em "Iniciar Sistema" para
-entrar no dashboard.
+Essa e a tela de login. Digite seu nome e entre como Convidado.
+Depois disso, voce chega no PORTAL, onde escolhe qual sistema
+quer acessar (Medicamentos, Leitos, Escalas ou Fila de Cirurgias).
 
 
 ===========================================================
@@ -74,10 +75,30 @@ Ctrl + C para parar os servidores.
 ===========================================================
  ENDERECOS DO SITE (LINKS)
 ===========================================================
-Tela de abertura (comeco):  http://localhost:5500/index.html
-Dashboard:                  http://localhost:5500/dashboard.html
-Medicamentos:                http://localhost:5500/medicamentos.html
-Movimentacoes:                http://localhost:5500/movimentacoes.html
+Login (comeco):              http://localhost:5500/index.html
+Portal (escolher sistema):   http://localhost:5500/portal.html
+
+SIGEM (medicamentos):
+  Dashboard:       http://localhost:5500/dashboard.html
+  Medicamentos:    http://localhost:5500/medicamentos.html
+  Movimentacoes:   http://localhost:5500/movimentacoes.html
+  Relatorios:      http://localhost:5500/relatorios.html
+
+SIGLE (leitos):      http://localhost:5500/leitos.html
+SIGEP (escalas):     http://localhost:5500/escala.html
+SIFEC (fila de cirurgias): http://localhost:5500/fila.html
 
 API (backend, so para conferir se esta no ar):
 http://localhost:3000/api/dashboard
+
+
+===========================================================
+ PRIMEIRA VEZ RODANDO O PROJETO NUMA MAQUINA NOVA?
+===========================================================
+Depois de criar o banco "sigem", rode TODOS esses arquivos,
+na ordem (dentro da pasta do projeto):
+
+mysql -u root sigem < database/schema.sql
+mysql -u root sigem < database/seed.sql
+mysql -u root sigem < database/schema_modulos.sql
+mysql -u root sigem < database/seed_modulos.sql

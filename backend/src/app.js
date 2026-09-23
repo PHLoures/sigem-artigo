@@ -18,6 +18,12 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const setoresRoutes = require('./routes/setores.routes');
 const relatoriosRoutes = require('./routes/relatorios.routes');
 
+// Modulos adicionais (SIGLE, SIGEP, SIFEC)
+const leitosRoutes = require('./routes/leitos.routes');
+const profissionaisRoutes = require('./routes/profissionais.routes');
+const escalasRoutes = require('./routes/escalas.routes');
+const filaCirurgiasRoutes = require('./routes/filaCirurgias.routes');
+
 const app = express();
 
 // Middlewares:
@@ -35,6 +41,10 @@ app.use('/api/movimentacoes', movimentacoesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/setores', setoresRoutes);
 app.use('/api/relatorios', relatoriosRoutes);
+app.use('/api/leitos', leitosRoutes);
+app.use('/api/profissionais', profissionaisRoutes);
+app.use('/api/escalas', escalasRoutes);
+app.use('/api/fila-cirurgias', filaCirurgiasRoutes);
 
 // Rota simples so para confirmar que a API esta no ar.
 app.get('/', (req, res) => {

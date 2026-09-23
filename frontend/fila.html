@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIFEC - Fila de Cirurgias</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script>
+        if (!localStorage.getItem('sigem_sessao')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-badge">
+                <span class="logo-texto">SIFEC</span>
+            </div>
+            <div class="marca-texto">
+                <h1>SIFEC</h1>
+                <span>Sistema de Fila de Espera para Cirurgias</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="portal.html">Portal</a>
+            <span id="usuario-logado"></span>
+        </nav>
+    </header>
+
+    <main>
+        <div id="mensagem-area"></div>
+
+        <section class="cards" id="cards-resumo"></section>
+
+        <section class="bloco">
+            <h2>Adicionar paciente na fila</h2>
+            <form class="form-cadastro" id="form-fila">
+                <div class="campo">
+                    <label for="fila-nome">Nome do paciente</label>
+                    <input type="text" id="fila-nome" required>
+                </div>
+                <div class="campo">
+                    <label for="fila-procedimento">Procedimento</label>
+                    <input type="text" id="fila-procedimento" placeholder="Ex: Apendicectomia" required>
+                </div>
+                <div class="campo">
+                    <label for="fila-prioridade">Prioridade clinica</label>
+                    <select id="fila-prioridade" required>
+                        <option value="BAIXA">Baixa</option>
+                        <option value="MEDIA" selected>Media</option>
+                        <option value="ALTA">Alta</option>
+                        <option value="URGENTE">Urgente</option>
+                    </select>
+                </div>
+                <div class="form-acoes">
+                    <button type="submit" class="btn-primario">Adicionar na fila</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bloco">
+            <h2>Fila de espera (ordenada por prioridade)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Procedimento</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th>Entrada na fila</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-fila"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        SIFEC &mdash; Sistema de Fila de Espera para Cirurgias &middot; Projeto academico
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/fila.js"></script>
+</body>
+</html>

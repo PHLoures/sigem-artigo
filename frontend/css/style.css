@@ -89,6 +89,23 @@ header.topo {
     display: block;
 }
 
+/* Usado nos modulos que ainda nao tem uma logo em imagem -
+   mostra a sigla do sistema em texto, dentro do mesmo "selo"
+   branco que a logo do SIGEM usa. Basta remover essa classe e
+   colocar a tag <img> quando a logo do modulo estiver pronta. */
+.marca .logo-badge:has(.logo-texto) {
+    width: auto;
+    padding: 6px 10px;
+}
+
+.logo-texto {
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--azul-marinho);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+}
+
 .marca .marca-texto h1 {
     margin: 0;
     font-size: 19px;
@@ -462,6 +479,12 @@ main.abertura {
     object-fit: contain;
 }
 
+.abertura-titulo {
+    color: var(--azul-marinho);
+    font-size: 20px;
+    margin: 0 0 10px;
+}
+
 .abertura-frase {
     color: var(--cinza-escuro);
     font-size: 14.5px;
@@ -537,6 +560,61 @@ main.abertura {
         text-transform: uppercase;
     }
 }
+
+/* ---------- Portal (selecao de sistema) ---------- */
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.portal-card {
+    display: block;
+    background: var(--branco);
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: var(--raio);
+    padding: 22px;
+    text-decoration: none;
+    color: var(--texto);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.portal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra);
+    border-color: var(--azul);
+}
+
+.portal-card h3 {
+    margin: 4px 0 6px;
+    font-size: 15.5px;
+    color: var(--azul-marinho);
+}
+
+.portal-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--cinza);
+    line-height: 1.4;
+}
+
+.portal-selo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.portal-selo-azul { background: var(--azul-claro); color: var(--azul-marinho); }
+.portal-selo-verde { background: var(--verde-bg); color: var(--verde); }
+.portal-selo-amarelo { background: var(--amarelo-bg); color: var(--amarelo); }
+.portal-selo-vermelho { background: var(--vermelho-bg); color: var(--vermelho); }
 
 /* ---------- Relatorios ---------- */
 .relatorio-cabecalho {
