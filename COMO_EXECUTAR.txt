@@ -10,6 +10,7 @@ PASSO 1 - Garantir que o banco de dados (MySQL) esta ligado
 Abra o Terminal e cole:
 
 brew services start mysql
+mysql -u root sigem
 
 (Se ja estiver ligado, ele so avisa "already started" - sem problema.)
 

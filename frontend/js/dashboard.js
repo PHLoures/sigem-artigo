@@ -11,7 +11,6 @@ async function carregarDashboard() {
         renderizarEstoqueBaixo(dados.estoqueBaixo);
         renderizarUltimasMovimentacoes(dados.ultimasMovimentacoes);
         renderizarGraficoEstoque(dados.estoquePorMedicamento);
-        renderizarGraficoMovimentacoes(dados.movimentacoesPorTipo);
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
@@ -45,33 +44,6 @@ function renderizarGraficoEstoque(lista) {
             },
             scales: {
                 y: { beginAtZero: true },
-            },
-        },
-    });
-}
-
-function renderizarGraficoMovimentacoes(lista) {
-    const ctx = document.getElementById('grafico-movimentacoes');
-
-    // Garante que sempre existam os dois tipos no grafico, mesmo
-    // que ainda nao tenha nenhuma ENTRADA ou SAIDA registrada.
-    const totalEntrada = lista.find(item => item.tipo === 'ENTRADA')?.total || 0;
-    const totalSaida = lista.find(item => item.tipo === 'SAIDA')?.total || 0;
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Entradas', 'Saidas'],
-            datasets: [{
-                data: [Number(totalEntrada), Number(totalSaida)],
-                backgroundColor: ['#15803d', '#2f5fe0'],
-                borderWidth: 0,
-            }],
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' },
             },
         },
     });
