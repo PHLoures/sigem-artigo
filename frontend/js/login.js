@@ -2,11 +2,11 @@
 //
 // Controla a tela index.html (login). Se o usuario ja estiver
 // logado (sessao salva no localStorage), pula direto para o
-// portal - nao faz sentido mostrar a tela de login de novo.
+// dashboard - nao faz sentido mostrar a tela de login de novo.
 
 const sessaoExistente = obterSessao();
 if (sessaoExistente) {
-    window.location.href = 'portal.html';
+    window.location.href = 'dashboard.html';
 }
 
 document.getElementById('form-login').addEventListener('submit', (evento) => {
@@ -20,7 +20,7 @@ document.getElementById('form-login').addEventListener('submit', (evento) => {
     }
 
     salvarSessao({ tipo: 'convidado', nome });
-    window.location.href = 'portal.html';
+    window.location.href = 'dashboard.html';
 });
 
 function mostrarMensagemLogin(texto) {

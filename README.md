@@ -1,18 +1,9 @@
-# Portal Hospitalar — projeto academico
+# SIGEM — Sistema de Gestao de Medicamentos Hospitalares
 
 Projeto academico desenvolvido para o trabalho sobre **"A precariedade dos
-hospitais no Brasil"**. E um portal com 4 sistemas independentes, cada um
-simulando uma solucao para um problema diferente ligado ao tema:
-
-| Sigla | Sistema | Problema que resolve |
-|---|---|---|
-| **SIGEM** | Gestao de Medicamentos | Estoque, validade e desperdicio de medicamentos |
-| **SIGLE** | Gestao de Leitos | Ocupacao e disponibilidade de leitos hospitalares |
-| **SIGEP** | Escala de Profissionais | Cadastro e escala de turnos de medicos/enfermeiros |
-| **SIFEC** | Fila de Cirurgias | Fila de espera para cirurgias, por prioridade clinica |
-
-Depois do login, o usuario cai numa tela de **Portal** e escolhe qual dos
-4 sistemas quer acessar.
+hospitais no Brasil"**. O sistema simula uma solucao para um dos problemas
+citados no tema: falta de controle de medicamentos, estoques baixos,
+desperdicios e vencimentos.
 
 ## Tecnologias
 
@@ -61,8 +52,6 @@ Crie o banco e rode os scripts:
 mysql -u root -e "CREATE DATABASE sigem CHARACTER SET utf8mb4;"
 mysql -u root sigem < database/schema.sql
 mysql -u root sigem < database/seed.sql
-mysql -u root sigem < database/schema_modulos.sql
-mysql -u root sigem < database/seed_modulos.sql
 ```
 
 Para conferir se deu certo:
@@ -139,30 +128,3 @@ Depois abra `http://localhost:5500/index.html` no navegador.
 | POST | /api/movimentacoes | Registra entrada/saida |
 | GET | /api/setores | Lista setores |
 | GET | /api/dashboard | Resumo para o dashboard |
-| GET | /api/relatorios/movimentacoes | Relatorio filtrado de movimentacoes |
-
-### SIGLE (leitos)
-| Metodo | Rota | Descricao |
-|---|---|---|
-| GET | /api/leitos | Lista leitos |
-| POST | /api/leitos | Cria leito |
-| PUT | /api/leitos/:id | Atualiza status/paciente do leito |
-| DELETE | /api/leitos/:id | Remove leito |
-
-### SIGEP (escala de profissionais)
-| Metodo | Rota | Descricao |
-|---|---|---|
-| GET | /api/profissionais | Lista profissionais |
-| POST | /api/profissionais | Cadastra profissional |
-| DELETE | /api/profissionais/:id | Remove profissional |
-| GET | /api/escalas | Lista escalas (com nome do profissional) |
-| POST | /api/escalas | Registra escala |
-| DELETE | /api/escalas/:id | Remove escala |
-
-### SIFEC (fila de cirurgias)
-| Metodo | Rota | Descricao |
-|---|---|---|
-| GET | /api/fila-cirurgias | Lista fila (ordenada por prioridade) |
-| POST | /api/fila-cirurgias | Adiciona paciente na fila |
-| PUT | /api/fila-cirurgias/:id | Atualiza status (agendar/realizar) |
-| DELETE | /api/fila-cirurgias/:id | Remove da fila |
