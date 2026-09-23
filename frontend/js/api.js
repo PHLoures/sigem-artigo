@@ -4,7 +4,19 @@
 // como formatar datas, e um "atalho" para chamar fetch() e ja
 // tratar erros de forma parecida em todo o sistema.
 
-const API_URL = 'http://localhost:3000/api';
+// Quando o site esta rodando no seu computador (localhost),
+// a API tambem esta no seu computador. Quando o site estiver
+// publicado na internet, a API estara em outro endereco (o do
+// Railway) - por isso a troca automatica abaixo.
+//
+// SUBSTITUA a linha abaixo pelo endereco real do seu backend
+// depois que ele estiver publicado no Railway (Passo 2 do guia
+// de deploy). Exemplo: 'https://sigem-backend.up.railway.app/api'
+const API_URL_PRODUCAO = 'https://COLOQUE-AQUI-A-URL-DO-RAILWAY.up.railway.app/api';
+
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000/api'
+    : API_URL_PRODUCAO;
 
 // Funcao generica para chamar a API.
 // metodo: 'GET', 'POST', 'PUT', 'DELETE'
