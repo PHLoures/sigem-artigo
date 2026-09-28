@@ -64,10 +64,18 @@ function renderizarUsuarioLogado() {
 
     container.innerHTML = `
         <span class="usuario-nome">Ola, ${sessao.nome}</span>
+        <button type="button" class="btn-tema" id="btn-tema" title="Mudar tema">🌙</button>
         <button type="button" class="btn-sair" id="btn-sair">Sair</button>
     `;
 
     document.getElementById('btn-sair').addEventListener('click', encerrarSessao);
+    document.getElementById('btn-tema').addEventListener('click', alternarTema);
+
+    // tema.js roda ANTES deste arquivo (aplica o tema salvo no
+    // <html> assim que a pagina carrega), mas o icone do botao
+    // (🌙 ou ☀️) so pode ser atualizado depois que o botao existir
+    // no HTML - por isso chamamos de novo aqui.
+    atualizarIconeBotaoTema();
 }
 
 // Executa automaticamente em toda pagina que carrega este

@@ -16,6 +16,8 @@
     --azul-hover: #1f4bc7;
 
     --branco: #ffffff;
+    --superficie: #ffffff;
+    --texto-destaque: #0f1f4d;
     --cinza-fundo: #f4f6fb;
     --cinza-borda: #e6e9f2;
     --cinza: #6b7280;
@@ -31,6 +33,31 @@
 
     --sombra: 0 1px 2px rgba(15, 31, 77, 0.06), 0 8px 24px rgba(15, 31, 77, 0.06);
     --raio: 14px;
+}
+
+/* ---------- Modo escuro ----------
+   Quando <html> tem o atributo data-tema="escuro" (controlado
+   por js/tema.js), essas variaveis substituem as de cima. Como
+   todo o resto do CSS usa var(--nome-da-cor) em vez de cores
+   fixas, o site inteiro troca de cor automaticamente, sem
+   precisar duplicar nenhuma regra. */
+html[data-tema="escuro"] {
+    --azul-claro: #1c2a52;
+    --azul-hover: #4a76f5;
+
+    --superficie: #1a2036;
+    --texto-destaque: #8ba4ff;
+    --cinza-fundo: #10141f;
+    --cinza-borda: #2b3350;
+    --cinza: #9aa3c0;
+    --cinza-escuro: #d3d8ec;
+    --texto: #e8eaf5;
+
+    --verde-bg: #113a24;
+    --amarelo-bg: #402c0a;
+    --vermelho-bg: #3d1414;
+
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -157,6 +184,18 @@ nav.menu a.ativo {
     background: rgba(255, 255, 255, 0.22);
 }
 
+.btn-tema {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 7px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    line-height: 1;
+}
+
+.btn-tema:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
 main {
     max-width: 1140px;
     margin: 0 auto;
@@ -188,7 +227,7 @@ main {
 }
 
 .card {
-    background: var(--branco);
+    background: var(--superficie);
     border: 1px solid var(--cinza-borda);
     border-radius: var(--raio);
     padding: 20px;
@@ -212,7 +251,7 @@ main {
 .card .card-valor {
     font-size: 30px;
     font-weight: 800;
-    color: var(--azul-marinho);
+    color: var(--texto-destaque);
     line-height: 1;
 }
 
@@ -240,7 +279,7 @@ main {
 
 /* ---------- Secoes ---------- */
 section.bloco {
-    background: var(--branco);
+    background: var(--superficie);
     border: 1px solid var(--cinza-borda);
     border-radius: var(--raio);
     padding: 22px;
@@ -253,7 +292,7 @@ section.bloco h2 {
     margin-bottom: 16px;
     font-size: 15.5px;
     font-weight: 700;
-    color: var(--azul-marinho);
+    color: var(--texto-destaque);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -271,7 +310,7 @@ section.bloco h2 {
 .badge-vermelho { background: var(--vermelho-bg); color: var(--vermelho); }
 .badge-amarelo { background: var(--amarelo-bg); color: var(--amarelo); }
 .badge-verde { background: var(--verde-bg); color: var(--verde); }
-.badge-azul { background: var(--azul-claro); color: var(--azul-marinho); }
+.badge-azul { background: var(--azul-claro); color: var(--texto-destaque); }
 
 /* ---------- Tabelas ---------- */
 table {
@@ -334,7 +373,7 @@ form.form-cadastro {
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    background: var(--branco);
+    background: var(--superficie);
     color: var(--texto);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -394,7 +433,7 @@ button.btn-perigo {
 
 button.btn-editar {
     background: var(--azul-claro);
-    color: var(--azul-marinho);
+    color: var(--texto-destaque);
     padding: 7px 14px;
     font-size: 13px;
     margin-right: 6px;
@@ -444,7 +483,7 @@ main.abertura {
 }
 
 .abertura-card {
-    background: var(--branco);
+    background: var(--superficie);
     border-radius: 20px;
     padding: 48px 40px;
     max-width: 420px;
