@@ -5,12 +5,12 @@
 Toda vez que for usar o sistema, siga esta ordem:
 
 
-PASSO 1 - Garantir que o banco de dados (MySQL) esta ligado
+PASSO 1 - Garantir que o banco de dados (PostgreSQL) esta ligado
 -------------------------------------------------------------
 Abra o Terminal e cole:
 
-brew services start mysql
-mysql -u root sigem
+brew services start postgresql@16
+psql -d sigem
 
 (Se ja estiver ligado, ele so avisa "already started" - sem problema.)
 

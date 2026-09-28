@@ -7,17 +7,15 @@
 //   2) atualizar a quantidade na tabela lotes (o "estoque atual").
 //
 // Por que usar uma TRANSACTION (transacao)?
-// Se o passo 1 der certo mas o passo 2 falhar (por exemplo,
-// o servidor cair no meio do caminho), o banco ficaria com um
-// registro de movimentacao que nao bate com o estoque real -
-// uma inconsistencia grave num sistema hospitalar.
+// Se o passo 1 der certo mas o passo 2 falhar, o banco ficaria
+// com um registro de movimentacao que nao bate com o estoque
+// real - uma inconsistencia grave num sistema hospitalar.
 //
 // Uma transacao garante que os dois passos aconteçam JUNTOS:
-// ou os dois sao salvos, ou nenhum e salvo (chamamos isso de
-// atomicidade). No mysql2, isso e feito com:
-//   connection.beginTransaction()
-//   connection.commit()
-//   connection.rollback()
+// ou os dois sao salvos, ou nenhum e salvo. Os comandos usados:
+//   BEGIN     -> comeca a transacao
+//   COMMIT    -> confirma e salva tudo de vez
+//   ROLLBACK  -> desfaz tudo, como se nada tivesse acontecido
 
 const pool = require('../database/pool');
 
@@ -25,7 +23,7 @@ const pool = require('../database/pool');
 // Lista o historico completo, com nomes em vez de so ids.
 async function listar(req, res) {
     try {
-        const [linhas] = await pool.query(
+        const resultado = await pool.query(
             `SELECT
                 mv.id,
                 mv.tipo,
@@ -41,7 +39,7 @@ async function listar(req, res) {
              LEFT JOIN setores s ON s.id = mv.setor_id
              ORDER BY mv.data_movimentacao DESC`
         );
-        res.json(linhas);
+        res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao buscar movimentacoes.' });
@@ -64,32 +62,30 @@ async function criar(req, res) {
     }
 
     // Pegamos uma conexao EXCLUSIVA da pool para poder rodar
-    // a transacao nela (isso nao funcionaria chamando pool.query
-    // varias vezes soltas, porque cada chamada poderia usar uma
-    // conexao diferente da pool).
-    const connection = await pool.getConnection();
+    // BEGIN / COMMIT / ROLLBACK nela.
+    const client = await pool.connect();
 
     try {
-        await connection.beginTransaction();
+        await client.query('BEGIN');
 
         // 1) Verifica a quantidade atual do lote e "trava" a
         //    linha com FOR UPDATE, para evitar que duas
         //    movimentacoes simultaneas leiam o mesmo estoque
         //    "antigo" ao mesmo tempo (condicao de corrida).
-        const [loteLinhas] = await connection.query(
-            'SELECT quantidade FROM lotes WHERE id = ? FOR UPDATE',
+        const loteResultado = await client.query(
+            'SELECT quantidade FROM lotes WHERE id = $1 FOR UPDATE',
             [lote_id]
         );
 
-        if (loteLinhas.length === 0) {
-            await connection.rollback();
+        if (loteResultado.rows.length === 0) {
+            await client.query('ROLLBACK');
             return res.status(404).json({ erro: 'Lote nao encontrado.' });
         }
 
-        const quantidadeAtual = loteLinhas[0].quantidade;
+        const quantidadeAtual = loteResultado.rows[0].quantidade;
 
         if (tipo === 'SAIDA' && quantidade > quantidadeAtual) {
-            await connection.rollback();
+            await client.query('ROLLBACK');
             return res.status(400).json({
                 erro: `Estoque insuficiente. Disponivel: ${quantidadeAtual}, solicitado: ${quantidade}.`,
             });
@@ -99,37 +95,33 @@ async function criar(req, res) {
         const novaQuantidade =
             tipo === 'ENTRADA' ? quantidadeAtual + quantidade : quantidadeAtual - quantidade;
 
-        await connection.query(
-            'UPDATE lotes SET quantidade = ? WHERE id = ?',
+        await client.query(
+            'UPDATE lotes SET quantidade = $1 WHERE id = $2',
             [novaQuantidade, lote_id]
         );
 
         // 3) Registra a movimentacao no historico.
-        const [insercao] = await connection.query(
+        const movimentacaoResultado = await client.query(
             `INSERT INTO movimentacoes
                 (medicamento_id, lote_id, setor_id, tipo, quantidade, motivo)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING *`,
             [medicamento_id, lote_id, setor_id || null, tipo, quantidade, motivo || null]
-        );
-
-        const [movimentacaoCriada] = await connection.query(
-            'SELECT * FROM movimentacoes WHERE id = ?',
-            [insercao.insertId]
         );
 
         // Se chegou ate aqui, os dois passos deram certo:
         // confirma tudo de uma vez.
-        await connection.commit();
+        await client.query('COMMIT');
 
-        res.status(201).json(movimentacaoCriada[0]);
+        res.status(201).json(movimentacaoResultado.rows[0]);
     } catch (erro) {
-        await connection.rollback();
+        await client.query('ROLLBACK');
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao registrar movimentacao.' });
     } finally {
         // Devolve a conexao para a pool, independente de ter
         // dado certo ou errado.
-        connection.release();
+        client.release();
     }
 }
 

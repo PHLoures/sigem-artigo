@@ -20,28 +20,32 @@ async function movimentacoes(req, res) {
     // Construimos a clausula WHERE dinamicamente: comecamos com
     // "1 = 1" (uma condicao sempre verdadeira) para poder ir
     // encadeando "AND" sem precisar checar se e o primeiro filtro.
+    //
+    // No PostgreSQL cada placeholder precisa de um numero
+    // ($1, $2, $3...), por isso usamos "valores.length + 1"
+    // para calcular qual numero usar em cada filtro adicionado.
     const condicoes = ['1 = 1'];
     const valores = [];
 
     if (data_inicio) {
-        condicoes.push('mv.data_movimentacao >= ?');
         valores.push(`${data_inicio} 00:00:00`);
+        condicoes.push(`mv.data_movimentacao >= $${valores.length}`);
     }
     if (data_fim) {
-        condicoes.push('mv.data_movimentacao <= ?');
         valores.push(`${data_fim} 23:59:59`);
+        condicoes.push(`mv.data_movimentacao <= $${valores.length}`);
     }
     if (tipo === 'ENTRADA' || tipo === 'SAIDA') {
-        condicoes.push('mv.tipo = ?');
         valores.push(tipo);
+        condicoes.push(`mv.tipo = $${valores.length}`);
     }
     if (medicamento_id) {
-        condicoes.push('mv.medicamento_id = ?');
         valores.push(medicamento_id);
+        condicoes.push(`mv.medicamento_id = $${valores.length}`);
     }
 
     try {
-        const [linhas] = await pool.query(
+        const resultado = await pool.query(
             `SELECT
                 mv.id,
                 mv.tipo,
@@ -59,7 +63,7 @@ async function movimentacoes(req, res) {
              ORDER BY mv.data_movimentacao DESC`,
             valores
         );
-        res.json(linhas);
+        res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao gerar relatorio.' });

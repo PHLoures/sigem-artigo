@@ -14,19 +14,19 @@ async function resumo(req, res) {
     try {
         // Total de medicamentos cadastrados (tipos diferentes,
         // nao soma de quantidade).
-        const [totalMedicamentosLinhas] = await pool.query(
+        const totalMedicamentosResultado = await pool.query(
             'SELECT COUNT(*) AS total FROM medicamentos'
         );
 
         // Soma de todas as quantidades de todos os lotes = total
         // de unidades fisicas em estoque no hospital.
-        const [totalEstoqueLinhas] = await pool.query(
+        const totalEstoqueResultado = await pool.query(
             'SELECT COALESCE(SUM(quantidade), 0) AS total FROM lotes'
         );
 
         // Medicamentos com estoque baixo: soma dos lotes de cada
         // medicamento <= estoque_minimo dele.
-        const [estoqueBaixo] = await pool.query(`
+        const estoqueBaixoResultado = await pool.query(`
             SELECT m.id, m.nome, m.estoque_minimo,
                    COALESCE(SUM(l.quantidade), 0) AS quantidade_total
             FROM medicamentos m
@@ -37,32 +37,29 @@ async function resumo(req, res) {
         `);
 
         // Lotes proximos do vencimento (dentro dos proximos X dias,
-        // mas ainda nao vencidos).
-        //
-        // No PostgreSQL fazíamos "CURRENT_DATE + $1::INTEGER * INTERVAL '1 day'".
-        // No MySQL, usamos a funcao DATE_ADD(data, INTERVAL x DAY),
-        // que soma X dias a uma data.
-        const [proximosVencimento] = await pool.query(
+        // mas ainda nao vencidos). $1::INTEGER * INTERVAL '1 day'
+        // multiplica o numero de dias por um intervalo de 1 dia.
+        const proximosVencimentoResultado = await pool.query(
             `SELECT l.id, l.numero_lote, l.quantidade, l.data_validade, m.nome AS medicamento_nome
              FROM lotes l
              JOIN medicamentos m ON m.id = l.medicamento_id
-             WHERE l.data_validade >= CURDATE()
-               AND l.data_validade <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+             WHERE l.data_validade >= CURRENT_DATE
+               AND l.data_validade <= CURRENT_DATE + $1::INTEGER * INTERVAL '1 day'
              ORDER BY l.data_validade`,
             [DIAS_ALERTA_VENCIMENTO]
         );
 
         // Lotes ja vencidos.
-        const [vencidos] = await pool.query(
+        const vencidosResultado = await pool.query(
             `SELECT l.id, l.numero_lote, l.quantidade, l.data_validade, m.nome AS medicamento_nome
              FROM lotes l
              JOIN medicamentos m ON m.id = l.medicamento_id
-             WHERE l.data_validade < CURDATE()
+             WHERE l.data_validade < CURRENT_DATE
              ORDER BY l.data_validade`
         );
 
         // Ultimas 10 movimentacoes.
-        const [ultimasMovimentacoes] = await pool.query(
+        const ultimasMovimentacoesResultado = await pool.query(
             `SELECT mv.tipo, mv.quantidade, mv.data_movimentacao,
                     m.nome AS medicamento_nome, l.numero_lote, s.nome AS setor_nome
              FROM movimentacoes mv
@@ -77,7 +74,7 @@ async function resumo(req, res) {
 
         // Quantidade total em estoque de CADA medicamento (todos,
         // nao so os com estoque baixo) - usado no grafico de barras.
-        const [estoquePorMedicamento] = await pool.query(`
+        const estoquePorMedicamentoResultado = await pool.query(`
             SELECT m.nome, COALESCE(SUM(l.quantidade), 0) AS quantidade_total
             FROM medicamentos m
             LEFT JOIN lotes l ON l.medicamento_id = m.id
@@ -86,13 +83,13 @@ async function resumo(req, res) {
         `);
 
         res.json({
-            totalMedicamentos: Number(totalMedicamentosLinhas[0].total),
-            totalEstoque: Number(totalEstoqueLinhas[0].total),
-            estoqueBaixo,
-            proximosVencimento,
-            vencidos,
-            ultimasMovimentacoes,
-            estoquePorMedicamento,
+            totalMedicamentos: Number(totalMedicamentosResultado.rows[0].total),
+            totalEstoque: Number(totalEstoqueResultado.rows[0].total),
+            estoqueBaixo: estoqueBaixoResultado.rows,
+            proximosVencimento: proximosVencimentoResultado.rows,
+            vencidos: vencidosResultado.rows,
+            ultimasMovimentacoes: ultimasMovimentacoesResultado.rows,
+            estoquePorMedicamento: estoquePorMedicamentoResultado.rows,
         });
     } catch (erro) {
         console.error(erro);
