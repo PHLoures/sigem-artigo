@@ -107,28 +107,44 @@ function renderizarCards(dados) {
     const qtdProximos = dados.proximosVencimento.length;
     const qtdEstoqueBaixo = dados.estoqueBaixo.length;
 
+    // Cada card e clicavel: os 3 de alerta rolam a pagina at a
+    // tabela correspondente (mesma pagina); os 2 primeiros levam
+    // para a pagina de Medicamentos, onde a lista completa esta.
     container.innerHTML = `
-        <div class="card">
+        <a href="medicamentos.html" class="card card-clicavel">
             <div class="card-titulo">Medicamentos cadastrados</div>
             <div class="card-valor">${dados.totalMedicamentos}</div>
-        </div>
-        <div class="card">
+        </a>
+        <a href="medicamentos.html" class="card card-clicavel">
             <div class="card-titulo">Unidades em estoque</div>
             <div class="card-valor">${dados.totalEstoque}</div>
-        </div>
-        <div class="card ${qtdEstoqueBaixo > 0 ? 'alerta-vermelho' : 'alerta-verde'}">
+        </a>
+        <div class="card card-clicavel ${qtdEstoqueBaixo > 0 ? 'alerta-vermelho' : 'alerta-verde'}" onclick="rolarPara('secao-estoque-baixo')">
             <div class="card-titulo">🔴 Estoque baixo</div>
             <div class="card-valor">${qtdEstoqueBaixo}</div>
         </div>
-        <div class="card ${qtdProximos > 0 ? 'alerta-amarelo' : 'alerta-verde'}">
+        <div class="card card-clicavel ${qtdProximos > 0 ? 'alerta-amarelo' : 'alerta-verde'}" onclick="rolarPara('secao-vencimento')">
             <div class="card-titulo">🟠 Proximos do vencimento</div>
             <div class="card-valor">${qtdProximos}</div>
         </div>
-        <div class="card ${qtdVencidos > 0 ? 'alerta-vermelho' : 'alerta-verde'}">
+        <div class="card card-clicavel ${qtdVencidos > 0 ? 'alerta-vermelho' : 'alerta-verde'}" onclick="rolarPara('secao-vencidos')">
             <div class="card-titulo">🔴 Vencidos</div>
             <div class="card-valor">${qtdVencidos}</div>
         </div>
     `;
+}
+
+// Rola a pagina suavemente até a secao com o id informado, e
+// da um destaque visual rapido (classe "destacado") para deixar
+// claro pra onde o usuario foi.
+function rolarPara(idSecao) {
+    const secao = document.getElementById(idSecao);
+    if (!secao) return;
+
+    secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    secao.classList.add('destacado');
+    setTimeout(() => secao.classList.remove('destacado'), 1500);
 }
 
 function renderizarVencidos(lista) {

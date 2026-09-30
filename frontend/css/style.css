@@ -235,6 +235,13 @@ main {
     transition: transform 0.15s;
 }
 
+.card-clicavel {
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
 .card:hover {
     transform: translateY(-2px);
 }
@@ -846,4 +853,14 @@ main.abertura {
     .chatbot-botao {
         right: 16px;
     }
+}
+
+/* ---------- Destaque ao clicar num card do dashboard ---------- */
+section.bloco.destacado {
+    animation: destacar-secao 1.5s ease;
+}
+
+@keyframes destacar-secao {
+    0%   { box-shadow: 0 0 0 3px var(--azul); }
+    100% { box-shadow: var(--sombra); }
 }
