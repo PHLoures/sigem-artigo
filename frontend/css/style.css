@@ -593,6 +593,12 @@ main.abertura {
     color: var(--cinza);
 }
 
+.secao-explicacao {
+    margin: -8px 0 16px;
+    font-size: 13px;
+    color: var(--cinza);
+}
+
 .relatorio-acoes {
     display: flex;
     gap: 10px;
@@ -636,4 +642,79 @@ main.abertura {
     table {
         font-size: 12px;
     }
+}
+
+/* ---------- Modal de QR Code ---------- */
+.modal-fundo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-fundo.aberto {
+    display: flex;
+}
+
+.modal-caixa {
+    background: var(--superficie);
+    border-radius: var(--raio);
+    padding: 28px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.modal-caixa h3 {
+    margin: 0 0 8px;
+    color: var(--texto-destaque);
+    font-size: 16px;
+}
+
+.modal-qrcode-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+/* ---------- Leitor de QR Code (camera) ---------- */
+.leitor-qrcode {
+    display: none;
+    margin-bottom: 20px;
+}
+
+.leitor-qrcode.aberto {
+    display: block;
+}
+
+.leitor-qrcode video {
+    width: 100%;
+    max-width: 360px;
+    border-radius: var(--raio);
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.leitor-qrcode-status {
+    text-align: center;
+    font-size: 13px;
+    color: var(--cinza);
+}
+
+.fonte-dado {
+    margin: 14px 0 0;
+    font-size: 12px;
+    color: var(--cinza);
+}
+
+.fonte-dado a {
+    color: var(--azul);
 }

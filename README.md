@@ -116,6 +116,12 @@ Depois abra `http://localhost:5500/index.html` no navegador.
   - atualizacao automatica da quantidade do lote
   - bloqueio de saida maior que o estoque disponivel
 - Historico completo de movimentacoes
+- Previsao de esgotamento de estoque (estimativa de dias restantes, baseada
+  no consumo medio de saidas dos ultimos 30 dias)
+- Geracao de QR Code por lote (pagina Medicamentos) e leitor via camera
+  (pagina Movimentacoes) para registrar saidas rapidamente
+- Pagina de Contexto com dados reais sobre a precariedade hospitalar no
+  Brasil, citando as fontes
 
 ## API REST
 
@@ -133,3 +139,4 @@ Depois abra `http://localhost:5500/index.html` no navegador.
 | POST | /api/movimentacoes | Registra entrada/saida |
 | GET | /api/setores | Lista setores |
 | GET | /api/dashboard | Resumo para o dashboard |
+| GET | /api/previsao-estoque | Estimativa de dias ate o estoque esgotar, por medicamento |

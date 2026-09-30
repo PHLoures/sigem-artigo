@@ -130,7 +130,7 @@ async function carregarLotes() {
 function renderizarTabelaLotes(lista) {
     const tbody = document.getElementById('tabela-lotes');
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="tabela-vazia">Nenhum lote cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="tabela-vazia">Nenhum lote cadastrado.</td></tr>`;
         return;
     }
     tbody.innerHTML = lista.map(l => `
@@ -139,9 +139,39 @@ function renderizarTabelaLotes(lista) {
             <td data-rotulo="Lote">${l.numero_lote}</td>
             <td data-rotulo="Quantidade">${l.quantidade}</td>
             <td data-rotulo="Validade">${formatarData(l.data_validade)}</td>
+            <td data-rotulo="QR Code">
+                <button type="button" class="btn-editar" onclick="mostrarQrCodeLote(${l.id}, '${l.numero_lote}', '${l.medicamento_nome}')">Gerar QR</button>
+            </td>
         </tr>
     `).join('');
 }
+
+// ---------- QR CODE DO LOTE ----------
+//
+// Gera um QR code que contem uma URL apontando para a pagina de
+// movimentacoes, ja indicando o lote (?lote_id=123). A biblioteca
+// "qrcode-generator" (assets/js/qrcode.js) faz o desenho - ela
+// so precisa do texto a codificar, sem precisar de internet.
+function mostrarQrCodeLote(loteId, numeroLote, medicamentoNome) {
+    const url = `${window.location.origin}/movimentacoes.html?lote_id=${loteId}`;
+
+    // typeNumber = 0 deixa a biblioteca escolher automaticamente
+    // o "tamanho" do QR code necessario para caber o texto.
+    // errorCorrectionLevel 'M' e um meio-termo entre confiabilidade
+    // de leitura e quantidade de informacao que cabe no codigo.
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+
+    document.getElementById('modal-qrcode-titulo').textContent =
+        `Lote ${numeroLote} - ${medicamentoNome}`;
+    document.getElementById('modal-qrcode-canvas').innerHTML = qr.createImgTag(6, 8);
+    document.getElementById('modal-qrcode').classList.add('aberto');
+}
+
+document.getElementById('btn-fechar-modal-qrcode').addEventListener('click', () => {
+    document.getElementById('modal-qrcode').classList.remove('aberto');
+});
 
 formLote.addEventListener('submit', async (evento) => {
     evento.preventDefault();

@@ -29,6 +29,7 @@
             <a href="medicamentos.html" class="ativo">Medicamentos</a>
             <a href="movimentacoes.html">Movimentacoes</a>
             <a href="relatorios.html">Relatorios</a>
+            <a href="contexto.html">Contexto</a>
         <span id="usuario-logado"></span>
         </nav>
     </header>
@@ -125,6 +126,7 @@
                         <th>Lote</th>
                         <th>Quantidade</th>
                         <th>Validade</th>
+                        <th>QR Code</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-lotes"></tbody>
@@ -132,10 +134,26 @@
         </section>
     </main>
 
+    <!-- Janela (modal) que mostra o QR code de um lote em destaque -->
+    <div class="modal-fundo" id="modal-qrcode">
+        <div class="modal-caixa">
+            <h3 id="modal-qrcode-titulo">QR Code do lote</h3>
+            <p class="secao-explicacao" style="margin-bottom:16px;">
+                Ao ser escaneado (pela camera na pagina de Movimentacoes),
+                este codigo abre o formulario de SAIDA ja com este lote
+                selecionado - util para registrar saidas rapidamente no
+                balcao da farmacia.
+            </p>
+            <div id="modal-qrcode-canvas" class="modal-qrcode-area"></div>
+            <button type="button" class="btn-secundario" id="btn-fechar-modal-qrcode">Fechar</button>
+        </div>
+    </div>
+
     <footer class="rodape">
         SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
     </footer>
 
+    <script src="assets/js/qrcode.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
     <script src="js/medicamentos.js"></script>

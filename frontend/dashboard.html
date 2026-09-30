@@ -32,6 +32,7 @@
             <a href="medicamentos.html">Medicamentos</a>
             <a href="movimentacoes.html">Movimentacoes</a>
             <a href="relatorios.html">Relatorios</a>
+            <a href="contexto.html">Contexto</a>
             <span id="usuario-logado"></span>
         </nav>
     </header>
@@ -54,6 +55,26 @@
                 <h2>Estoque por medicamento</h2>
                 <canvas id="grafico-estoque"></canvas>
             </div>
+        </section>
+
+        <!-- Previsao de esgotamento -->
+        <section class="bloco">
+            <h2>📉 Previsão de esgotamento de estoque</h2>
+            <p class="secao-explicacao">
+                Estimativa de quantos dias faltam para cada medicamento acabar,
+                baseada no consumo médio (saídas) dos últimos 30 dias.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Estoque atual</th>
+                        <th>Saída (30 dias)</th>
+                        <th>Previsão</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-previsao"></tbody>
+            </table>
         </section>
 
         <!-- Alertas: vencidos -->

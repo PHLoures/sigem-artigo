@@ -29,6 +29,7 @@
             <a href="medicamentos.html">Medicamentos</a>
             <a href="movimentacoes.html" class="ativo">Movimentacoes</a>
             <a href="relatorios.html">Relatorios</a>
+            <a href="contexto.html">Contexto</a>
         <span id="usuario-logado"></span>
         </nav>
     </header>
@@ -38,6 +39,21 @@
 
         <section class="bloco">
             <h2>Registrar movimentacao</h2>
+
+            <div class="form-acoes" style="margin-bottom:18px;">
+                <button type="button" class="btn-secundario" id="btn-abrir-leitor">📷 Escanear QR Code do lote</button>
+            </div>
+
+            <!-- Leitor de QR code via camera. Fica escondido ate o
+                 usuario clicar no botao acima. -->
+            <div class="leitor-qrcode" id="leitor-qrcode">
+                <video id="video-leitor" autoplay playsinline muted></video>
+                <p class="leitor-qrcode-status" id="status-leitor">Aponte a camera para o QR code do lote...</p>
+                <div class="form-acoes" style="justify-content:center;">
+                    <button type="button" class="btn-secundario" id="btn-fechar-leitor">Cancelar</button>
+                </div>
+            </div>
+
             <form class="form-cadastro" id="form-movimentacao">
                 <div class="campo">
                     <label for="mov-medicamento">Medicamento</label>
@@ -97,6 +113,7 @@
         SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
     </footer>
 
+    <script src="assets/js/jsQR.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
     <script src="js/movimentacoes.js"></script>

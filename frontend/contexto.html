@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGEM - Contexto</title>
+    <script src="js/tema.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script>
+        if (!localStorage.getItem('sigem_sessao')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-badge">
+                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+            </div>
+            <div class="marca-texto">
+                <h1>SIGEM</h1>
+                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="movimentacoes.html">Movimentacoes</a>
+            <a href="relatorios.html">Relatorios</a>
+            <a href="contexto.html" class="ativo">Contexto</a>
+            <span id="usuario-logado"></span>
+        </nav>
+    </header>
+
+    <main>
+        <section class="bloco">
+            <h2>📌 Por que este sistema existe</h2>
+            <p class="secao-explicacao" style="font-size:14.5px; margin-top:0;">
+                O SIGEM foi criado para o trabalho acadêmico sobre
+                <strong>"A precariedade dos hospitais no Brasil"</strong>.
+                Antes de qualquer tela ou funcionalidade, é importante entender
+                o problema real que motivou o projeto. Os números abaixo vêm
+                de fontes públicas e estão citados com o link original de cada um.
+            </p>
+        </section>
+
+        <section class="bloco">
+            <h2>💊 Desabastecimento de medicamentos</h2>
+            <div class="cards" style="margin-top:12px;">
+                <div class="card alerta-vermelho">
+                    <div class="card-titulo">Relatos de irregularidade (1º trim. 2026)</div>
+                    <div class="card-valor">33.104</div>
+                </div>
+                <div class="card alerta-amarelo">
+                    <div class="card-titulo">Medicamentos afetados no período</div>
+                    <div class="card-valor">58</div>
+                </div>
+                <div class="card alerta-vermelho">
+                    <div class="card-titulo">Pacientes com ruptura &gt; 61 dias (2024)</div>
+                    <div class="card-valor">32%</div>
+                </div>
+            </div>
+            <p class="fonte-dado">
+                Fonte: Movimento Medicamento no Tempo Certo, via
+                <a href="https://www.bioredbrasil.com.br/falta-de-medicamentos-nas-farmacias-de-alto-custo-expoe-crise-no-acesso-a-tratamentos-no-sus-no-inicio-de-2026/" target="_blank" rel="noopener">Biored Brasil</a>
+                e
+                <a href="https://www.gazetadopovo.com.br/brasil/pacientes-cronicos-racionam-param-tratamento-por-falta-medicamentos-sus/" target="_blank" rel="noopener">Gazeta do Povo</a>.
+            </p>
+        </section>
+
+        <section class="bloco">
+            <h2>🛏️ Falta de leitos hospitalares</h2>
+            <div class="cards" style="margin-top:12px;">
+                <div class="card alerta-vermelho">
+                    <div class="card-titulo">Leitos de internação do SUS perdidos (2010-2023)</div>
+                    <div class="card-valor">25 mil</div>
+                </div>
+                <div class="card alerta-vermelho">
+                    <div class="card-titulo">Queda em leitos pediátricos no período</div>
+                    <div class="card-valor">28%</div>
+                </div>
+                <div class="card alerta-amarelo">
+                    <div class="card-titulo">Municípios de fronteira sem UTI</div>
+                    <div class="card-valor">93%</div>
+                </div>
+            </div>
+            <p class="fonte-dado">
+                Fonte: Conselho Federal de Medicina (CFM), via
+                <a href="https://portal.cfm.org.br/noticias/em-13-anos-brasil-perde-25-mil-leitos-de-internacao-do-sus/" target="_blank" rel="noopener">portal.cfm.org.br</a>
+                e
+                <a href="https://agenciabrasil.ebc.com.br/geral/noticia/2018-04/na-fonteira-22-dos-municipios-nao-tem-leito-de-internacao-e-93-estao-sem-uti" target="_blank" rel="noopener">Agência Brasil</a>.
+            </p>
+        </section>
+
+        <section class="bloco">
+            <h2>🏥 Infraestrutura precária</h2>
+            <div class="cards" style="margin-top:12px;">
+                <div class="card alerta-amarelo">
+                    <div class="card-titulo">Centros cirúrgicos sem bateria de emergência</div>
+                    <div class="card-valor">33%</div>
+                </div>
+                <div class="card alerta-vermelho">
+                    <div class="card-titulo">Hospitais com falta de lençóis</div>
+                    <div class="card-valor">63%</div>
+                </div>
+                <div class="card alerta-amarelo">
+                    <div class="card-titulo">Sem camas reguláveis</div>
+                    <div class="card-valor">17%</div>
+                </div>
+            </div>
+            <p class="fonte-dado">
+                Fonte: levantamento citado por
+                <a href="https://www.otempo.com.br/cidades/falta-de-estrutura-em-hospitais-coloca-pacientes-em-risco-1.2179577" target="_blank" rel="noopener">O Tempo</a>.
+            </p>
+        </section>
+
+        <section class="bloco">
+            <h2>🎯 Como o SIGEM ataca esses problemas</h2>
+            <p class="secao-explicacao" style="margin-top:0;">
+                O sistema não resolve a precariedade hospitalar por completo (isso
+                depende de investimento público), mas ataca uma parte concreta e
+                automatizável dela: a <strong>gestão do estoque de medicamentos</strong>,
+                que é uma das causas do desabastecimento mostrado nos números acima.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problema real</th>
+                        <th>Funcionalidade do SIGEM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-rotulo="Problema">Desabastecimento sem alerta prévio</td>
+                        <td data-rotulo="Funcionalidade"><span class="badge badge-azul">Previsão de esgotamento</span> no Dashboard, calculada pelo consumo médio</td>
+                    </tr>
+                    <tr>
+                        <td data-rotulo="Problema">Medicamentos vencidos por falta de controle</td>
+                        <td data-rotulo="Funcionalidade"><span class="badge badge-vermelho">Alertas de vencimento</span> por lote, com data de validade individual</td>
+                    </tr>
+                    <tr>
+                        <td data-rotulo="Problema">Desperdício e perda de rastreabilidade</td>
+                        <td data-rotulo="Funcionalidade"><span class="badge badge-verde">Histórico completo</span> de entradas e saídas por lote e setor</td>
+                    </tr>
+                    <tr>
+                        <td data-rotulo="Problema">Lentidão operacional no balcão da farmácia</td>
+                        <td data-rotulo="Funcionalidade"><span class="badge badge-amarelo">QR Code por lote</span>, escaneado pela câmera para registrar saídas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+    </footer>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

@@ -14,6 +14,52 @@ async function carregarDashboard() {
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
+
+    try {
+        const previsao = await chamarApi('/previsao-estoque');
+        renderizarPrevisao(previsao);
+    } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+    }
+}
+
+// ---------- PREVISAO DE ESGOTAMENTO ----------
+//
+// Classifica visualmente cada previsao:
+//   sem dados suficientes -> cinza (nao teve saida nos ultimos 30 dias)
+//   <= 7 dias  -> vermelho (critico)
+//   <= 30 dias -> amarelo (atencao)
+//   > 30 dias  -> verde (tranquilo)
+function renderizarPrevisao(lista) {
+    const tbody = document.getElementById('tabela-previsao');
+    if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="tabela-vazia">Nenhum medicamento cadastrado.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = lista.map(item => {
+        const dias = item.dias_ate_esgotar !== null ? Number(item.dias_ate_esgotar) : null;
+
+        let badge;
+        if (dias === null) {
+            badge = `<span class="badge badge-azul">Sem dados suficientes</span>`;
+        } else if (dias <= 7) {
+            badge = `<span class="badge badge-vermelho">Esgota em ${dias} dias</span>`;
+        } else if (dias <= 30) {
+            badge = `<span class="badge badge-amarelo">Esgota em ${dias} dias</span>`;
+        } else {
+            badge = `<span class="badge badge-verde">Esgota em ${dias} dias</span>`;
+        }
+
+        return `
+            <tr>
+                <td data-rotulo="Medicamento">${item.nome}</td>
+                <td data-rotulo="Estoque atual">${item.estoque_atual}</td>
+                <td data-rotulo="Saida (30 dias)">${item.saida_ultimos_30_dias}</td>
+                <td data-rotulo="Previsao">${badge}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // ---------- GRAFICOS (biblioteca Chart.js) ----------

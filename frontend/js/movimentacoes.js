@@ -112,5 +112,154 @@ function mostrarMensagem(texto, tipo) {
     }
 }
 
-carregarFormulario();
+// ---------- SELECIONAR LOTE VIA QR CODE ----------
+//
+// Usada tanto pelo leitor de camera (abaixo) quanto quando a
+// pagina e aberta diretamente com "?lote_id=123" na URL (por
+// exemplo, se alguem escanear o QR com a camera nativa do
+// celular, fora do nosso leitor).
+async function selecionarLotePorId(loteId) {
+    try {
+        // Nao temos uma rota "GET /api/lotes/:id" pronta, entao
+        // buscamos a lista completa e procuramos o id nela - para
+        // a quantidade de lotes de um projeto academico, isso e
+        // simples e rapido o suficiente.
+        const lotes = await chamarApi('/lotes');
+        const lote = lotes.find(l => l.id === loteId);
+
+        if (!lote) {
+            mostrarMensagem('Lote nao encontrado.', 'erro');
+            return;
+        }
+
+        selectMedicamento.value = lote.medicamento_id;
+        await carregarLotesDoMedicamento(lote.medicamento_id);
+        selectLote.value = loteId;
+
+        // Escanear o QR code de um lote fisico normalmente
+        // significa "esse remedio esta saindo da farmacia agora"
+        // - por isso ja deixamos o tipo pre-selecionado em SAIDA.
+        document.getElementById('mov-tipo').value = 'SAIDA';
+        document.getElementById('mov-quantidade').focus();
+
+        mostrarMensagem(
+            `Lote ${lote.numero_lote} (${lote.medicamento_nome}) selecionado via QR Code.`,
+            'sucesso'
+        );
+    } catch (erro) {
+        mostrarMensagem(erro.message, 'erro');
+    }
+}
+
+// Se a pagina foi aberta com "?lote_id=123" na URL, ja seleciona
+// esse lote assim que o formulario terminar de carregar.
+async function verificarLoteNaUrl() {
+    const parametros = new URLSearchParams(window.location.search);
+    const loteId = parametros.get('lote_id');
+    if (loteId) {
+        await selecionarLotePorId(Number(loteId));
+    }
+}
+
+// ---------- LEITOR DE QR CODE (CAMERA) ----------
+//
+// Usa a biblioteca jsQR (assets/js/jsQR.js) para procurar um QR
+// code em cada quadro (frame) do video da camera. O processo:
+//   1) pede permissao e liga a camera (getUserMedia);
+//   2) a cada frame, desenha a imagem do video num <canvas>
+//      "escondido" (invisivel na tela, so usado como rascunho);
+//   3) le os pixels desse canvas e pergunta ao jsQR se tem
+//      algum QR code ali;
+//   4) se achar, para a camera e processa o resultado.
+
+let streamDaCamera = null;
+let leituraEmAndamento = false;
+
+const canvasEscondido = document.createElement('canvas');
+const contextoEscondido = canvasEscondido.getContext('2d', { willReadFrequently: true });
+
+async function abrirLeitorQrCode() {
+    const video = document.getElementById('video-leitor');
+
+    try {
+        // facingMode "environment" pede a camera TRASEIRA em
+        // celulares (a frontal seria menos pratica para ler
+        // codigos). Em notebooks sem camera traseira, o navegador
+        // usa a unica camera disponivel mesmo assim.
+        streamDaCamera = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+        });
+    } catch (erro) {
+        console.error(erro);
+        mostrarMensagem(
+            'Nao foi possivel acessar a camera. Verifique se o navegador tem permissao.',
+            'erro'
+        );
+        return;
+    }
+
+    video.srcObject = streamDaCamera;
+    document.getElementById('leitor-qrcode').classList.add('aberto');
+    document.getElementById('status-leitor').textContent = 'Aponte a camera para o QR code do lote...';
+
+    leituraEmAndamento = true;
+    requestAnimationFrame(processarProximoFrame);
+}
+
+function fecharLeitorQrCode() {
+    leituraEmAndamento = false;
+
+    if (streamDaCamera) {
+        // Sempre parar as "tracks" da camera ao fechar - senao a
+        // luzinha de "camera em uso" do navegador/notebook fica
+        // ligada mesmo depois do leitor fechado.
+        streamDaCamera.getTracks().forEach(faixa => faixa.stop());
+        streamDaCamera = null;
+    }
+
+    document.getElementById('leitor-qrcode').classList.remove('aberto');
+}
+
+function processarProximoFrame() {
+    if (!leituraEmAndamento) return;
+
+    const video = document.getElementById('video-leitor');
+
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvasEscondido.width = video.videoWidth;
+        canvasEscondido.height = video.videoHeight;
+        contextoEscondido.drawImage(video, 0, 0, canvasEscondido.width, canvasEscondido.height);
+
+        const imagem = contextoEscondido.getImageData(0, 0, canvasEscondido.width, canvasEscondido.height);
+        const codigoEncontrado = jsQR(imagem.data, imagem.width, imagem.height);
+
+        if (codigoEncontrado) {
+            document.getElementById('status-leitor').textContent = 'QR Code encontrado!';
+            processarTextoEscaneado(codigoEncontrado.data);
+            fecharLeitorQrCode();
+            return;
+        }
+    }
+
+    requestAnimationFrame(processarProximoFrame);
+}
+
+function processarTextoEscaneado(texto) {
+    try {
+        const url = new URL(texto);
+        const loteId = url.searchParams.get('lote_id');
+        if (loteId) {
+            selecionarLotePorId(Number(loteId));
+        } else {
+            mostrarMensagem('QR Code lido, mas nao contem um lote valido do SIGEM.', 'erro');
+        }
+    } catch {
+        mostrarMensagem('QR Code lido, mas o conteudo nao e um link valido.', 'erro');
+    }
+}
+
+document.getElementById('btn-abrir-leitor').addEventListener('click', abrirLeitorQrCode);
+document.getElementById('btn-fechar-leitor').addEventListener('click', fecharLeitorQrCode);
+
+carregarFormulario().then(verificarLoteNaUrl);
 carregarHistorico();
