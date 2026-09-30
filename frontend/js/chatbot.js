@@ -93,117 +93,133 @@ async function enviarPergunta(evento) {
 
 // ---------- MOTOR DE RESPOSTAS (baseado em palavras-chave) ----------
 //
-// Cada "intencao" e checada em ordem, da mais especifica para a
-// mais generica. A primeira que bater com alguma palavra da
-// pergunta e a que responde.
+// Cada "intencao" abaixo e checada de forma INDEPENDENTE (nao
+// para na primeira que bater) - assim, uma pergunta composta
+// como "quero saber os vencidos E os proximos do vencimento"
+// recebe as DUAS respostas, uma embaixo da outra, em vez de so
+// a primeira que a gente detectar.
+//
+// A saudacao e a unica excecao: se o usuario so disse "oi", nao
+// faz sentido tentar casar isso com as outras intencoes.
 async function responderPergunta(perguntaOriginal) {
     const pergunta = normalizar(perguntaOriginal);
 
+    if (contemAlguma(pergunta, ['oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'o que voce faz'])) {
+        return 'Posso te ajudar com informacoes sobre: medicamentos vencidos, proximos do vencimento, ' +
+               'estoque baixo, previsao de esgotamento, estoque de um medicamento especifico, ' +
+               'e as ultimas movimentacoes registradas. Voce tambem pode perguntar mais de uma ' +
+               'coisa na mesma frase.';
+    }
+
+    const respostas = [];
+
     try {
-        // 1) Saudacao / ajuda
-        if (contemAlguma(pergunta, ['oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'o que voce faz'])) {
-            return 'Posso te ajudar com informacoes sobre: medicamentos vencidos, proximos do vencimento, ' +
-                   'estoque baixo, previsao de esgotamento, estoque de um medicamento especifico, ' +
-                   'e as ultimas movimentacoes registradas.';
-        }
+        // Busca os dados uma unica vez e reaproveita em varias
+        // intencoes, em vez de chamar a API repetida vezes.
+        const dados = await chamarApi('/dashboard');
 
-        // 2) Pergunta sobre um MEDICAMENTO especifico (procura o
-        //    nome de algum medicamento cadastrado dentro da pergunta)
+        // 1) Pergunta sobre MEDICAMENTOS especificos (pode citar
+        //    mais de um na mesma frase - por isso usamos filter,
+        //    nao find, e percorremos todos os que baterem).
         const medicamentos = await chamarApi('/medicamentos');
-        const medicamentoCitado = medicamentos.find(m => pergunta.includes(normalizar(m.nome)));
+        const medicamentosCitados = medicamentos.filter(m => pergunta.includes(normalizar(m.nome)));
 
-        if (medicamentoCitado) {
-            const lotes = await chamarApi(`/lotes/medicamento/${medicamentoCitado.id}`);
+        for (const medicamento of medicamentosCitados) {
+            const lotes = await chamarApi(`/lotes/medicamento/${medicamento.id}`);
             const totalEstoque = lotes.reduce((soma, l) => soma + l.quantidade, 0);
-            const status = totalEstoque <= medicamentoCitado.estoque_minimo
+            const status = totalEstoque <= medicamento.estoque_minimo
                 ? '<span class="badge badge-vermelho">Estoque baixo</span>'
                 : '<span class="badge badge-verde">Estoque normal</span>';
 
-            return `<strong>${medicamentoCitado.nome}</strong>: ${totalEstoque} unidades em estoque ` +
-                   `(${lotes.length} lote${lotes.length === 1 ? '' : 's'}), estoque minimo de ${medicamentoCitado.estoque_minimo}. ${status}`;
+            respostas.push(
+                `<strong>${medicamento.nome}</strong>: ${totalEstoque} unidades em estoque ` +
+                `(${lotes.length} lote${lotes.length === 1 ? '' : 's'}), estoque minimo de ${medicamento.estoque_minimo}. ${status}`
+            );
         }
 
-        // 3) Vencidos (checar ANTES de "proximo do vencimento",
+        // 2) Vencidos (checado ANTES de "proximo do vencimento",
         //    porque "vencid" e mais especifico que "venc")
         if (contemAlguma(pergunta, ['vencid', 'ja venceu', 'ja passou da validade'])) {
-            const dados = await chamarApi('/dashboard');
             if (dados.vencidos.length === 0) {
-                return '✅ Nenhum medicamento vencido no momento.';
+                respostas.push('✅ Nenhum medicamento vencido no momento.');
+            } else {
+                const itens = dados.vencidos
+                    .map(v => `${v.medicamento_nome} (lote ${v.numero_lote}, venceu em ${formatarData(v.data_validade)})`)
+                    .join('<br>');
+                respostas.push(`🔴 Medicamentos vencidos:<br>${itens}`);
             }
-            const itens = dados.vencidos
-                .map(v => `${v.medicamento_nome} (lote ${v.numero_lote}, venceu em ${formatarData(v.data_validade)})`)
-                .join('<br>');
-            return `🔴 Medicamentos vencidos:<br>${itens}`;
         }
 
-        // 4) Proximo do vencimento
-        if (contemAlguma(pergunta, ['venc', 'validade'])) {
-            const dados = await chamarApi('/dashboard');
+        // 3) Proximo do vencimento
+        if (contemAlguma(pergunta, ['proxim', 'venc', 'validade'])) {
             if (dados.proximosVencimento.length === 0) {
-                return '✅ Nenhum lote proximo do vencimento nos proximos 30 dias.';
+                respostas.push('✅ Nenhum lote proximo do vencimento nos proximos 30 dias.');
+            } else {
+                const itens = dados.proximosVencimento
+                    .map(v => `${v.medicamento_nome} (lote ${v.numero_lote}, vence em ${formatarData(v.data_validade)})`)
+                    .join('<br>');
+                respostas.push(`🟠 Proximos do vencimento:<br>${itens}`);
             }
-            const itens = dados.proximosVencimento
-                .map(v => `${v.medicamento_nome} (lote ${v.numero_lote}, vence em ${formatarData(v.data_validade)})`)
-                .join('<br>');
-            return `🟠 Proximos do vencimento:<br>${itens}`;
         }
 
-        // 5) Previsao de esgotamento
+        // 4) Previsao de esgotamento
         if (contemAlguma(pergunta, ['esgota', 'previsao', 'quando acaba', 'vai acabar'])) {
             const previsao = await chamarApi('/previsao-estoque');
             const comDados = previsao.filter(p => p.dias_ate_esgotar !== null);
 
             if (comDados.length === 0) {
-                return 'Ainda nao ha saidas suficientes registradas para calcular uma previsao confiavel.';
+                respostas.push('Ainda nao ha saidas suficientes registradas para calcular uma previsao confiavel.');
+            } else {
+                const itens = comDados
+                    .slice(0, 3)
+                    .map(p => `${p.nome}: esgota em ${Number(p.dias_ate_esgotar)} dias`)
+                    .join('<br>');
+                respostas.push(`📉 Previsao (mais urgentes primeiro):<br>${itens}`);
             }
-
-            const itens = comDados
-                .slice(0, 3)
-                .map(p => `${p.nome}: esgota em ${Number(p.dias_ate_esgotar)} dias`)
-                .join('<br>');
-            return `📉 Previsao (mais urgentes primeiro):<br>${itens}`;
         }
 
-        // 6) Estoque baixo / acabando
+        // 5) Estoque baixo / acabando
         if (contemAlguma(pergunta, ['estoque baixo', 'acabando', 'faltando', 'baixo'])) {
-            const dados = await chamarApi('/dashboard');
             if (dados.estoqueBaixo.length === 0) {
-                return '✅ Nenhum medicamento com estoque baixo no momento.';
+                respostas.push('✅ Nenhum medicamento com estoque baixo no momento.');
+            } else {
+                const itens = dados.estoqueBaixo
+                    .map(e => `${e.nome}: ${e.quantidade_total} unidades (minimo: ${e.estoque_minimo})`)
+                    .join('<br>');
+                respostas.push(`🔴 Estoque baixo:<br>${itens}`);
             }
-            const itens = dados.estoqueBaixo
-                .map(e => `${e.nome}: ${e.quantidade_total} unidades (minimo: ${e.estoque_minimo})`)
-                .join('<br>');
-            return `🔴 Estoque baixo:<br>${itens}`;
         }
 
-        // 7) Totais gerais
+        // 6) Totais gerais
         if (contemAlguma(pergunta, ['quantos medicamentos', 'total de medicamentos', 'quantos tipos'])) {
-            const dados = await chamarApi('/dashboard');
-            return `Temos <strong>${dados.totalMedicamentos}</strong> medicamentos diferentes cadastrados no sistema.`;
+            respostas.push(`Temos <strong>${dados.totalMedicamentos}</strong> medicamentos diferentes cadastrados no sistema.`);
         }
 
         if (contemAlguma(pergunta, ['estoque total', 'quantidade total', 'total em estoque', 'unidades em estoque'])) {
-            const dados = await chamarApi('/dashboard');
-            return `O estoque total (somando todos os lotes de todos os medicamentos) e de <strong>${dados.totalEstoque}</strong> unidades.`;
+            respostas.push(`O estoque total (somando todos os lotes de todos os medicamentos) e de <strong>${dados.totalEstoque}</strong> unidades.`);
         }
 
-        // 8) Historico / movimentacoes
+        // 7) Historico / movimentacoes
         if (contemAlguma(pergunta, ['movimenta', 'historico', 'entrada', 'saida'])) {
-            const dados = await chamarApi('/dashboard');
             const ultimas = dados.ultimasMovimentacoes.slice(0, 3);
             if (ultimas.length === 0) {
-                return 'Nenhuma movimentacao registrada ainda.';
+                respostas.push('Nenhuma movimentacao registrada ainda.');
+            } else {
+                const itens = ultimas
+                    .map(m => `${m.tipo} de ${m.quantidade} ${m.medicamento_nome} em ${formatarData(m.data_movimentacao)}`)
+                    .join('<br>');
+                respostas.push(`Ultimas movimentacoes:<br>${itens}`);
             }
-            const itens = ultimas
-                .map(m => `${m.tipo} de ${m.quantidade} ${m.medicamento_nome} em ${formatarData(m.data_movimentacao)}`)
-                .join('<br>');
-            return `Ultimas movimentacoes:<br>${itens}`;
         }
 
-        // 9) Nao entendeu nenhuma das intencoes acima
-        return 'Nao entendi essa pergunta 🤔. Tente perguntar sobre: medicamentos vencidos, ' +
-               'proximos do vencimento, estoque baixo, previsao de esgotamento, o nome de um ' +
-               'medicamento especifico, ou o historico de movimentacoes.';
+        // Nenhuma intencao bateu com nada na pergunta
+        if (respostas.length === 0) {
+            return 'Nao entendi essa pergunta 🤔. Tente perguntar sobre: medicamentos vencidos, ' +
+                   'proximos do vencimento, estoque baixo, previsao de esgotamento, o nome de um ' +
+                   'medicamento especifico, ou o historico de movimentacoes.';
+        }
+
+        return respostas.join('<br><br>');
     } catch (erro) {
         console.error(erro);
         return 'Desculpa, tive um problema para buscar essa informacao. Tente novamente.';
