@@ -234,10 +234,7 @@ function renderizarHero(dados) {
 
     const chip = document.getElementById('hero-status');
     chip.classList.remove('atencao', 'critico');
-    if (criseAtiva()) {
-        chip.classList.add('critico');
-        document.getElementById('hero-status-texto').textContent = 'Modo crise ativo (simulação)';
-    } else if (total === 0) {
+    if (total === 0) {
         document.getElementById('hero-status-texto').textContent = 'Tudo em ordem no estoque';
     } else {
         chip.classList.add(qtdCriticos > 0 ? 'critico' : 'atencao');
@@ -412,7 +409,7 @@ function renderizarUltimasMovimentacoes(lista) {
 
 // ---------- SIMULADOR "E SE?" ----------
 //
-// Pega a previsao real (ou a de crise) e recalcula na hora,
+// Pega a previsao real  e recalcula na hora,
 // aplicando duas mudancas hipoteticas:
 //   consumo   -> multiplica o consumo diario (ex: +50% = x1.5)
 //   reposicao -> aumenta o estoque atual (ex: +100% = dobra)
@@ -471,25 +468,4 @@ function atualizarSimulador() {
 sliderConsumo.addEventListener('input', atualizarSimulador);
 sliderReposicao.addEventListener('input', atualizarSimulador);
 
-// ---------- MODO CRISE (botao) ----------
-function atualizarVisualCrise() {
-    const ativa = criseAtiva();
-    document.body.classList.toggle('modo-crise', ativa);
-    document.getElementById('bloco-crise').classList.toggle('crise-ativa', ativa);
-    document.getElementById('btn-crise-texto').textContent = ativa ? 'Voltar ao normal' : 'Simular crise';
-    document.getElementById('crise-titulo-texto').textContent = ativa
-        ? 'MODO CRISE ATIVO (simulação)'
-        : 'Modo crise';
-    document.getElementById('crise-descricao').textContent = ativa
-        ? 'Estes números são simulados: estoque a 25% do mínimo e consumo +50%. Nada foi alterado no banco de dados.'
-        : 'Simula um hospital em desabastecimento: o estoque despenca e o consumo sobe 50%. Serve para ver como o SIGEM alerta a equipe a tempo.';
-}
-
-document.getElementById('btn-crise').addEventListener('click', () => {
-    definirCrise(!criseAtiva());
-    atualizarVisualCrise();
-    carregarDashboard();
-});
-
-atualizarVisualCrise();
 carregarDashboard();

@@ -166,7 +166,7 @@ async function responderPergunta(perguntaOriginal) {
         for (const medicamento of medicamentosCitados) {
             const lotes = await chamarApi(`/lotes/medicamento/${medicamento.id}`);
             const estoqueReal = lotes.reduce((soma, l) => soma + l.quantidade, 0);
-            const totalEstoque = criseAtiva() ? estoqueEmCrise(estoqueReal, medicamento.estoque_minimo) : estoqueReal;
+            const totalEstoque = estoqueReal;
             const status = totalEstoque <= medicamento.estoque_minimo
                 ? '<span class="badge badge-vermelho">Estoque baixo</span>'
                 : '<span class="badge badge-verde">Estoque normal</span>';
@@ -259,10 +259,7 @@ async function responderPergunta(perguntaOriginal) {
                    'medicamento específico, ou o histórico de movimentações.';
         }
 
-        const aviso = criseAtiva()
-            ? '<strong>🚨 Modo crise ativo</strong> (dados simulados)<br><br>'
-            : '';
-        return aviso + respostas.join('<br><br>');
+        return respostas.join('<br><br>');
     } catch (erro) {
         console.error(erro);
         return 'Desculpe, tive um problema para buscar essa informação. Tente novamente.';

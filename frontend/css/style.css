@@ -489,10 +489,6 @@ nav.menu > a.ativo {
     mask-image: radial-gradient(ellipse at 20% 30%, #000 20%, transparent 75%);
 }
 
-body.modo-crise .hero {
-    background: linear-gradient(135deg, #3d0a10 0%, #8f1c26 55%, #e04a4a 100%);
-}
-
 .hero-chip {
     display: inline-flex;
     align-items: center;
@@ -1658,59 +1654,6 @@ footer.rodape a {
 }
 
 /* ---------- 9. Recursos: crise, simulador, comparativo, linha do tempo ---------- */
-.barra-crise {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 18px 22px !important;
-    border-left: 5px solid var(--cinza-borda) !important;
-    transition: background 0.4s ease, border-color 0.4s ease;
-}
-
-.barra-crise-texto h2 {
-    margin: 0 0 4px !important;
-    font-size: 16px !important;
-}
-
-.barra-crise .secao-explicacao {
-    margin: 0;
-    max-width: 70ch;
-}
-
-.btn-crise {
-    background: var(--vermelho-bg);
-    color: var(--vermelho);
-    border: 1.5px solid color-mix(in srgb, var(--vermelho) 35%, transparent);
-}
-
-.btn-crise:hover {
-    background: var(--vermelho);
-    color: var(--branco);
-    transform: translateY(-2px);
-}
-
-.barra-crise.crise-ativa {
-    background: var(--vermelho-bg);
-    border-left-color: var(--vermelho) !important;
-}
-
-.barra-crise.crise-ativa .btn-crise {
-    background: var(--superficie);
-    color: var(--texto);
-    border-color: var(--cinza-borda);
-}
-
-.barra-crise.crise-ativa h2 {
-    color: var(--vermelho);
-    animation: pulsar-crise 1.6s ease-in-out infinite;
-}
-
-body.modo-crise header.topo {
-    background: rgba(110, 14, 22, 0.9);
-}
-
 .simulador-controles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
@@ -2581,19 +2524,6 @@ html.tema-trocando *::after {
         grid-column: 1 / -1;
     }
 
-    /* barra de crise compacta no celular */
-    .barra-crise {
-        padding: 14px 16px !important;
-    }
-
-    .barra-crise:not(.crise-ativa) .secao-explicacao {
-        display: none;
-    }
-
-    .barra-crise-texto h2 {
-        margin: 0 !important;
-    }
-
     .hero-titulo {
         font-size: 28px;
     }
@@ -2620,7 +2550,6 @@ html.tema-trocando *::after {
     .comparativo-celula.comp-sem::before { content: 'Sem o SIGEM'; }
     .comparativo-celula.comp-com::before { content: 'Com o SIGEM'; }
 
-    .btn-crise,
     .hero-acoes a {
         width: 100%;
     }
@@ -2732,7 +2661,6 @@ html.tema-trocando *::after {
     .nav-inferior,
     .chatbot-botao,
     .chatbot-painel,
-    .barra-crise,
     .btn-instalar,
     .hero,
     #mensagem-area {

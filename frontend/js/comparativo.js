@@ -1,8 +1,7 @@
 // comparativo.js
 //
 // Preenche os cards "ao vivo" da pagina comparativo.html com o que o
-// sistema detectou nos dados reais (ou simulados, se o modo crise
-// estiver ligado).
+// sistema detectou nos dados reais.
 
 async function carregarCardsAoVivo() {
     const container = document.getElementById('cards-ao-vivo');
