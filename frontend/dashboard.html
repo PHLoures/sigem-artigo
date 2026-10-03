@@ -33,6 +33,7 @@
             <a href="medicamentos.html">Medicamentos</a>
             <a href="movimentacoes.html">Movimentacoes</a>
             <a href="relatorios.html">Relatorios</a>
+            <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html">Contexto</a>
             <span id="usuario-logado"></span>
         </nav>
@@ -44,6 +45,18 @@
         </div>
 
         <div id="mensagem-area"></div>
+
+        <!-- Modo crise: simulacao para a apresentacao (nada e gravado no banco) -->
+        <section class="bloco barra-crise no-print" id="bloco-crise">
+            <div class="barra-crise-texto">
+                <h2 id="crise-titulo">🚨 Modo crise</h2>
+                <p class="secao-explicacao" id="crise-descricao">
+                    Simula um hospital em desabastecimento: o estoque despenca e o consumo
+                    sobe 50%. Serve para ver como o SIGEM alerta a equipe a tempo.
+                </p>
+            </div>
+            <button type="button" class="btn-crise" id="btn-crise">Simular crise</button>
+        </section>
 
         <!-- Cards de resumo -->
         <section class="cards" id="cards-resumo">
@@ -75,6 +88,36 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-previsao"></tbody>
+            </table>
+        </section>
+
+        <!-- Simulador "e se?" -->
+        <section class="bloco" id="secao-simulador">
+            <h2>🧪 Simulador "e se?"</h2>
+            <p class="secao-explicacao">
+                Mexa nos controles e veja como a previsão de esgotamento muda.
+                Ajuda a decidir <strong>quanto repor</strong> antes de faltar.
+            </p>
+            <div class="simulador-controles">
+                <div class="campo">
+                    <label for="sim-consumo">Consumo: <strong id="sim-consumo-valor">sem mudança</strong></label>
+                    <input type="range" id="sim-consumo" min="-50" max="200" step="10" value="0">
+                </div>
+                <div class="campo">
+                    <label for="sim-reposicao">Reposição de estoque: <strong id="sim-reposicao-valor">nenhuma</strong></label>
+                    <input type="range" id="sim-reposicao" min="0" max="200" step="10" value="0">
+                </div>
+            </div>
+            <p class="sim-resumo" id="sim-resumo"></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Hoje</th>
+                        <th>No cenário</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-simulador"></tbody>
             </table>
         </section>
 
@@ -151,6 +194,7 @@
     <script src="assets/js/chart.umd.min.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/crise.js"></script>
     <script src="js/chatbot.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

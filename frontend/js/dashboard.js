@@ -2,9 +2,12 @@
 //
 // Busca o resumo em /api/dashboard e preenche a pagina index.html.
 
+let graficoEstoque = null;
+let previsaoAtual = [];
+
 async function carregarDashboard() {
     try {
-        const dados = await chamarApi('/dashboard');
+        const dados = await obterDashboard();
         renderizarCards(dados);
         renderizarVencidos(dados.vencidos);
         renderizarProximosVencimento(dados.proximosVencimento);
@@ -16,8 +19,10 @@ async function carregarDashboard() {
     }
 
     try {
-        const previsao = await chamarApi('/previsao-estoque');
+        const previsao = await obterPrevisao();
+        previsaoAtual = previsao;
         renderizarPrevisao(previsao);
+        atualizarSimulador();
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
@@ -30,6 +35,14 @@ async function carregarDashboard() {
 //   <= 7 dias  -> vermelho (critico)
 //   <= 30 dias -> amarelo (atencao)
 //   > 30 dias  -> verde (tranquilo)
+function badgePrevisao(dias) {
+    if (dias === null) return `<span class="badge badge-azul">Sem dados suficientes</span>`;
+    const arredondado = Math.round(dias * 10) / 10;
+    if (dias <= 7) return `<span class="badge badge-vermelho">Esgota em ${arredondado} dias</span>`;
+    if (dias <= 30) return `<span class="badge badge-amarelo">Esgota em ${arredondado} dias</span>`;
+    return `<span class="badge badge-verde">Esgota em ${arredondado} dias</span>`;
+}
+
 function renderizarPrevisao(lista) {
     const tbody = document.getElementById('tabela-previsao');
     if (lista.length === 0) {
@@ -40,16 +53,7 @@ function renderizarPrevisao(lista) {
     tbody.innerHTML = lista.map(item => {
         const dias = item.dias_ate_esgotar !== null ? Number(item.dias_ate_esgotar) : null;
 
-        let badge;
-        if (dias === null) {
-            badge = `<span class="badge badge-azul">Sem dados suficientes</span>`;
-        } else if (dias <= 7) {
-            badge = `<span class="badge badge-vermelho">Esgota em ${dias} dias</span>`;
-        } else if (dias <= 30) {
-            badge = `<span class="badge badge-amarelo">Esgota em ${dias} dias</span>`;
-        } else {
-            badge = `<span class="badge badge-verde">Esgota em ${dias} dias</span>`;
-        }
+        const badge = badgePrevisao(dias);
 
         return `
             <tr>
@@ -72,7 +76,9 @@ function renderizarPrevisao(lista) {
 function renderizarGraficoEstoque(lista) {
     const ctx = document.getElementById('grafico-estoque');
 
-    new Chart(ctx, {
+    if (graficoEstoque) graficoEstoque.destroy();
+
+    graficoEstoque = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: lista.map(item => item.nome),
@@ -246,4 +252,86 @@ function renderizarUltimasMovimentacoes(lista) {
     `).join('');
 }
 
+// ---------- SIMULADOR "E SE?" ----------
+//
+// Pega a previsao real (ou a de crise) e recalcula na hora,
+// aplicando duas mudancas hipoteticas:
+//   consumo   -> multiplica o consumo diario (ex: +50% = x1.5)
+//   reposicao -> aumenta o estoque atual (ex: +100% = dobra)
+// dias = estoque / consumo diario
+const sliderConsumo = document.getElementById('sim-consumo');
+const sliderReposicao = document.getElementById('sim-reposicao');
+
+function atualizarSimulador() {
+    const consumoPct = Number(sliderConsumo.value);
+    const reposicaoPct = Number(sliderReposicao.value);
+
+    document.getElementById('sim-consumo-valor').textContent =
+        consumoPct === 0 ? 'sem mudança' : `${consumoPct > 0 ? '+' : ''}${consumoPct}%`;
+    document.getElementById('sim-reposicao-valor').textContent =
+        reposicaoPct === 0 ? 'nenhuma' : `+${reposicaoPct}% de estoque`;
+
+    const tbody = document.getElementById('tabela-simulador');
+    if (previsaoAtual.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="tabela-vazia">Sem dados para simular.</td></tr>`;
+        return;
+    }
+
+    let criticosHoje = 0;
+    let criticosCenario = 0;
+
+    tbody.innerHTML = previsaoAtual.map(item => {
+        const consumoMensal = Number(item.saida_ultimos_30_dias);
+        const diasHoje = item.dias_ate_esgotar !== null ? Number(item.dias_ate_esgotar) : null;
+
+        let diasCenario = null;
+        if (consumoMensal > 0) {
+            const consumoDiario = (consumoMensal / 30) * (1 + consumoPct / 100);
+            const estoque = Number(item.estoque_atual) * (1 + reposicaoPct / 100);
+            diasCenario = consumoDiario > 0 ? estoque / consumoDiario : null;
+        }
+
+        if (diasHoje !== null && diasHoje <= 7) criticosHoje++;
+        if (diasCenario !== null && diasCenario <= 7) criticosCenario++;
+
+        return `
+            <tr>
+                <td data-rotulo="Medicamento">${item.nome}</td>
+                <td data-rotulo="Hoje">${badgePrevisao(diasHoje)}</td>
+                <td data-rotulo="No cenario">${badgePrevisao(diasCenario)}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const resumo = document.getElementById('sim-resumo');
+    resumo.textContent = criticosCenario === criticosHoje
+        ? `Medicamentos em situação crítica (esgotam em até 7 dias): ${criticosCenario} — igual a hoje.`
+        : `Medicamentos em situação crítica (esgotam em até 7 dias): ${criticosCenario} no cenário, contra ${criticosHoje} hoje.`;
+    resumo.className = 'sim-resumo ' + (criticosCenario > criticosHoje ? 'sim-pior' : criticosCenario < criticosHoje ? 'sim-melhor' : '');
+}
+
+sliderConsumo.addEventListener('input', atualizarSimulador);
+sliderReposicao.addEventListener('input', atualizarSimulador);
+
+// ---------- MODO CRISE (botao) ----------
+function atualizarVisualCrise() {
+    const ativa = criseAtiva();
+    document.body.classList.toggle('modo-crise', ativa);
+    document.getElementById('bloco-crise').classList.toggle('crise-ativa', ativa);
+    document.getElementById('btn-crise').textContent = ativa ? 'Voltar ao normal' : 'Simular crise';
+    document.getElementById('crise-titulo').textContent = ativa
+        ? '🚨 MODO CRISE ATIVO (simulação)'
+        : '🚨 Modo crise';
+    document.getElementById('crise-descricao').textContent = ativa
+        ? 'Estes números são simulados: estoque a 25% do mínimo e consumo +50%. Nada foi alterado no banco de dados.'
+        : 'Simula um hospital em desabastecimento: o estoque despenca e o consumo sobe 50%. Serve para ver como o SIGEM alerta a equipe a tempo.';
+}
+
+document.getElementById('btn-crise').addEventListener('click', () => {
+    definirCrise(!criseAtiva());
+    atualizarVisualCrise();
+    carregarDashboard();
+});
+
+atualizarVisualCrise();
 carregarDashboard();

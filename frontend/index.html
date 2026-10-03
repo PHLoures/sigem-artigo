@@ -32,7 +32,14 @@
                     autocomplete="name"
                     required
                 >
-                <button type="submit" class="btn-primario btn-iniciar">Entrar como Convidado</button>
+                <label class="rotulo-perfil" for="perfil-usuario">Entrar como</label>
+                <select id="perfil-usuario">
+                    <option value="farmaceutico">Farmaceutico</option>
+                    <option value="enfermeiro">Enfermeiro</option>
+                    <option value="gestor">Gestor</option>
+                </select>
+                <p class="descricao-perfil" id="descricao-perfil"></p>
+                <button type="submit" class="btn-primario btn-iniciar">Entrar</button>
             </form>
         </div>
     </main>

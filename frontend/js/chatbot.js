@@ -136,7 +136,7 @@ async function responderPergunta(perguntaOriginal) {
     try {
         // Busca os dados uma unica vez e reaproveita em varias
         // intencoes, em vez de chamar a API repetida vezes.
-        const dados = await chamarApi('/dashboard');
+        const dados = await obterDashboard();
 
         // 1) Pergunta sobre MEDICAMENTOS especificos (pode citar
         //    mais de um na mesma frase - por isso usamos filter,
@@ -146,7 +146,8 @@ async function responderPergunta(perguntaOriginal) {
 
         for (const medicamento of medicamentosCitados) {
             const lotes = await chamarApi(`/lotes/medicamento/${medicamento.id}`);
-            const totalEstoque = lotes.reduce((soma, l) => soma + l.quantidade, 0);
+            const estoqueReal = lotes.reduce((soma, l) => soma + l.quantidade, 0);
+            const totalEstoque = criseAtiva() ? estoqueEmCrise(estoqueReal, medicamento.estoque_minimo) : estoqueReal;
             const status = totalEstoque <= medicamento.estoque_minimo
                 ? '<span class="badge badge-vermelho">Estoque baixo</span>'
                 : '<span class="badge badge-verde">Estoque normal</span>';
@@ -184,7 +185,7 @@ async function responderPergunta(perguntaOriginal) {
 
         // 4) Previsao de esgotamento
         if (contemAlguma(pergunta, ['esgota', 'previsao', 'quando acaba', 'vai acabar'])) {
-            const previsao = await chamarApi('/previsao-estoque');
+            const previsao = await obterPrevisao();
             const comDados = previsao.filter(p => p.dias_ate_esgotar !== null);
 
             if (comDados.length === 0) {
@@ -239,7 +240,10 @@ async function responderPergunta(perguntaOriginal) {
                    'medicamento especifico, ou o historico de movimentacoes.';
         }
 
-        return respostas.join('<br><br>');
+        const aviso = criseAtiva()
+            ? '<strong>🚨 Modo crise ativo</strong> (dados simulados)<br><br>'
+            : '';
+        return aviso + respostas.join('<br><br>');
     } catch (erro) {
         console.error(erro);
         return 'Desculpa, tive um problema para buscar essa informacao. Tente novamente.';

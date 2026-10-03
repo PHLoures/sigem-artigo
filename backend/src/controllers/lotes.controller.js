@@ -40,6 +40,43 @@ async function listarPorMedicamento(req, res) {
     }
 }
 
+// GET /api/lotes/:id/historico
+// Devolve os dados de UM lote e todas as movimentacoes dele, para
+// montar a "linha do tempo" (rastreabilidade) na tela.
+async function historico(req, res) {
+    const { id } = req.params;
+    try {
+        const loteResultado = await pool.query(
+            `SELECT l.*, m.nome AS medicamento_nome
+             FROM lotes l
+             JOIN medicamentos m ON m.id = l.medicamento_id
+             WHERE l.id = $1`,
+            [id]
+        );
+        if (loteResultado.rows.length === 0) {
+            return res.status(404).json({ erro: 'Lote nao encontrado.' });
+        }
+
+        const movimentacoesResultado = await pool.query(
+            `SELECT mv.tipo, mv.quantidade, mv.motivo, mv.data_movimentacao,
+                    s.nome AS setor_nome
+             FROM movimentacoes mv
+             LEFT JOIN setores s ON s.id = mv.setor_id
+             WHERE mv.lote_id = $1
+             ORDER BY mv.data_movimentacao ASC, mv.id ASC`,
+            [id]
+        );
+
+        res.json({
+            lote: loteResultado.rows[0],
+            movimentacoes: movimentacoesResultado.rows,
+        });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ erro: 'Erro ao buscar historico do lote.' });
+    }
+}
+
 // POST /api/lotes
 // Cria um novo lote.
 async function criar(req, res) {
@@ -112,4 +149,4 @@ async function remover(req, res) {
     }
 }
 
-module.exports = { listar, listarPorMedicamento, criar, atualizar, remover };
+module.exports = { listar, listarPorMedicamento, historico, criar, atualizar, remover };

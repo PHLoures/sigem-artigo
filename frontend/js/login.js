@@ -19,7 +19,8 @@ document.getElementById('form-login').addEventListener('submit', (evento) => {
         return;
     }
 
-    salvarSessao({ tipo: 'convidado', nome });
+    const perfil = document.getElementById('perfil-usuario').value;
+    salvarSessao({ tipo: 'convidado', nome, perfil });
     navegarComTransicao('dashboard.html');
 });
 
@@ -27,3 +28,14 @@ function mostrarMensagemLogin(texto) {
     const area = document.getElementById('mensagem-login');
     area.innerHTML = `<div class="mensagem mensagem-erro">${texto}</div>`;
 }
+
+// Mostra, abaixo da caixa de escolha, o que cada perfil pode fazer.
+const selectPerfil = document.getElementById('perfil-usuario');
+const descricaoPerfil = document.getElementById('descricao-perfil');
+
+function atualizarDescricaoPerfil() {
+    descricaoPerfil.textContent = PERFIS[selectPerfil.value].descricao;
+}
+
+selectPerfil.addEventListener('change', atualizarDescricaoPerfil);
+atualizarDescricaoPerfil();

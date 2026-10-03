@@ -4,6 +4,7 @@ const controller = require('../controllers/lotes.controller');
 
 router.get('/', controller.listar);
 router.get('/medicamento/:medicamentoId', controller.listarPorMedicamento);
+router.get('/:id/historico', controller.historico);
 router.post('/', controller.criar);
 router.put('/:id', controller.atualizar);
 router.delete('/:id', controller.remover);

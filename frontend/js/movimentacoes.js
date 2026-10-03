@@ -7,6 +7,18 @@ const formMovimentacao = document.getElementById('form-movimentacao');
 const selectMedicamento = document.getElementById('mov-medicamento');
 const selectLote = document.getElementById('mov-lote');
 
+// ---------- PERMISSOES DO PERFIL ----------
+//
+// Gestor: so le o historico (formulario escondido).
+// Enfermeiro: so registra SAIDA (a opcao ENTRADA some da lista).
+if (!podeFazer('entrada') && !podeFazer('saida')) {
+    formMovimentacao.closest('section').style.display = 'none';
+    mostrarAvisoPerfil('voce pode consultar o historico, mas nao registrar movimentacoes.');
+} else if (!podeFazer('entrada')) {
+    document.querySelector('#mov-tipo option[value="ENTRADA"]').remove();
+    mostrarAvisoPerfil('voce pode registrar apenas SAIDAS de estoque.');
+}
+
 async function carregarFormulario() {
     try {
         const [medicamentos, setores] = await Promise.all([

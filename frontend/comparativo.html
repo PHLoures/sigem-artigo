@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGEM - Comparativo</title>
+    <script src="js/tema.js"></script>
+    <script src="js/transicoes.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script>
+        if (!localStorage.getItem('sigem_sessao')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <header class="topo">
+        <div class="marca">
+            <div class="logo-badge">
+                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+            </div>
+            <div class="marca-texto">
+                <h1>SIGEM</h1>
+                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+            </div>
+        </div>
+        <nav class="menu">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="movimentacoes.html">Movimentacoes</a>
+            <a href="relatorios.html">Relatorios</a>
+            <a href="comparativo.html" class="ativo">Comparativo</a>
+            <a href="contexto.html">Contexto</a>
+            <span id="usuario-logado"></span>
+        </nav>
+    </header>
+
+    <main>
+        <section class="bloco">
+            <h2>⚖️ Com SIGEM x sem SIGEM</h2>
+            <p class="secao-explicacao" style="font-size:14.5px; margin-top:0;">
+                Como a farmácia de um hospital costuma trabalhar quando o controle é
+                feito em papel e planilhas, comparado ao que muda com o sistema.
+                O problema real por trás disso está na página <a href="contexto.html">Contexto</a>.
+            </p>
+        </section>
+
+        <section class="bloco">
+            <div class="comparativo">
+                <div class="comparativo-titulo comp-sem">😟 Sem o SIGEM</div>
+                <div class="comparativo-titulo comp-com">✅ Com o SIGEM</div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Validade</strong>
+                    Alguém precisa lembrar de olhar as caixas. Lotes vencem esquecidos na prateleira.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Validade</strong>
+                    Alertas automáticos de lotes vencidos e próximos do vencimento (30 dias).
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Falta de estoque</strong>
+                    Descobre-se que o remédio acabou quando o paciente já precisa dele.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Falta de estoque</strong>
+                    Previsão de esgotamento pelo consumo médio e alerta de estoque baixo.
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Rastreabilidade</strong>
+                    Não se sabe ao certo para qual setor foi cada unidade de um lote.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Rastreabilidade</strong>
+                    Linha do tempo de cada lote: entradas, saídas, setor e motivo.
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Balcão da farmácia</strong>
+                    Anotação manual de cada retirada, sujeita a erro e esquecimento.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Balcão da farmácia</strong>
+                    QR Code por lote: escaneia com a câmera e a saída já vem preenchida.
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Decisão de compra</strong>
+                    Baseada em achismo e em planilhas desatualizadas.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Decisão de compra</strong>
+                    Simulador "e se?" mostra quanto repor para não faltar.
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Responsabilidade</strong>
+                    Qualquer pessoa mexe em tudo, sem distinção de função.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Responsabilidade</strong>
+                    Perfis (farmacêutico, enfermeiro, gestor) com permissões diferentes.
+                </div>
+
+                <div class="comparativo-celula comp-sem">
+                    <strong>Relatórios</strong>
+                    Horas montando planilha para prestar contas.
+                </div>
+                <div class="comparativo-celula comp-com">
+                    <strong>Relatórios</strong>
+                    Filtro por período, tipo e medicamento, com exportação em PDF e CSV.
+                </div>
+            </div>
+        </section>
+
+        <section class="bloco">
+            <h2>📡 O que o SIGEM está enxergando agora</h2>
+            <p class="secao-explicacao">
+                Números ao vivo do banco de dados: cada um desses problemas passaria
+                despercebido sem o sistema.
+            </p>
+            <div class="cards" id="cards-ao-vivo">
+                <div class="card"><div class="card-titulo">Carregando...</div><div class="card-valor">-</div></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/crise.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/comparativo.js"></script>
+</body>
+</html>

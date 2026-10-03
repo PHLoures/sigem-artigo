@@ -6,6 +6,18 @@
 const formMedicamento = document.getElementById('form-medicamento');
 const formLote = document.getElementById('form-lote');
 
+// ---------- PERMISSOES DO PERFIL ----------
+//
+// Quem nao pode editar cadastros (enfermeiro, gestor) so ve as
+// listas: escondemos os formularios e os botoes Editar/Excluir.
+const podeEditar = podeFazer('editar_cadastros');
+
+if (!podeEditar) {
+    formMedicamento.closest('section').style.display = 'none';
+    formLote.style.display = 'none';
+    mostrarAvisoPerfil('nesta tela voce so pode consultar medicamentos e lotes.');
+}
+
 // ---------- MEDICAMENTOS ----------
 
 async function carregarMedicamentos() {
@@ -33,8 +45,10 @@ function renderizarTabelaMedicamentos(lista) {
             <td data-rotulo="Fabricante">${m.fabricante}</td>
             <td data-rotulo="Estoque minimo">${m.estoque_minimo}</td>
             <td data-rotulo="Acoes">
-                <button class="btn-editar" onclick="editarMedicamento(${m.id})">Editar</button>
-                <button class="btn-perigo" onclick="excluirMedicamento(${m.id})">Excluir</button>
+                ${podeEditar ? `
+                    <button class="btn-editar" onclick="editarMedicamento(${m.id})">Editar</button>
+                    <button class="btn-perigo" onclick="excluirMedicamento(${m.id})">Excluir</button>
+                ` : '-'}
             </td>
         </tr>
     `).join('');
@@ -141,6 +155,7 @@ function renderizarTabelaLotes(lista) {
             <td data-rotulo="Validade">${formatarData(l.data_validade)}</td>
             <td data-rotulo="QR Code">
                 <button type="button" class="btn-editar" onclick="mostrarQrCodeLote(${l.id}, '${l.numero_lote}', '${l.medicamento_nome}')">Gerar QR</button>
+                <button type="button" class="btn-editar" onclick="mostrarHistoricoLote(${l.id})">Historico</button>
             </td>
         </tr>
     `).join('');
@@ -171,6 +186,85 @@ function mostrarQrCodeLote(loteId, numeroLote, medicamentoNome) {
 
 document.getElementById('btn-fechar-modal-qrcode').addEventListener('click', () => {
     document.getElementById('modal-qrcode').classList.remove('aberto');
+});
+
+// ---------- LINHA DO TEMPO DO LOTE (rastreabilidade) ----------
+//
+// Mostra a "vida" de um lote: quando foi cadastrado, cada entrada e
+// saida (com setor e motivo) e a data de validade. E isso que a
+// vigilancia sanitaria chama de RASTREABILIDADE: saber para onde
+// foi cada unidade de um lote.
+async function mostrarHistoricoLote(loteId) {
+    const corpo = document.getElementById('modal-historico-corpo');
+    corpo.innerHTML = '<p class="secao-explicacao">Carregando...</p>';
+    document.getElementById('modal-historico').classList.add('aberto');
+
+    try {
+        const { lote, movimentacoes } = await chamarApi(`/lotes/${loteId}/historico`);
+        document.getElementById('modal-historico-titulo').textContent =
+            `Lote ${lote.numero_lote} - ${lote.medicamento_nome}`;
+        corpo.innerHTML = montarLinhaDoTempo(lote, movimentacoes);
+    } catch (erro) {
+        corpo.innerHTML = `<div class="mensagem mensagem-erro">${erro.message}</div>`;
+    }
+}
+
+function montarLinhaDoTempo(lote, movimentacoes) {
+    const hoje = new Date();
+    const validade = new Date(lote.data_validade);
+    const diasParaVencer = Math.ceil((validade - hoje) / 86400000);
+
+    // Eventos em ordem cronologica. O cadastro vai sempre no topo
+    // (e o inicio da historia do lote).
+    const eventos = movimentacoes.map(m => ({
+        data: new Date(m.data_movimentacao),
+        classe: m.tipo === 'ENTRADA' ? 'verde' : 'azul',
+        titulo: `${m.tipo === 'ENTRADA' ? 'Entrada' : 'Saida'} de ${m.quantidade} unidades`,
+        detalhe: [m.setor_nome ? `Setor: ${m.setor_nome}` : '', m.motivo ? `Motivo: ${m.motivo}` : '']
+            .filter(Boolean).join(' - '),
+        quando: formatarData(m.data_movimentacao),
+    }));
+
+    const linhas = [{
+        classe: 'cinza',
+        titulo: 'Lote cadastrado no sistema',
+        detalhe: `Quantidade atual: ${lote.quantidade} unidades`,
+        quando: formatarData(lote.criado_em),
+    }, ...eventos];
+
+    // Validade: vermelho se ja venceu, amarelo se falta menos de 30 dias
+    let classeValidade = 'verde';
+    let textoValidade = `Vence em ${diasParaVencer} dias`;
+    if (diasParaVencer < 0) {
+        classeValidade = 'vermelho';
+        textoValidade = `Venceu ha ${-diasParaVencer} dias`;
+    } else if (diasParaVencer <= 30) {
+        classeValidade = 'amarelo';
+    }
+    linhas.push({
+        classe: classeValidade,
+        titulo: 'Data de validade',
+        detalhe: textoValidade,
+        quando: formatarData(lote.data_validade),
+    });
+
+    const html = linhas.map((l, i) => `
+        <li class="tl-item tl-${l.classe}" style="animation-delay:${i * 0.07}s">
+            <div class="tl-quando">${l.quando}</div>
+            <div class="tl-titulo">${l.titulo}</div>
+            ${l.detalhe ? `<div class="tl-detalhe">${l.detalhe}</div>` : ''}
+        </li>
+    `).join('');
+
+    const vazio = movimentacoes.length === 0
+        ? '<p class="secao-explicacao">Este lote ainda nao teve nenhuma movimentacao.</p>'
+        : '';
+
+    return `${vazio}<ol class="timeline">${html}</ol>`;
+}
+
+document.getElementById('btn-fechar-modal-historico').addEventListener('click', () => {
+    document.getElementById('modal-historico').classList.remove('aberto');
 });
 
 formLote.addEventListener('submit', async (evento) => {
