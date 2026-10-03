@@ -85,6 +85,7 @@ function renderizarGraficoEstoque(lista) {
         },
         options: {
             responsive: true,
+            animation: { duration: 900, easing: 'easeOutQuart' },
             plugins: {
                 legend: { display: false },
             },
@@ -132,6 +133,37 @@ function renderizarCards(dados) {
             <div class="card-valor">${qtdVencidos}</div>
         </div>
     `;
+
+    animarContadores();
+}
+
+// Faz os numeros dos cards "contarem" de 0 ate o valor real, em vez de
+// aparecerem prontos. A curva "ease-out" comeca rapido e desacelera
+// no final, o que da uma sensacao mais natural.
+function animarContadores() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const DURACAO_MS = 800;
+
+    document.querySelectorAll('.card-valor').forEach((elemento) => {
+        const valorFinal = Number(elemento.textContent);
+        if (!Number.isFinite(valorFinal) || valorFinal === 0) return;
+
+        const inicio = performance.now();
+
+        function passo(agora) {
+            const progresso = Math.min((agora - inicio) / DURACAO_MS, 1);
+            const suavizado = 1 - Math.pow(1 - progresso, 3); // ease-out cubico
+            elemento.textContent = Math.round(valorFinal * suavizado);
+
+            if (progresso < 1) {
+                requestAnimationFrame(passo);
+            }
+        }
+
+        elemento.textContent = '0';
+        requestAnimationFrame(passo);
+    });
 }
 
 // Rola a pagina suavemente até a secao com o id informado, e

@@ -37,7 +37,7 @@ function obterSessao() {
 
 function encerrarSessao() {
     localStorage.removeItem(SIGEM_SESSAO_CHAVE);
-    window.location.href = 'index.html';
+    navegarComTransicao('index.html');
 }
 
 // Chamada no TOPO das paginas protegidas (dashboard, medicamentos,

@@ -20,7 +20,7 @@ document.getElementById('form-login').addEventListener('submit', (evento) => {
     }
 
     salvarSessao({ tipo: 'convidado', nome });
-    window.location.href = 'dashboard.html';
+    navegarComTransicao('dashboard.html');
 });
 
 function mostrarMensagemLogin(texto) {

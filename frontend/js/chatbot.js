@@ -44,7 +44,13 @@ function inicializarChatbot() {
 }
 
 function abrirFecharChatbot() {
-    document.getElementById('chatbot-painel').classList.toggle('aberto');
+    const painel = document.getElementById('chatbot-painel');
+    painel.classList.toggle('aberto');
+
+    // Ao abrir, ja deixa o cursor pronto para digitar (depois da animacao)
+    if (painel.classList.contains('aberto')) {
+        setTimeout(() => document.getElementById('chatbot-input').focus(), 250);
+    }
 }
 
 function adicionarMensagem(texto, classe) {
@@ -54,14 +60,15 @@ function adicionarMensagem(texto, classe) {
     bolha.innerHTML = texto;
     area.appendChild(bolha);
     area.scrollTop = area.scrollHeight;
+    return bolha;
 }
 
 function adicionarMensagemUsuario(texto) {
-    adicionarMensagem(texto, 'chatbot-bolha-usuario');
+    return adicionarMensagem(texto, 'chatbot-bolha-usuario');
 }
 
 function adicionarMensagemBot(texto) {
-    adicionarMensagem(texto, 'chatbot-bolha-bot');
+    return adicionarMensagem(texto, 'chatbot-bolha-bot');
 }
 
 // Remove acentos e deixa tudo minusculo, para a comparacao de
@@ -87,7 +94,20 @@ async function enviarPergunta(evento) {
     adicionarMensagemUsuario(pergunta);
     input.value = '';
 
+    // Bolha com tres pontinhos pulando enquanto o assistente "pensa"
+    const digitando = adicionarMensagemBot('<span class="digitando"><i></i><i></i><i></i></span>');
+    const inicio = Date.now();
+
     const respostaHtml = await responderPergunta(pergunta);
+
+    // Mesmo quando a resposta e instantanea, deixa os pontinhos
+    // aparecerem por um instante - sem isso eles apenas "piscariam".
+    const faltaEsperar = 450 - (Date.now() - inicio);
+    if (faltaEsperar > 0) {
+        await new Promise((resolver) => setTimeout(resolver, faltaEsperar));
+    }
+
+    digitando.remove();
     adicionarMensagemBot(respostaHtml);
 }
 

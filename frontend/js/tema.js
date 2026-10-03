@@ -25,8 +25,17 @@ function aplicarTemaSalvo() {
     }
 }
 
+let temporizadorTransicaoTema = null;
+
 function alternarTema() {
-    const estaEscuro = document.documentElement.getAttribute('data-tema') === 'escuro';
+    const raiz = document.documentElement;
+    const estaEscuro = raiz.getAttribute('data-tema') === 'escuro';
+
+    // Liga a classe que faz TODAS as cores mudarem com transicao suave
+    // (veja "Troca de tema" no style.css) e desliga depois que acabar.
+    raiz.classList.add('tema-trocando');
+    clearTimeout(temporizadorTransicaoTema);
+    temporizadorTransicaoTema = setTimeout(() => raiz.classList.remove('tema-trocando'), 500);
 
     if (estaEscuro) {
         document.documentElement.removeAttribute('data-tema');
@@ -36,16 +45,23 @@ function alternarTema() {
         localStorage.setItem(SIGEM_TEMA_CHAVE, 'escuro');
     }
 
-    atualizarIconeBotaoTema();
+    atualizarIconeBotaoTema(true);
 }
 
-function atualizarIconeBotaoTema() {
+function atualizarIconeBotaoTema(animar = false) {
     const botao = document.getElementById('btn-tema');
     if (!botao) return;
 
     const estaEscuro = document.documentElement.getAttribute('data-tema') === 'escuro';
     botao.textContent = estaEscuro ? '☀️' : '🌙';
     botao.title = estaEscuro ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+
+    if (animar) {
+        // Remove e recoloca a classe para a animacao poder repetir
+        botao.classList.remove('girando');
+        void botao.offsetWidth; // forca o navegador a "esquecer" a animacao anterior
+        botao.classList.add('girando');
+    }
 }
 
 aplicarTemaSalvo();

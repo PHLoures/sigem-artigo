@@ -14,6 +14,52 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
     ? 'http://localhost:3000/api'
     : API_URL_PRODUCAO;
 
+// ---------- Indicador de carregamento ----------
+//
+// Enquanto ha requisicoes esperando resposta, mostramos uma barrinha
+// animada no topo da tela. Se alguma demorar mais de 4 segundos
+// (acontece no plano gratis do Render, quando o servidor "dormiu"),
+// aparece tambem um aviso explicando - assim a tela nunca parece
+// travada sem motivo.
+
+let requisicoesPendentes = 0;
+let temporizadorAviso = null;
+
+function garantirIndicadoresDeCarregamento() {
+    if (document.getElementById('barra-carregando')) return;
+
+    const barra = document.createElement('div');
+    barra.id = 'barra-carregando';
+
+    const aviso = document.createElement('div');
+    aviso.id = 'aviso-servidor';
+    aviso.textContent = '⏳ Conectando ao servidor... na primeira visita pode levar cerca de 1 minuto.';
+
+    document.body.append(barra, aviso);
+}
+
+function iniciarCarregamento() {
+    garantirIndicadoresDeCarregamento();
+    requisicoesPendentes++;
+
+    if (requisicoesPendentes === 1) {
+        document.getElementById('barra-carregando').classList.add('ativa');
+        temporizadorAviso = setTimeout(() => {
+            document.getElementById('aviso-servidor').classList.add('visivel');
+        }, 4000);
+    }
+}
+
+function finalizarCarregamento() {
+    requisicoesPendentes = Math.max(0, requisicoesPendentes - 1);
+
+    if (requisicoesPendentes === 0) {
+        clearTimeout(temporizadorAviso);
+        document.getElementById('barra-carregando').classList.remove('ativa');
+        document.getElementById('aviso-servidor').classList.remove('visivel');
+    }
+}
+
 // Funcao generica para chamar a API.
 // metodo: 'GET', 'POST', 'PUT', 'DELETE'
 // corpo: objeto que vira JSON (so usado em POST/PUT)
@@ -26,16 +72,21 @@ async function chamarApi(caminho, metodo = 'GET', corpo = null) {
         opcoes.body = JSON.stringify(corpo);
     }
 
-    const resposta = await fetch(`${API_URL}${caminho}`, opcoes);
-    const dados = await resposta.json();
+    iniciarCarregamento();
+    try {
+        const resposta = await fetch(`${API_URL}${caminho}`, opcoes);
+        const dados = await resposta.json();
 
-    if (!resposta.ok) {
-        // A API sempre devolve { erro: "mensagem" } quando algo
-        // da errado - usamos essa mensagem para mostrar ao usuario.
-        throw new Error(dados.erro || 'Erro desconhecido.');
+        if (!resposta.ok) {
+            // A API sempre devolve { erro: "mensagem" } quando algo
+            // da errado - usamos essa mensagem para mostrar ao usuario.
+            throw new Error(dados.erro || 'Erro desconhecido.');
+        }
+
+        return dados;
+    } finally {
+        finalizarCarregamento();
     }
-
-    return dados;
 }
 
 // Formata uma data ISO (ex: "2026-10-07T03:00:00.000Z") para o
