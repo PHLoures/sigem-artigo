@@ -1345,3 +1345,29 @@ body.modo-crise header.topo {
 @media print {
     .barra-crise, .selo-perfil { display: none !important; }
 }
+
+
+/* ---------- Botao "Instalar app" ---------- */
+.btn-instalar {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.btn-instalar-topo {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--branco);
+    padding: 7px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+.btn-instalar-topo:hover { background: rgba(255, 255, 255, 0.22); }
+.btn-instalar-login {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px 14px;
+    font-size: 14px;
+    border-radius: 10px;
+    background: var(--azul-claro);
+    color: var(--texto-destaque);
+}
+.btn-instalar-login:hover { background: var(--cinza-borda); }
+@media print { .btn-instalar { display: none !important; } }
