@@ -48,7 +48,9 @@ function criarBotaoInstalar(classeExtra) {
     const botao = document.createElement('button');
     botao.type = 'button';
     botao.className = `btn-instalar ${classeExtra}`;
-    botao.textContent = '📲 Instalar app';
+    botao.innerHTML = `${icone('baixar')}<span class="btn-instalar-texto">Instalar app</span>`;
+    botao.title = 'Instalar o SIGEM como aplicativo';
+    botao.setAttribute('aria-label', 'Instalar app');
     botao.addEventListener('click', aoClicarInstalar);
     return botao;
 }

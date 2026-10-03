@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGEM - Medicamentos</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1f4d">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
     <script>
@@ -21,18 +23,18 @@
     <header class="topo">
         <div class="marca">
             <div class="logo-badge">
-                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" width="40" height="40">
             </div>
             <div class="marca-texto">
-                <h1>SIGEM</h1>
-                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+                <strong class="marca-nome">SIGEM</strong>
+                <span>Sistema de Gestão de Medicamentos Hospitalares</span>
             </div>
         </div>
         <nav class="menu">
             <a href="dashboard.html">Dashboard</a>
             <a href="medicamentos.html" class="ativo">Medicamentos</a>
-            <a href="movimentacoes.html">Movimentacoes</a>
-            <a href="relatorios.html">Relatorios</a>
+            <a href="movimentacoes.html">Movimentações</a>
+            <a href="relatorios.html">Relatórios</a>
             <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html">Contexto</a>
         <span id="usuario-logado"></span>
@@ -40,10 +42,18 @@
     </header>
 
     <main>
+        <div class="pagina-cabecalho">
+            <div>
+                <p class="pagina-eyebrow">Estoque</p>
+                <h1 class="pagina-titulo">Medicamentos e lotes</h1>
+                <p class="pagina-sub">Cadastre medicamentos, controle lotes e validade, gere o QR Code e consulte o histórico completo de cada lote.</p>
+            </div>
+        </div>
+
         <div id="mensagem-area"></div>
 
         <section class="bloco">
-            <h2 id="titulo-formulario">Cadastrar medicamento</h2>
+            <h2><span class="ico" data-ico="mais-sinal"></span><span id="titulo-formulario">Cadastrar medicamento</span></h2>
             <form class="form-cadastro" id="form-medicamento">
                 <!-- id escondido: vazio = cadastro novo, preenchido = edicao -->
                 <input type="hidden" id="medicamento-id">
@@ -53,7 +63,7 @@
                     <input type="text" id="nome" required>
                 </div>
                 <div class="campo">
-                    <label for="principio_ativo">Principio ativo</label>
+                    <label for="principio_ativo">Princípio ativo</label>
                     <input type="text" id="principio_ativo" required>
                 </div>
                 <div class="campo">
@@ -61,7 +71,7 @@
                     <input type="text" id="dosagem" placeholder="Ex: 500mg" required>
                 </div>
                 <div class="campo">
-                    <label for="forma_farmaceutica">Forma farmaceutica</label>
+                    <label for="forma_farmaceutica">Forma farmacêutica</label>
                     <input type="text" id="forma_farmaceutica" placeholder="Ex: Comprimido" required>
                 </div>
                 <div class="campo">
@@ -69,29 +79,29 @@
                     <input type="text" id="fabricante" required>
                 </div>
                 <div class="campo">
-                    <label for="estoque_minimo">Estoque minimo</label>
+                    <label for="estoque_minimo">Estoque mínimo</label>
                     <input type="number" id="estoque_minimo" min="0" value="0" required>
                 </div>
 
                 <div class="form-acoes">
                     <button type="submit" class="btn-primario" id="btn-salvar">Cadastrar</button>
-                    <button type="button" class="btn-secundario" id="btn-cancelar" style="display:none;">Cancelar edicao</button>
+                    <button type="button" class="btn-secundario" id="btn-cancelar" style="display:none;">Cancelar edição</button>
                 </div>
             </form>
         </section>
 
         <section class="bloco">
-            <h2>Medicamentos cadastrados</h2>
+            <h2><span class="ico" data-ico="lista"></span>Medicamentos cadastrados</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>Principio ativo</th>
+                        <th>Princípio ativo</th>
                         <th>Dosagem</th>
                         <th>Forma</th>
                         <th>Fabricante</th>
-                        <th>Estoque minimo</th>
-                        <th>Acoes</th>
+                        <th>Estoque mínimo</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-medicamentos"></tbody>
@@ -99,7 +109,7 @@
         </section>
 
         <section class="bloco">
-            <h2>Lotes cadastrados</h2>
+            <h2><span class="ico" data-ico="camadas"></span>Lotes cadastrados</h2>
             <p style="color:#6b7280; font-size:14px;">Cadastre lotes de um medicamento informando o id dele na lista acima.</p>
 
             <form class="form-cadastro" id="form-lote">
@@ -108,7 +118,7 @@
                     <select id="lote-medicamento" required></select>
                 </div>
                 <div class="campo">
-                    <label for="numero_lote">Numero do lote</label>
+                    <label for="numero_lote">Número do lote</label>
                     <input type="text" id="numero_lote" required>
                 </div>
                 <div class="campo">
@@ -131,7 +141,7 @@
                         <th>Lote</th>
                         <th>Quantidade</th>
                         <th>Validade</th>
-                        <th>QR Code / Historico</th>
+                        <th>QR Code / Histórico</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-lotes"></tbody>
@@ -144,10 +154,10 @@
         <div class="modal-caixa">
             <h3 id="modal-qrcode-titulo">QR Code do lote</h3>
             <p class="secao-explicacao" style="margin-bottom:16px;">
-                Ao ser escaneado (pela camera na pagina de Movimentacoes),
-                este codigo abre o formulario de SAIDA ja com este lote
-                selecionado - util para registrar saidas rapidamente no
-                balcao da farmacia.
+                Ao ser escaneado (pela câmera na página de Movimentações),
+                este código abre o formulário de SAÍDA já com este lote
+                selecionado &mdash; útil para registrar saídas rapidamente no
+                balcão da farmácia.
             </p>
             <div id="modal-qrcode-canvas" class="modal-qrcode-area"></div>
             <button type="button" class="btn-secundario" id="btn-fechar-modal-qrcode">Fechar</button>
@@ -164,15 +174,17 @@
     </div>
 
     <footer class="rodape">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
     <script src="assets/js/qrcode.js"></script>
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/crise.js?v=5"></script>
-    <script src="js/chatbot.js?v=5"></script>
-    <script src="js/medicamentos.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/crise.js?v=13"></script>
+    <script src="js/chatbot.js?v=13"></script>
+    <script src="js/medicamentos.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

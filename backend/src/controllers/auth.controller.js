@@ -68,13 +68,13 @@ async function registrar(req, res) {
         return res.status(400).json({ erro: 'Informe seu nome (2 a 100 letras).' });
     }
     if (!REGEX_EMAIL.test(email) || email.length > 150) {
-        return res.status(400).json({ erro: 'Informe um e-mail valido.' });
+        return res.status(400).json({ erro: 'Informe um e-mail válido.' });
     }
     if (senha.length < 6 || senha.length > 72) {
         return res.status(400).json({ erro: 'A senha deve ter de 6 a 72 caracteres.' });
     }
     if (!PERFIS_VALIDOS.includes(perfil)) {
-        return res.status(400).json({ erro: 'Escolha um perfil valido.' });
+        return res.status(400).json({ erro: 'Escolha um perfil válido.' });
     }
 
     try {
@@ -89,7 +89,7 @@ async function registrar(req, res) {
         res.status(201).json({ token, usuario: { nome: usuario.nome, perfil: usuario.perfil } });
     } catch (erro) {
         if (erro.code === '23505') {
-            return res.status(409).json({ erro: 'Ja existe uma conta com esse e-mail.' });
+            return res.status(409).json({ erro: 'Já existe uma conta com esse e-mail.' });
         }
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao criar a conta.' });
@@ -149,7 +149,7 @@ async function logout(req, res) {
         if (token) {
             await pool.query('DELETE FROM sessoes WHERE token_hash = $1', [hashDoToken(token)]);
         }
-        res.json({ mensagem: 'Sessao encerrada.' });
+        res.json({ mensagem: 'Sessão encerrada.' });
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao sair.' });

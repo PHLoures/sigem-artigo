@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGEM - Contexto</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1f4d">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
     <script>
@@ -21,18 +23,18 @@
     <header class="topo">
         <div class="marca">
             <div class="logo-badge">
-                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" width="40" height="40">
             </div>
             <div class="marca-texto">
-                <h1>SIGEM</h1>
-                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+                <strong class="marca-nome">SIGEM</strong>
+                <span>Sistema de Gestão de Medicamentos Hospitalares</span>
             </div>
         </div>
         <nav class="menu">
             <a href="dashboard.html">Dashboard</a>
             <a href="medicamentos.html">Medicamentos</a>
-            <a href="movimentacoes.html">Movimentacoes</a>
-            <a href="relatorios.html">Relatorios</a>
+            <a href="movimentacoes.html">Movimentações</a>
+            <a href="relatorios.html">Relatórios</a>
             <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html" class="ativo">Contexto</a>
             <span id="usuario-logado"></span>
@@ -40,8 +42,16 @@
     </header>
 
     <main>
+        <div class="pagina-cabecalho">
+            <div>
+                <p class="pagina-eyebrow">O problema</p>
+                <h1 class="pagina-titulo">Contexto</h1>
+                <p class="pagina-sub">Os números reais que motivaram o SIGEM, com a fonte de cada um.</p>
+            </div>
+        </div>
+
         <section class="bloco">
-            <h2>📌 Por que este sistema existe</h2>
+            <h2><span class="ico" data-ico="info"></span> Por que este sistema existe</h2>
             <p class="secao-explicacao" style="font-size:14.5px; margin-top:0;">
                 O SIGEM foi criado para o trabalho acadêmico sobre
                 <strong>"A precariedade dos hospitais no Brasil"</strong>.
@@ -52,19 +62,19 @@
         </section>
 
         <section class="bloco">
-            <h2>💊 Desabastecimento de medicamentos</h2>
+            <h2><span class="ico vermelho" data-ico="pill"></span> Desabastecimento de medicamentos</h2>
             <div class="cards" style="margin-top:12px;">
                 <div class="card alerta-vermelho">
                     <div class="card-titulo">Relatos de irregularidade (1º trim. 2026)</div>
-                    <div class="card-valor">33.104</div>
+                    <div class="card-valor" data-contar="33104">33.104</div>
                 </div>
                 <div class="card alerta-amarelo">
                     <div class="card-titulo">Medicamentos afetados no período</div>
-                    <div class="card-valor">58</div>
+                    <div class="card-valor" data-contar="58">58</div>
                 </div>
                 <div class="card alerta-vermelho">
                     <div class="card-titulo">Pacientes com ruptura &gt; 61 dias (2024)</div>
-                    <div class="card-valor">32%</div>
+                    <div class="card-valor" data-contar="32" data-sufixo="%">32%</div>
                 </div>
             </div>
             <p class="fonte-dado">
@@ -76,19 +86,19 @@
         </section>
 
         <section class="bloco">
-            <h2>🛏️ Falta de leitos hospitalares</h2>
+            <h2><span class="ico vermelho" data-ico="hospital"></span> Falta de leitos hospitalares</h2>
             <div class="cards" style="margin-top:12px;">
                 <div class="card alerta-vermelho">
                     <div class="card-titulo">Leitos de internação do SUS perdidos (2010-2023)</div>
-                    <div class="card-valor">25 mil</div>
+                    <div class="card-valor" data-contar="25" data-sufixo=" mil">25 mil</div>
                 </div>
                 <div class="card alerta-vermelho">
                     <div class="card-titulo">Queda em leitos pediátricos no período</div>
-                    <div class="card-valor">28%</div>
+                    <div class="card-valor" data-contar="28" data-sufixo="%">28%</div>
                 </div>
                 <div class="card alerta-amarelo">
                     <div class="card-titulo">Municípios de fronteira sem UTI</div>
-                    <div class="card-valor">93%</div>
+                    <div class="card-valor" data-contar="93" data-sufixo="%">93%</div>
                 </div>
             </div>
             <p class="fonte-dado">
@@ -100,19 +110,19 @@
         </section>
 
         <section class="bloco">
-            <h2>🏥 Infraestrutura precária</h2>
+            <h2><span class="ico amarelo" data-ico="alerta"></span> Infraestrutura precária</h2>
             <div class="cards" style="margin-top:12px;">
                 <div class="card alerta-amarelo">
                     <div class="card-titulo">Centros cirúrgicos sem bateria de emergência</div>
-                    <div class="card-valor">33%</div>
+                    <div class="card-valor" data-contar="33" data-sufixo="%">33%</div>
                 </div>
                 <div class="card alerta-vermelho">
                     <div class="card-titulo">Hospitais com falta de lençóis</div>
-                    <div class="card-valor">63%</div>
+                    <div class="card-valor" data-contar="63" data-sufixo="%">63%</div>
                 </div>
                 <div class="card alerta-amarelo">
                     <div class="card-titulo">Sem camas reguláveis</div>
-                    <div class="card-valor">17%</div>
+                    <div class="card-valor" data-contar="17" data-sufixo="%">17%</div>
                 </div>
             </div>
             <p class="fonte-dado">
@@ -122,7 +132,7 @@
         </section>
 
         <section class="bloco">
-            <h2>🎯 Como o SIGEM ataca esses problemas</h2>
+            <h2><span class="ico verde" data-ico="escudo"></span> Como o SIGEM ataca esses problemas</h2>
             <p class="secao-explicacao" style="margin-top:0;">
                 O sistema não resolve a precariedade hospitalar por completo (isso
                 depende de investimento público), mas ataca uma parte concreta e
@@ -159,13 +169,15 @@
     </main>
 
     <footer class="rodape">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/crise.js?v=5"></script>
-    <script src="js/chatbot.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/crise.js?v=13"></script>
+    <script src="js/chatbot.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

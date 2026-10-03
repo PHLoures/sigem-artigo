@@ -15,7 +15,7 @@ const podeEditar = podeFazer('editar_cadastros');
 if (!podeEditar) {
     formMedicamento.closest('section').style.display = 'none';
     formLote.style.display = 'none';
-    mostrarAvisoPerfil('nesta tela voce so pode consultar medicamentos e lotes.');
+    mostrarAvisoPerfil('nesta tela você só pode consultar medicamentos e lotes.');
 }
 
 // ---------- MEDICAMENTOS ----------
@@ -38,13 +38,13 @@ function renderizarTabelaMedicamentos(lista) {
     }
     tbody.innerHTML = lista.map(m => `
         <tr>
-            <td data-rotulo="Nome"><strong>#${m.id}</strong> ${m.nome}</td>
-            <td data-rotulo="Principio ativo">${m.principio_ativo}</td>
-            <td data-rotulo="Dosagem">${m.dosagem}</td>
-            <td data-rotulo="Forma">${m.forma_farmaceutica}</td>
-            <td data-rotulo="Fabricante">${m.fabricante}</td>
-            <td data-rotulo="Estoque minimo">${m.estoque_minimo}</td>
-            <td data-rotulo="Acoes">
+            <td data-rotulo="Nome"><strong>#${m.id}</strong> ${esc(m.nome)}</td>
+            <td data-rotulo="Princípio ativo">${esc(m.principio_ativo)}</td>
+            <td data-rotulo="Dosagem">${esc(m.dosagem)}</td>
+            <td data-rotulo="Forma">${esc(m.forma_farmaceutica)}</td>
+            <td data-rotulo="Fabricante">${esc(m.fabricante)}</td>
+            <td data-rotulo="Estoque mínimo">${m.estoque_minimo}</td>
+            <td data-rotulo="Ações">
                 ${podeEditar ? `
                     <button class="btn-editar" onclick="editarMedicamento(${m.id})">Editar</button>
                     <button class="btn-perigo" onclick="excluirMedicamento(${m.id})">Excluir</button>
@@ -56,7 +56,7 @@ function renderizarTabelaMedicamentos(lista) {
 
 function preencherSelectMedicamentos(lista) {
     const select = document.getElementById('lote-medicamento');
-    select.innerHTML = lista.map(m => `<option value="${m.id}">${m.nome} (#${m.id})</option>`).join('');
+    select.innerHTML = lista.map(m => `<option value="${m.id}">${esc(m.nome)} (#${m.id})</option>`).join('');
 }
 
 formMedicamento.addEventListener('submit', async (evento) => {
@@ -99,7 +99,7 @@ async function editarMedicamento(id) {
         document.getElementById('estoque_minimo').value = m.estoque_minimo;
 
         document.getElementById('titulo-formulario').textContent = `Editando: ${m.nome}`;
-        document.getElementById('btn-salvar').textContent = 'Salvar alteracoes';
+        document.getElementById('btn-salvar').textContent = 'Salvar alterações';
         document.getElementById('btn-cancelar').style.display = 'inline-block';
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -123,7 +123,7 @@ async function excluirMedicamento(id) {
 
     try {
         await chamarApi(`/medicamentos/${id}`, 'DELETE');
-        mostrarMensagem('Medicamento excluido com sucesso.', 'sucesso');
+        mostrarMensagem('Medicamento excluído com sucesso.', 'sucesso');
         carregarMedicamentos();
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
@@ -149,13 +149,13 @@ function renderizarTabelaLotes(lista) {
     }
     tbody.innerHTML = lista.map(l => `
         <tr>
-            <td data-rotulo="Medicamento">${l.medicamento_nome}</td>
-            <td data-rotulo="Lote">${l.numero_lote}</td>
+            <td data-rotulo="Medicamento">${esc(l.medicamento_nome)}</td>
+            <td data-rotulo="Lote">${esc(l.numero_lote)}</td>
             <td data-rotulo="Quantidade">${l.quantidade}</td>
             <td data-rotulo="Validade">${formatarData(l.data_validade)}</td>
             <td data-rotulo="QR Code">
-                <button type="button" class="btn-editar" onclick="mostrarQrCodeLote(${l.id}, '${l.numero_lote}', '${l.medicamento_nome}')">Gerar QR</button>
-                <button type="button" class="btn-editar" onclick="mostrarHistoricoLote(${l.id})">Historico</button>
+                <button type="button" class="btn-editar" data-acao="qr" data-id="${l.id}" data-lote="${esc(l.numero_lote)}" data-med="${esc(l.medicamento_nome)}">${icone('qr')}Gerar QR</button>
+                <button type="button" class="btn-editar" data-acao="historico" data-id="${l.id}">${icone('historico')}Histórico</button>
             </td>
         </tr>
     `).join('');
@@ -167,6 +167,18 @@ function renderizarTabelaLotes(lista) {
 // movimentacoes, ja indicando o lote (?lote_id=123). A biblioteca
 // "qrcode-generator" (assets/js/qrcode.js) faz o desenho - ela
 // so precisa do texto a codificar, sem precisar de internet.
+// Os botoes da tabela de lotes guardam os dados em "data-" (e nao em
+// onclick) para que um nome de lote malicioso nunca vire codigo.
+document.getElementById('tabela-lotes').addEventListener('click', (e) => {
+    const botao = e.target.closest('button[data-acao]');
+    if (!botao) return;
+    if (botao.dataset.acao === 'qr') {
+        mostrarQrCodeLote(Number(botao.dataset.id), botao.dataset.lote, botao.dataset.med);
+    } else {
+        mostrarHistoricoLote(Number(botao.dataset.id));
+    }
+});
+
 function mostrarQrCodeLote(loteId, numeroLote, medicamentoNome) {
     const url = `${window.location.origin}/movimentacoes.html?lote_id=${loteId}`;
 
@@ -205,7 +217,7 @@ async function mostrarHistoricoLote(loteId) {
             `Lote ${lote.numero_lote} - ${lote.medicamento_nome}`;
         corpo.innerHTML = montarLinhaDoTempo(lote, movimentacoes);
     } catch (erro) {
-        corpo.innerHTML = `<div class="mensagem mensagem-erro">${erro.message}</div>`;
+        corpo.textContent = erro.message;
     }
 }
 
@@ -219,8 +231,8 @@ function montarLinhaDoTempo(lote, movimentacoes) {
     const eventos = movimentacoes.map(m => ({
         data: new Date(m.data_movimentacao),
         classe: m.tipo === 'ENTRADA' ? 'verde' : 'azul',
-        titulo: `${m.tipo === 'ENTRADA' ? 'Entrada' : 'Saida'} de ${m.quantidade} unidades`,
-        detalhe: [m.setor_nome ? `Setor: ${m.setor_nome}` : '', m.motivo ? `Motivo: ${m.motivo}` : '']
+        titulo: `${m.tipo === 'ENTRADA' ? 'Entrada' : 'Saída'} de ${m.quantidade} unidades`,
+        detalhe: [m.setor_nome ? `Setor: ${esc(m.setor_nome)}` : '', m.motivo ? `Motivo: ${esc(m.motivo)}` : '']
             .filter(Boolean).join(' - '),
         quando: formatarData(m.data_movimentacao),
     }));
@@ -237,7 +249,7 @@ function montarLinhaDoTempo(lote, movimentacoes) {
     let textoValidade = `Vence em ${diasParaVencer} dias`;
     if (diasParaVencer < 0) {
         classeValidade = 'vermelho';
-        textoValidade = `Venceu ha ${-diasParaVencer} dias`;
+        textoValidade = `Venceu há ${-diasParaVencer} dias`;
     } else if (diasParaVencer <= 30) {
         classeValidade = 'amarelo';
     }

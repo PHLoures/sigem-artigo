@@ -42,7 +42,7 @@ async function listar(req, res) {
         res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao buscar movimentacoes.' });
+        res.status(500).json({ erro: 'Erro ao buscar movimentações.' });
     }
 }
 
@@ -52,10 +52,10 @@ async function criar(req, res) {
     const { medicamento_id, lote_id, setor_id, tipo, quantidade, motivo } = req.body;
 
     if (!medicamento_id || !lote_id || !tipo || !quantidade) {
-        return res.status(400).json({ erro: 'Preencha todos os campos obrigatorios.' });
+        return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
     if (tipo !== 'ENTRADA' && tipo !== 'SAIDA') {
-        return res.status(400).json({ erro: 'Tipo deve ser ENTRADA ou SAIDA.' });
+        return res.status(400).json({ erro: 'Tipo deve ser ENTRADA ou SAÍDA.' });
     }
     if (quantidade <= 0) {
         return res.status(400).json({ erro: 'Quantidade deve ser maior que zero.' });
@@ -79,7 +79,7 @@ async function criar(req, res) {
 
         if (loteResultado.rows.length === 0) {
             await client.query('ROLLBACK');
-            return res.status(404).json({ erro: 'Lote nao encontrado.' });
+            return res.status(404).json({ erro: 'Lote não encontrado.' });
         }
 
         const quantidadeAtual = loteResultado.rows[0].quantidade;
@@ -87,7 +87,7 @@ async function criar(req, res) {
         if (tipo === 'SAIDA' && quantidade > quantidadeAtual) {
             await client.query('ROLLBACK');
             return res.status(400).json({
-                erro: `Estoque insuficiente. Disponivel: ${quantidadeAtual}, solicitado: ${quantidade}.`,
+                erro: `Estoque insuficiente. Disponível: ${quantidadeAtual}, solicitado: ${quantidade}.`,
             });
         }
 
@@ -117,7 +117,7 @@ async function criar(req, res) {
     } catch (erro) {
         await client.query('ROLLBACK');
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao registrar movimentacao.' });
+        res.status(500).json({ erro: 'Erro ao registrar movimentação.' });
     } finally {
         // Devolve a conexao para a pool, independente de ter
         // dado certo ou errado.

@@ -3,17 +3,21 @@
 // Busca o resumo em /api/dashboard e preenche a pagina index.html.
 
 let graficoEstoque = null;
+let graficoSituacao = null;
 let previsaoAtual = [];
+let ultimosDados = null;   // guardado para redesenhar os graficos ao trocar de tema
 
 async function carregarDashboard() {
     try {
         const dados = await obterDashboard();
+        ultimosDados = dados;
+        renderizarHero(dados);
         renderizarCards(dados);
         renderizarVencidos(dados.vencidos);
         renderizarProximosVencimento(dados.proximosVencimento);
         renderizarEstoqueBaixo(dados.estoqueBaixo);
         renderizarUltimasMovimentacoes(dados.ultimasMovimentacoes);
-        renderizarGraficoEstoque(dados.estoquePorMedicamento);
+        renderizarGraficos(dados);
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
@@ -57,10 +61,10 @@ function renderizarPrevisao(lista) {
 
         return `
             <tr>
-                <td data-rotulo="Medicamento">${item.nome}</td>
+                <td data-rotulo="Medicamento">${esc(item.nome)}</td>
                 <td data-rotulo="Estoque atual">${item.estoque_atual}</td>
-                <td data-rotulo="Saida (30 dias)">${item.saida_ultimos_30_dias}</td>
-                <td data-rotulo="Previsao">${badge}</td>
+                <td data-rotulo="Saída (30 dias)">${item.saida_ultimos_30_dias}</td>
+                <td data-rotulo="Previsão">${badge}</td>
             </tr>
         `;
     }).join('');
@@ -73,33 +77,178 @@ function renderizarPrevisao(lista) {
 // puro por baixo). Ela desenha o grafico dentro de uma tag
 // <canvas>, que e como uma "tela de pintura" do navegador.
 
-function renderizarGraficoEstoque(lista) {
-    const ctx = document.getElementById('grafico-estoque');
+// Le as cores atuais do site (que mudam no modo escuro) para o grafico
+// combinar com o resto da tela.
+function coresDoTema() {
+    const css = getComputedStyle(document.documentElement);
+    const ler = (nome) => css.getPropertyValue(nome).trim();
+    return {
+        texto: ler('--cinza'),
+        grade: ler('--cinza-borda'),
+        superficie: ler('--superficie'),
+        destaque: ler('--texto-destaque'),
+        azul: ler('--azul'),
+        azul2: ler('--azul-2'),
+        verde: ler('--verde'),
+        vermelho: ler('--vermelho'),
+    };
+}
 
+// Faz uma barra com degrade (mais forte embaixo, mais claro no topo).
+function degrade(ctx, area, corTopo, corBase) {
+    const grad = ctx.createLinearGradient(0, area.bottom, 0, area.top);
+    grad.addColorStop(0, corBase);
+    grad.addColorStop(1, corTopo);
+    return grad;
+}
+
+function renderizarGraficos(dados) {
+    if (typeof Chart === 'undefined') return;   // biblioteca nao carregou: o resto da pagina segue normal
+    const cor = coresDoTema();
+
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+    Chart.defaults.color = cor.texto;
+
+    const estoquesBaixos = new Set(dados.estoqueBaixo.map(e => e.nome));
+    const lista = dados.estoquePorMedicamento;
+
+    // ----- Barras: estoque de cada medicamento (vermelho = abaixo do minimo) -----
     if (graficoEstoque) graficoEstoque.destroy();
-
-    graficoEstoque = new Chart(ctx, {
+    graficoEstoque = new Chart(document.getElementById('grafico-estoque'), {
         type: 'bar',
         data: {
             labels: lista.map(item => item.nome),
             datasets: [{
                 label: 'Unidades em estoque',
                 data: lista.map(item => Number(item.quantidade_total)),
-                backgroundColor: '#2f5fe0',
-                borderRadius: 6,
+                backgroundColor: (contexto) => {
+                    const { ctx, chartArea } = contexto.chart;
+                    if (!chartArea) return cor.azul;
+                    const baixo = estoquesBaixos.has(lista[contexto.dataIndex].nome);
+                    return baixo
+                        ? degrade(ctx, chartArea, '#ff8a8a', cor.vermelho)
+                        : degrade(ctx, chartArea, cor.azul2, cor.azul);
+                },
+                borderRadius: 10,
+                borderSkipped: false,
+                maxBarThickness: 56,
             }],
         },
         options: {
             responsive: true,
-            animation: { duration: 900, easing: 'easeOutQuart' },
+            maintainAspectRatio: false,
+            animation: { duration: 1100, easing: 'easeOutQuart' },
             plugins: {
                 legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0a1647',
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: false,
+                    titleFont: { weight: '700' },
+                    callbacks: {
+                        label: (item) => `${item.parsed.y} unidades`,
+                        afterLabel: (item) => estoquesBaixos.has(item.label) ? 'Abaixo do estoque mínimo' : '',
+                    },
+                },
             },
             scales: {
-                y: { beginAtZero: true },
+                x: { grid: { display: false }, border: { display: false } },
+                y: { beginAtZero: true, grid: { color: cor.grade }, border: { display: false }, ticks: { precision: 0 } },
             },
         },
     });
+
+    // ----- Rosca: quantos medicamentos estao com estoque normal x baixo -----
+    const baixos = dados.estoqueBaixo.length;
+    const normais = Math.max(0, dados.totalMedicamentos - baixos);
+
+    // Escreve o total no centro da rosca
+    const textoCentral = {
+        id: 'textoCentral',
+        afterDraw(grafico) {
+            const { ctx, chartArea: { left, right, top, bottom } } = grafico;
+            const x = (left + right) / 2;
+            const y = (top + bottom) / 2;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = cor.destaque;
+            ctx.font = "800 34px 'Inter', sans-serif";
+            ctx.fillText(dados.totalMedicamentos, x, y - 8);
+            ctx.fillStyle = cor.texto;
+            ctx.font = "500 12px 'Inter', sans-serif";
+            ctx.fillText('medicamentos', x, y + 18);
+            ctx.restore();
+        },
+    };
+
+    if (graficoSituacao) graficoSituacao.destroy();
+    graficoSituacao = new Chart(document.getElementById('grafico-situacao'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Estoque normal', 'Estoque baixo'],
+            datasets: [{
+                data: [normais, baixos],
+                backgroundColor: [cor.verde, cor.vermelho],
+                borderColor: cor.superficie,
+                borderWidth: 4,
+                hoverOffset: 8,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            animation: { duration: 1300, easing: 'easeOutQuart', animateRotate: true },
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 18 } },
+                tooltip: { backgroundColor: '#0a1647', padding: 12, cornerRadius: 10 },
+            },
+        },
+        plugins: [textoCentral],
+    });
+}
+
+// Ao trocar entre claro/escuro, redesenha os graficos com as cores novas
+window.addEventListener('sigem:tema', () => {
+    if (ultimosDados) renderizarGraficos(ultimosDados);
+});
+
+// ---------- HERO (saudacao no topo do dashboard) ----------
+function renderizarHero(dados) {
+    const sessao = obterSessao();
+    const hora = new Date().getHours();
+    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+    const primeiroNome = sessao && sessao.nome ? sessao.nome.split(' ')[0] : 'bem-vindo';
+    const data = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    document.getElementById('hero-saudacao').textContent = saudacao;
+    document.getElementById('hero-nome').textContent = primeiroNome;
+    document.getElementById('hero-resumo').textContent =
+        `Hoje é ${data}. São ${dados.totalMedicamentos} medicamentos cadastrados e ${dados.totalEstoque} unidades em estoque.`;
+
+    const qtdCriticos = dados.vencidos.length + dados.estoqueBaixo.length;
+    const qtdAtencao = dados.proximosVencimento.length;
+    const total = qtdCriticos + qtdAtencao;
+
+    const chip = document.getElementById('hero-status');
+    chip.classList.remove('atencao', 'critico');
+    if (criseAtiva()) {
+        chip.classList.add('critico');
+        document.getElementById('hero-status-texto').textContent = 'Modo crise ativo (simulação)';
+    } else if (total === 0) {
+        document.getElementById('hero-status-texto').textContent = 'Tudo em ordem no estoque';
+    } else {
+        chip.classList.add(qtdCriticos > 0 ? 'critico' : 'atencao');
+        document.getElementById('hero-status-texto').textContent =
+            `${total} ${total === 1 ? 'alerta precisa' : 'alertas precisam'} de atenção`;
+    }
+
+    // Quem nao pode registrar movimentacao (gestor) nao ve o atalho
+    if (!podeFazer('entrada') && !podeFazer('saida')) {
+        document.getElementById('hero-registrar').style.display = 'none';
+    }
 }
 
 function mostrarMensagem(texto, tipo) {
@@ -114,29 +263,38 @@ function renderizarCards(dados) {
     const qtdProximos = dados.proximosVencimento.length;
     const qtdEstoqueBaixo = dados.estoqueBaixo.length;
 
-    // Cada card e clicavel: os 3 de alerta rolam a pagina at a
+    // Cada card e clicavel: os 3 de alerta rolam a pagina ate a
     // tabela correspondente (mesma pagina); os 2 primeiros levam
     // para a pagina de Medicamentos, onde a lista completa esta.
+    const rodape = (temAlerta) => temAlerta
+        ? `Ver detalhes ${icone('seta')}`
+        : `${icone('ok')} Tudo certo`;
+
     container.innerHTML = `
         <a href="medicamentos.html" class="card card-clicavel">
-            <div class="card-titulo">Medicamentos cadastrados</div>
+            <div class="card-topo"><span class="card-icone">${icone('pill')}</span><span class="card-titulo">Medicamentos cadastrados</span></div>
             <div class="card-valor">${dados.totalMedicamentos}</div>
+            <div class="card-rodape">Ver cadastro ${icone('seta')}</div>
         </a>
         <a href="medicamentos.html" class="card card-clicavel">
-            <div class="card-titulo">Unidades em estoque</div>
+            <div class="card-topo"><span class="card-icone">${icone('pacote')}</span><span class="card-titulo">Unidades em estoque</span></div>
             <div class="card-valor">${dados.totalEstoque}</div>
+            <div class="card-rodape">Ver lotes ${icone('seta')}</div>
         </a>
         <div class="card card-clicavel ${qtdEstoqueBaixo > 0 ? 'alerta-vermelho' : 'alerta-verde'}" onclick="rolarPara('secao-estoque-baixo')">
-            <div class="card-titulo">🔴 Estoque baixo</div>
+            <div class="card-topo"><span class="card-icone">${icone('alerta')}</span><span class="card-titulo">Estoque baixo</span></div>
             <div class="card-valor">${qtdEstoqueBaixo}</div>
+            <div class="card-rodape">${rodape(qtdEstoqueBaixo > 0)}</div>
         </div>
         <div class="card card-clicavel ${qtdProximos > 0 ? 'alerta-amarelo' : 'alerta-verde'}" onclick="rolarPara('secao-vencimento')">
-            <div class="card-titulo">🟠 Proximos do vencimento</div>
+            <div class="card-topo"><span class="card-icone">${icone('relogio')}</span><span class="card-titulo">Próximos do vencimento</span></div>
             <div class="card-valor">${qtdProximos}</div>
+            <div class="card-rodape">${rodape(qtdProximos > 0)}</div>
         </div>
         <div class="card card-clicavel ${qtdVencidos > 0 ? 'alerta-vermelho' : 'alerta-verde'}" onclick="rolarPara('secao-vencidos')">
-            <div class="card-titulo">🔴 Vencidos</div>
+            <div class="card-topo"><span class="card-icone">${icone('calendario-x')}</span><span class="card-titulo">Vencidos</span></div>
             <div class="card-valor">${qtdVencidos}</div>
+            <div class="card-rodape">${rodape(qtdVencidos > 0)}</div>
         </div>
     `;
 
@@ -193,8 +351,8 @@ function renderizarVencidos(lista) {
     }
     tbody.innerHTML = lista.map(item => `
         <tr>
-            <td data-rotulo="Medicamento">${item.medicamento_nome}</td>
-            <td data-rotulo="Lote">${item.numero_lote}</td>
+            <td data-rotulo="Medicamento">${esc(item.medicamento_nome)}</td>
+            <td data-rotulo="Lote">${esc(item.numero_lote)}</td>
             <td data-rotulo="Quantidade">${item.quantidade}</td>
             <td data-rotulo="Validade"><span class="badge badge-vermelho">${formatarData(item.data_validade)}</span></td>
         </tr>
@@ -204,13 +362,13 @@ function renderizarVencidos(lista) {
 function renderizarProximosVencimento(lista) {
     const tbody = document.getElementById('tabela-vencimento');
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="tabela-vazia">Nenhum lote proximo do vencimento.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="tabela-vazia">Nenhum lote próximo do vencimento.</td></tr>`;
         return;
     }
     tbody.innerHTML = lista.map(item => `
         <tr>
-            <td data-rotulo="Medicamento">${item.medicamento_nome}</td>
-            <td data-rotulo="Lote">${item.numero_lote}</td>
+            <td data-rotulo="Medicamento">${esc(item.medicamento_nome)}</td>
+            <td data-rotulo="Lote">${esc(item.numero_lote)}</td>
             <td data-rotulo="Quantidade">${item.quantidade}</td>
             <td data-rotulo="Validade"><span class="badge badge-amarelo">${formatarData(item.data_validade)}</span></td>
         </tr>
@@ -225,8 +383,8 @@ function renderizarEstoqueBaixo(lista) {
     }
     tbody.innerHTML = lista.map(item => `
         <tr>
-            <td data-rotulo="Medicamento">${item.nome}</td>
-            <td data-rotulo="Estoque minimo">${item.estoque_minimo}</td>
+            <td data-rotulo="Medicamento">${esc(item.nome)}</td>
+            <td data-rotulo="Estoque mínimo">${item.estoque_minimo}</td>
             <td data-rotulo="Quantidade atual"><span class="badge badge-vermelho">${item.quantidade_total}</span></td>
         </tr>
     `).join('');
@@ -235,19 +393,19 @@ function renderizarEstoqueBaixo(lista) {
 function renderizarUltimasMovimentacoes(lista) {
     const tbody = document.getElementById('tabela-ultimas-movimentacoes');
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="tabela-vazia">Nenhuma movimentacao registrada.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="tabela-vazia">Nenhuma movimentação registrada.</td></tr>`;
         return;
     }
     tbody.innerHTML = lista.map(item => `
         <tr>
             <td data-rotulo="Data">${formatarData(item.data_movimentacao)}</td>
-            <td data-rotulo="Medicamento">${item.medicamento_nome}</td>
-            <td data-rotulo="Lote">${item.numero_lote}</td>
+            <td data-rotulo="Medicamento">${esc(item.medicamento_nome)}</td>
+            <td data-rotulo="Lote">${esc(item.numero_lote)}</td>
             <td data-rotulo="Tipo">
                 <span class="badge ${item.tipo === 'ENTRADA' ? 'badge-verde' : 'badge-azul'}">${item.tipo}</span>
             </td>
             <td data-rotulo="Quantidade">${item.quantidade}</td>
-            <td data-rotulo="Setor">${item.setor_nome || '-'}</td>
+            <td data-rotulo="Setor">${esc(item.setor_nome || '-')}</td>
         </tr>
     `).join('');
 }
@@ -296,9 +454,9 @@ function atualizarSimulador() {
 
         return `
             <tr>
-                <td data-rotulo="Medicamento">${item.nome}</td>
+                <td data-rotulo="Medicamento">${esc(item.nome)}</td>
                 <td data-rotulo="Hoje">${badgePrevisao(diasHoje)}</td>
-                <td data-rotulo="No cenario">${badgePrevisao(diasCenario)}</td>
+                <td data-rotulo="No cenário">${badgePrevisao(diasCenario)}</td>
             </tr>
         `;
     }).join('');
@@ -318,10 +476,10 @@ function atualizarVisualCrise() {
     const ativa = criseAtiva();
     document.body.classList.toggle('modo-crise', ativa);
     document.getElementById('bloco-crise').classList.toggle('crise-ativa', ativa);
-    document.getElementById('btn-crise').textContent = ativa ? 'Voltar ao normal' : 'Simular crise';
-    document.getElementById('crise-titulo').textContent = ativa
-        ? '🚨 MODO CRISE ATIVO (simulação)'
-        : '🚨 Modo crise';
+    document.getElementById('btn-crise-texto').textContent = ativa ? 'Voltar ao normal' : 'Simular crise';
+    document.getElementById('crise-titulo-texto').textContent = ativa
+        ? 'MODO CRISE ATIVO (simulação)'
+        : 'Modo crise';
     document.getElementById('crise-descricao').textContent = ativa
         ? 'Estes números são simulados: estoque a 25% do mínimo e consumo +50%. Nada foi alterado no banco de dados.'
         : 'Simula um hospital em desabastecimento: o estoque despenca e o consumo sobe 50%. Serve para ver como o SIGEM alerta a equipe a tempo.';

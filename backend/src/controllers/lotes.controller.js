@@ -54,7 +54,7 @@ async function historico(req, res) {
             [id]
         );
         if (loteResultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Lote nao encontrado.' });
+            return res.status(404).json({ erro: 'Lote não encontrado.' });
         }
 
         const movimentacoesResultado = await pool.query(
@@ -73,7 +73,7 @@ async function historico(req, res) {
         });
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao buscar historico do lote.' });
+        res.status(500).json({ erro: 'Erro ao buscar histórico do lote.' });
     }
 }
 
@@ -83,7 +83,7 @@ async function criar(req, res) {
     const { medicamento_id, numero_lote, quantidade, data_validade } = req.body;
 
     if (!medicamento_id || !numero_lote || quantidade == null || !data_validade) {
-        return res.status(400).json({ erro: 'Preencha todos os campos obrigatorios.' });
+        return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
 
     try {
@@ -99,7 +99,7 @@ async function criar(req, res) {
         // Erro comum: numero_lote repetido para o mesmo medicamento
         // (viola a UNIQUE (medicamento_id, numero_lote) do schema).
         if (erro.code === '23505') {
-            return res.status(409).json({ erro: 'Ja existe um lote com esse numero para este medicamento.' });
+            return res.status(409).json({ erro: 'Já existe um lote com esse número para este medicamento.' });
         }
         res.status(500).json({ erro: 'Erro ao criar lote.' });
     }
@@ -119,7 +119,7 @@ async function atualizar(req, res) {
             [numero_lote, quantidade, data_validade, id]
         );
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Lote nao encontrado.' });
+            return res.status(404).json({ erro: 'Lote não encontrado.' });
         }
         res.json(resultado.rows[0]);
     } catch (erro) {
@@ -137,13 +137,13 @@ async function remover(req, res) {
             [id]
         );
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Lote nao encontrado.' });
+            return res.status(404).json({ erro: 'Lote não encontrado.' });
         }
         res.json({ mensagem: 'Lote removido com sucesso.' });
     } catch (erro) {
         console.error(erro);
         if (erro.code === '23503') {
-            return res.status(409).json({ erro: 'Nao e possivel excluir: existem movimentacoes vinculadas a este lote.' });
+            return res.status(409).json({ erro: 'Não é possível excluir: existem movimentações vinculadas a este lote.' });
         }
         res.status(500).json({ erro: 'Erro ao remover lote.' });
     }

@@ -13,10 +13,10 @@ const selectLote = document.getElementById('mov-lote');
 // Enfermeiro: so registra SAIDA (a opcao ENTRADA some da lista).
 if (!podeFazer('entrada') && !podeFazer('saida')) {
     formMovimentacao.closest('section').style.display = 'none';
-    mostrarAvisoPerfil('voce pode consultar o historico, mas nao registrar movimentacoes.');
+    mostrarAvisoPerfil('você pode consultar o histórico, mas não registrar movimentações.');
 } else if (!podeFazer('entrada')) {
     document.querySelector('#mov-tipo option[value="ENTRADA"]').remove();
-    mostrarAvisoPerfil('voce pode registrar apenas SAIDAS de estoque.');
+    mostrarAvisoPerfil('você pode registrar apenas SAÍDAS de estoque.');
 }
 
 async function carregarFormulario() {
@@ -27,13 +27,13 @@ async function carregarFormulario() {
         ]);
 
         selectMedicamento.innerHTML = medicamentos
-            .map(m => `<option value="${m.id}">${m.nome}</option>`)
+            .map(m => `<option value="${m.id}">${esc(m.nome)}</option>`)
             .join('');
 
         const selectSetor = document.getElementById('mov-setor');
         selectSetor.innerHTML =
-            '<option value="">-- nenhum --</option>' +
-            setores.map(s => `<option value="${s.id}">${s.nome}</option>`).join('');
+            '<option value="">Nenhum</option>' +
+            setores.map(s => `<option value="${s.id}">${esc(s.nome)}</option>`).join('');
 
         // Assim que carregar, ja busca os lotes do primeiro medicamento.
         if (medicamentos.length > 0) {
@@ -58,7 +58,7 @@ async function carregarLotesDoMedicamento(medicamentoId) {
             return;
         }
         selectLote.innerHTML = lotes
-            .map(l => `<option value="${l.id}">${l.numero_lote} (disponivel: ${l.quantidade})</option>`)
+            .map(l => `<option value="${l.id}">${esc(l.numero_lote)} (disponível: ${l.quantidade})</option>`)
             .join('');
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
@@ -79,7 +79,7 @@ formMovimentacao.addEventListener('submit', async (evento) => {
 
     try {
         await chamarApi('/movimentacoes', 'POST', dados);
-        mostrarMensagem('Movimentacao registrada com sucesso.', 'sucesso');
+        mostrarMensagem('Movimentação registrada com sucesso.', 'sucesso');
         formMovimentacao.reset();
         carregarLotesDoMedicamento(selectMedicamento.value);
         carregarHistorico();
@@ -94,21 +94,21 @@ async function carregarHistorico() {
         const tbody = document.getElementById('tabela-movimentacoes');
 
         if (lista.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="tabela-vazia">Nenhuma movimentacao registrada.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="tabela-vazia">Nenhuma movimentação registrada.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = lista.map(item => `
             <tr>
                 <td data-rotulo="Data">${formatarData(item.data_movimentacao)}</td>
-                <td data-rotulo="Medicamento">${item.medicamento_nome}</td>
-                <td data-rotulo="Lote">${item.numero_lote}</td>
+                <td data-rotulo="Medicamento">${esc(item.medicamento_nome)}</td>
+                <td data-rotulo="Lote">${esc(item.numero_lote)}</td>
                 <td data-rotulo="Tipo">
                     <span class="badge ${item.tipo === 'ENTRADA' ? 'badge-verde' : 'badge-azul'}">${item.tipo}</span>
                 </td>
                 <td data-rotulo="Quantidade">${item.quantidade}</td>
-                <td data-rotulo="Setor">${item.setor_nome || '-'}</td>
-                <td data-rotulo="Motivo">${item.motivo || '-'}</td>
+                <td data-rotulo="Setor">${esc(item.setor_nome || '-')}</td>
+                <td data-rotulo="Motivo">${esc(item.motivo || '-')}</td>
             </tr>
         `).join('');
     } catch (erro) {
@@ -140,7 +140,7 @@ async function selecionarLotePorId(loteId) {
         const lote = lotes.find(l => l.id === loteId);
 
         if (!lote) {
-            mostrarMensagem('Lote nao encontrado.', 'erro');
+            mostrarMensagem('Lote não encontrado.', 'erro');
             return;
         }
 
@@ -155,7 +155,7 @@ async function selecionarLotePorId(loteId) {
         document.getElementById('mov-quantidade').focus();
 
         mostrarMensagem(
-            `Lote ${lote.numero_lote} (${lote.medicamento_nome}) selecionado via QR Code.`,
+            `Lote ${esc(lote.numero_lote)} (${esc(lote.medicamento_nome)}) selecionado via QR Code.`,
             'sucesso'
         );
     } catch (erro) {
@@ -204,7 +204,7 @@ async function abrirLeitorQrCode() {
     } catch (erro) {
         console.error(erro);
         mostrarMensagem(
-            'Nao foi possivel acessar a camera. Verifique se o navegador tem permissao.',
+            'Não foi possível acessar a câmera. Verifique se o navegador tem permissão.',
             'erro'
         );
         return;
@@ -212,7 +212,7 @@ async function abrirLeitorQrCode() {
 
     video.srcObject = streamDaCamera;
     document.getElementById('leitor-qrcode').classList.add('aberto');
-    document.getElementById('status-leitor').textContent = 'Aponte a camera para o QR code do lote...';
+    document.getElementById('status-leitor').textContent = 'Aponte a câmera para o QR Code do lote...';
 
     leituraEmAndamento = true;
     requestAnimationFrame(processarProximoFrame);
@@ -263,10 +263,10 @@ function processarTextoEscaneado(texto) {
         if (loteId) {
             selecionarLotePorId(Number(loteId));
         } else {
-            mostrarMensagem('QR Code lido, mas nao contem um lote valido do SIGEM.', 'erro');
+            mostrarMensagem('QR Code lido, mas não contém um lote válido do SIGEM.', 'erro');
         }
     } catch {
-        mostrarMensagem('QR Code lido, mas o conteudo nao e um link valido.', 'erro');
+        mostrarMensagem('QR Code lido, mas o conteúdo não é um link válido.', 'erro');
     }
 }
 

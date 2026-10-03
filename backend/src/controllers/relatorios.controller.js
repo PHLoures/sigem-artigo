@@ -66,7 +66,7 @@ async function movimentacoes(req, res) {
         res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao gerar relatorio.' });
+        res.status(500).json({ erro: 'Erro ao gerar relatório.' });
     }
 }
 

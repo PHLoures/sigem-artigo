@@ -46,6 +46,9 @@ function alternarTema() {
     }
 
     atualizarIconeBotaoTema(true);
+
+    // avisa os graficos (dashboard.js) para trocarem de cor
+    window.dispatchEvent(new CustomEvent('sigem:tema'));
 }
 
 function atualizarIconeBotaoTema(animar = false) {
@@ -53,7 +56,7 @@ function atualizarIconeBotaoTema(animar = false) {
     if (!botao) return;
 
     const estaEscuro = document.documentElement.getAttribute('data-tema') === 'escuro';
-    botao.textContent = estaEscuro ? '☀️' : '🌙';
+    botao.innerHTML = icone(estaEscuro ? 'sun' : 'moon');
     botao.title = estaEscuro ? 'Mudar para modo claro' : 'Mudar para modo escuro';
 
     if (animar) {

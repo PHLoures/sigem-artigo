@@ -14,7 +14,7 @@ async function carregarMedicamentos() {
         const select = document.getElementById('filtro-medicamento');
         select.innerHTML =
             '<option value="">Todos</option>' +
-            medicamentos.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+            medicamentos.map(m => `<option value="${m.id}">${esc(m.nome)}</option>`).join('');
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
     }
@@ -52,7 +52,7 @@ function atualizarSubtitulo(dataInicio, dataFim, tipo) {
     if (dataFim) partes.push(`até ${formatarDataInputParaBr(dataFim)}`);
     if (tipo) partes.push(`tipo ${tipo}`);
 
-    const texto = partes.length > 0 ? `Periodo: ${partes.join(' ')}` : 'Periodo: todos os registros';
+    const texto = partes.length > 0 ? `Período: ${partes.join(' ')}` : 'Período: todos os registros';
     document.getElementById('relatorio-periodo').textContent = texto;
 }
 
@@ -64,20 +64,20 @@ function formatarDataInputParaBr(dataAAAAMMDD) {
 function renderizarTabela(lista) {
     const tbody = document.getElementById('tabela-relatorio');
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="tabela-vazia">Nenhuma movimentacao encontrada para esse filtro.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="tabela-vazia">Nenhuma movimentação encontrada para esse filtro.</td></tr>`;
         return;
     }
     tbody.innerHTML = lista.map(item => `
         <tr>
             <td data-rotulo="Data">${formatarData(item.data_movimentacao)}</td>
-            <td data-rotulo="Medicamento">${item.medicamento_nome}</td>
-            <td data-rotulo="Lote">${item.numero_lote}</td>
+            <td data-rotulo="Medicamento">${esc(item.medicamento_nome)}</td>
+            <td data-rotulo="Lote">${esc(item.numero_lote)}</td>
             <td data-rotulo="Tipo">
                 <span class="badge ${item.tipo === 'ENTRADA' ? 'badge-verde' : 'badge-azul'}">${item.tipo}</span>
             </td>
             <td data-rotulo="Quantidade">${item.quantidade}</td>
-            <td data-rotulo="Setor">${item.setor_nome || '-'}</td>
-            <td data-rotulo="Motivo">${item.motivo || '-'}</td>
+            <td data-rotulo="Setor">${esc(item.setor_nome || '-')}</td>
+            <td data-rotulo="Motivo">${esc(item.motivo || '-')}</td>
         </tr>
     `).join('');
 }
@@ -102,7 +102,7 @@ document.getElementById('btn-limpar-filtro').addEventListener('click', () => {
 
 document.getElementById('btn-exportar-csv').addEventListener('click', () => {
     if (ultimoRelatorio.length === 0) {
-        mostrarMensagem('Nao ha dados para exportar.', 'erro');
+        mostrarMensagem('Não há dados para exportar.', 'erro');
         return;
     }
 
@@ -155,7 +155,7 @@ document.getElementById('btn-exportar-csv').addEventListener('click', () => {
 
 document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
     if (ultimoRelatorio.length === 0) {
-        mostrarMensagem('Nao ha dados para exportar.', 'erro');
+        mostrarMensagem('Não há dados para exportar.', 'erro');
         return;
     }
 
@@ -165,12 +165,12 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
     const linhasTabela = ultimoRelatorio.map(item => `
         <tr>
             <td>${formatarData(item.data_movimentacao)}</td>
-            <td>${item.medicamento_nome}</td>
-            <td>${item.numero_lote}</td>
+            <td>${esc(item.medicamento_nome)}</td>
+            <td>${esc(item.numero_lote)}</td>
             <td><span class="badge-imp ${item.tipo === 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}">${item.tipo}</span></td>
             <td class="col-numero">${item.quantidade}</td>
-            <td>${item.setor_nome || '-'}</td>
-            <td>${item.motivo || '-'}</td>
+            <td>${esc(item.setor_nome || '-')}</td>
+            <td>${esc(item.motivo || '-')}</td>
         </tr>
     `).join('');
 
@@ -213,18 +213,18 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
 
     // ---------- Quem gerou o relatorio ----------
     const sessao = obterSessao();
-    const nomeUsuario = sessao ? sessao.nome : 'Convidado';
+    const nomeUsuario = sessao ? sessao.nome : 'Visitante';
 
     const linhasRankingSetores = rankingSetores.length > 0
-        ? rankingSetores.map(([setor, total]) => `<li>${setor}: <strong>${total}</strong> unidades</li>`).join('')
-        : '<li>Nenhuma saida com setor informado neste periodo.</li>';
+        ? rankingSetores.map(([setor, total]) => `<li>${esc(setor)}: <strong>${total}</strong> unidades</li>`).join('')
+        : '<li>Nenhuma saída com setor informado neste período.</li>';
 
     const htmlRelatorio = `
         <!DOCTYPE html>
         <html lang="pt-br">
         <head>
             <meta charset="UTF-8">
-            <title>Relatorio SIGEM - Movimentacoes</title>
+            <title>Relatório SIGEM - Movimentações</title>
             <style>
                 * { box-sizing: border-box; }
                 body {
@@ -356,26 +356,26 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
                 <img src="${window.location.origin}/assets/img/logo.png" alt="Logo SIGEM">
                 <div>
                     <h1>SIGEM</h1>
-                    <p>Sistema de Gestao de Medicamentos Hospitalares</p>
+                    <p>Sistema de Gestão de Medicamentos Hospitalares</p>
                 </div>
             </div>
 
-            <h2 class="titulo-relatorio">Relatorio de Movimentacoes</h2>
+            <h2 class="titulo-relatorio">Relatório de Movimentações</h2>
             <p class="subtitulo">${periodo}</p>
 
             <div class="resumo">
                 <div>Total de registros<strong>${ultimoRelatorio.length}</strong></div>
                 <div>Unidades em entradas<strong>${totalEntradas}</strong></div>
-                <div>Unidades em saidas<strong>${totalSaidas}</strong></div>
+                <div>Unidades em saídas<strong>${totalSaidas}</strong></div>
             </div>
 
             <div class="destaques">
                 <div class="destaque-card">
                     <h3>Medicamento mais movimentado</h3>
-                    <p>${medicamentoDestaque ? `${medicamentoDestaque[0]} &mdash; ${medicamentoDestaque[1]} unidades` : 'Sem dados no periodo'}</p>
+                    <p>${medicamentoDestaque ? `${esc(medicamentoDestaque[0])} &mdash; ${medicamentoDestaque[1]} unidades` : 'Sem dados no período'}</p>
                 </div>
                 <div class="destaque-card">
-                    <h3>Saidas por setor</h3>
+                    <h3>Saídas por setor</h3>
                     <ul>${linhasRankingSetores}</ul>
                 </div>
             </div>
@@ -395,7 +395,7 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
                 <tbody>${linhasTabela}</tbody>
             </table>
 
-            <p class="rodape">Relatorio gerado por ${nomeUsuario} &middot; SIGEM em ${dataGeracao}</p>
+            <p class="rodape">Relatório gerado por ${esc(nomeUsuario)} &middot; SIGEM em ${dataGeracao}</p>
         </body>
         </html>
     `;
@@ -409,7 +409,7 @@ document.getElementById('btn-exportar-pdf').addEventListener('click', () => {
     // isso essa checagem e necessaria antes de usar a janela.
     if (!janelaRelatorio) {
         mostrarMensagem(
-            'O navegador bloqueou a abertura do relatorio. Permita pop-ups para este site e tente novamente.',
+            'O navegador bloqueou a abertura do relatório. Permita pop-ups para este site e tente novamente.',
             'erro'
         );
         return;

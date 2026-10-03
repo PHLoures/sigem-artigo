@@ -47,7 +47,7 @@ async function previsaoEstoque(req, res) {
         res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao calcular previsao de estoque.' });
+        res.status(500).json({ erro: 'Erro ao calcular previsão de estoque.' });
     }
 }
 

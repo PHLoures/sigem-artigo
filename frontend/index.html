@@ -2,25 +2,59 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SIGEM - Entrar</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1f4d">
+    <meta name="theme-color" content="#0a1647">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body class="pagina-abertura">
 
-    <main class="abertura">
-        <div class="abertura-card">
-            <img src="assets/img/logo.png" alt="Logo SIGEM" class="abertura-logo">
+    <!-- Fundo animado: luzes coloridas que flutuam devagar -->
+    <div class="abertura-fundo" aria-hidden="true">
+        <span class="orbe orbe-1"></span>
+        <span class="orbe orbe-2"></span>
+        <span class="orbe orbe-3"></span>
+    </div>
 
+    <main class="abertura">
+        <!-- Lado esquerdo: apresentacao do sistema -->
+        <section class="abertura-marca">
+            <span class="hero-chip"><i class="pulso-ponto"></i>Projeto acadêmico &middot; Metodologia Científica</span>
+            <h1 class="abertura-titulo">Cada medicamento no <span>lugar certo</span>, na hora certa.</h1>
             <p class="abertura-frase">
-                Mais controle, seguranca e eficiencia no gerenciamento
-                de medicamentos hospitalares.
+                Mais controle, segurança e eficiência no gerenciamento de
+                medicamentos hospitalares &mdash; do estoque à validade, de cada lote ao paciente.
             </p>
+
+            <ul class="abertura-recursos">
+                <li><span class="rec-icone" data-ico="alerta"></span>Alertas automáticos de validade e estoque baixo</li>
+                <li><span class="rec-icone" data-ico="queda"></span>Previsão de esgotamento e simulador &ldquo;e se?&rdquo;</li>
+                <li><span class="rec-icone" data-ico="qr"></span>QR Code e rastreabilidade de cada lote</li>
+            </ul>
+
+            <div class="abertura-estatisticas">
+                <div>
+                    <strong data-contar="33104">33.104</strong>
+                    <span>relatos de falta de medicamentos no 1º trimestre de 2026</span>
+                </div>
+                <div>
+                    <strong data-contar="25" data-sufixo=" mil">25 mil</strong>
+                    <span>leitos do SUS perdidos entre 2010 e 2023</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lado direito: entrar / criar conta -->
+        <div class="abertura-card">
+            <div class="abertura-logo-badge">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" class="abertura-logo">
+            </div>
 
             <div id="mensagem-login"></div>
 
@@ -45,7 +79,7 @@
                 <label class="mostrar-senha"><input type="checkbox" data-alvo="criar-senha"> Mostrar senha</label>
                 <label class="rotulo-perfil" for="criar-perfil">Seu perfil</label>
                 <select id="criar-perfil">
-                    <option value="farmaceutico">Farmaceutico</option>
+                    <option value="farmaceutico">Farmacêutico</option>
                     <option value="enfermeiro">Enfermeiro</option>
                     <option value="gestor">Gestor</option>
                 </select>
@@ -58,12 +92,14 @@
     </main>
 
     <footer class="rodape rodape-abertura">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/login.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/login.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

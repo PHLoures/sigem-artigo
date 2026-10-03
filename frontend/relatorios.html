@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGEM - Relatorios</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <title>SIGEM - Relatórios</title>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1f4d">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
     <script>
@@ -21,18 +23,18 @@
     <header class="topo no-print">
         <div class="marca">
             <div class="logo-badge">
-                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" width="40" height="40">
             </div>
             <div class="marca-texto">
-                <h1>SIGEM</h1>
-                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+                <strong class="marca-nome">SIGEM</strong>
+                <span>Sistema de Gestão de Medicamentos Hospitalares</span>
             </div>
         </div>
         <nav class="menu">
             <a href="dashboard.html">Dashboard</a>
             <a href="medicamentos.html">Medicamentos</a>
-            <a href="movimentacoes.html">Movimentacoes</a>
-            <a href="relatorios.html" class="ativo">Relatorios</a>
+            <a href="movimentacoes.html">Movimentações</a>
+            <a href="relatorios.html" class="ativo">Relatórios</a>
             <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html">Contexto</a>
         <span id="usuario-logado"></span>
@@ -40,10 +42,18 @@
     </header>
 
     <main>
+        <div class="pagina-cabecalho no-print">
+            <div>
+                <p class="pagina-eyebrow">Análise</p>
+                <h1 class="pagina-titulo">Relatórios</h1>
+                <p class="pagina-sub">Filtre o histórico por período, tipo e medicamento e exporte em CSV ou PDF.</p>
+            </div>
+        </div>
+
         <div id="mensagem-area" class="no-print"></div>
 
         <section class="bloco no-print">
-            <h2>Filtrar historico de movimentacoes</h2>
+            <h2><span class="ico" data-ico="filtro"></span>Filtrar histórico de movimentações</h2>
             <form class="form-cadastro" id="form-filtro">
                 <div class="campo">
                     <label for="filtro-data-inicio">Data inicial</label>
@@ -58,7 +68,7 @@
                     <select id="filtro-tipo">
                         <option value="">Todos</option>
                         <option value="ENTRADA">ENTRADA</option>
-                        <option value="SAIDA">SAIDA</option>
+                        <option value="SAIDA">SAÍDA</option>
                     </select>
                 </div>
                 <div class="campo">
@@ -77,12 +87,12 @@
         <section class="bloco" id="bloco-resultado">
             <div class="relatorio-cabecalho">
                 <div>
-                    <h2 style="margin-bottom:2px;">Relatorio de movimentacoes</h2>
-                    <p class="relatorio-subtitulo" id="relatorio-periodo">Periodo: todos os registros</p>
+                    <h2 style="margin-bottom:2px;"><span class="ico" data-ico="relatorios"></span>Relatório de movimentações</h2>
+                    <p class="relatorio-subtitulo" id="relatorio-periodo">Período: todos os registros</p>
                 </div>
                 <div class="relatorio-acoes no-print">
-                    <button type="button" class="btn-secundario" id="btn-exportar-csv">Exportar CSV</button>
-                    <button type="button" class="btn-primario" id="btn-exportar-pdf">Exportar PDF</button>
+                    <button type="button" class="btn-secundario" id="btn-exportar-csv"><span data-ico="baixar"></span>Exportar CSV</button>
+                    <button type="button" class="btn-primario" id="btn-exportar-pdf"><span data-ico="relatorios"></span>Exportar PDF</button>
                 </div>
             </div>
 
@@ -104,14 +114,16 @@
     </main>
 
     <footer class="rodape no-print">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/crise.js?v=5"></script>
-    <script src="js/chatbot.js?v=5"></script>
-    <script src="js/relatorios.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/crise.js?v=13"></script>
+    <script src="js/chatbot.js?v=13"></script>
+    <script src="js/relatorios.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

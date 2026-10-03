@@ -89,7 +89,7 @@ async function chamarApi(caminho, metodo = 'GET', corpo = null) {
         if (resposta.status === 401 && !caminho.startsWith('/auth/')) {
             localStorage.removeItem('sigem_sessao');
             window.location.href = 'index.html';
-            throw new Error(dados.erro || 'Sessao expirada.');
+            throw new Error(dados.erro || 'Sessão expirada.');
         }
 
         if (!resposta.ok) {

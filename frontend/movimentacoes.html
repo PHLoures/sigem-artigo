@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGEM - Movimentacoes</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <title>SIGEM - Movimentações</title>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1f4d">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
     <script>
@@ -21,18 +23,18 @@
     <header class="topo">
         <div class="marca">
             <div class="logo-badge">
-                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" width="40" height="40">
             </div>
             <div class="marca-texto">
-                <h1>SIGEM</h1>
-                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+                <strong class="marca-nome">SIGEM</strong>
+                <span>Sistema de Gestão de Medicamentos Hospitalares</span>
             </div>
         </div>
         <nav class="menu">
             <a href="dashboard.html">Dashboard</a>
             <a href="medicamentos.html">Medicamentos</a>
-            <a href="movimentacoes.html" class="ativo">Movimentacoes</a>
-            <a href="relatorios.html">Relatorios</a>
+            <a href="movimentacoes.html" class="ativo">Movimentações</a>
+            <a href="relatorios.html">Relatórios</a>
             <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html">Contexto</a>
         <span id="usuario-logado"></span>
@@ -40,20 +42,28 @@
     </header>
 
     <main>
+        <div class="pagina-cabecalho">
+            <div>
+                <p class="pagina-eyebrow">Operação</p>
+                <h1 class="pagina-titulo">Movimentações</h1>
+                <p class="pagina-sub">Registre entradas e saídas de estoque. Em saídas, informe o setor que recebeu o medicamento.</p>
+            </div>
+        </div>
+
         <div id="mensagem-area"></div>
 
         <section class="bloco">
-            <h2>Registrar movimentacao</h2>
+            <h2><span class="ico" data-ico="movimentacoes"></span>Registrar movimentação</h2>
 
             <div class="form-acoes" style="margin-bottom:18px;">
-                <button type="button" class="btn-secundario" id="btn-abrir-leitor">📷 Escanear QR Code do lote</button>
+                <button type="button" class="btn-secundario" id="btn-abrir-leitor"><span data-ico="camera"></span>Escanear QR Code do lote</button>
             </div>
 
             <!-- Leitor de QR code via camera. Fica escondido ate o
                  usuario clicar no botao acima. -->
             <div class="leitor-qrcode" id="leitor-qrcode">
                 <video id="video-leitor" autoplay playsinline muted></video>
-                <p class="leitor-qrcode-status" id="status-leitor">Aponte a camera para o QR code do lote...</p>
+                <p class="leitor-qrcode-status" id="status-leitor">Aponte a câmera para o QR Code do lote...</p>
                 <div class="form-acoes" style="justify-content:center;">
                     <button type="button" class="btn-secundario" id="btn-fechar-leitor">Cancelar</button>
                 </div>
@@ -72,13 +82,13 @@
                     <label for="mov-tipo">Tipo</label>
                     <select id="mov-tipo" required>
                         <option value="ENTRADA">ENTRADA</option>
-                        <option value="SAIDA">SAIDA</option>
+                        <option value="SAIDA">SAÍDA</option>
                     </select>
                 </div>
                 <div class="campo" id="campo-setor">
-                    <label for="mov-setor">Setor (obrigatorio em saida)</label>
+                    <label for="mov-setor">Setor (obrigatório em saída)</label>
                     <select id="mov-setor">
-                        <option value="">-- nenhum --</option>
+                        <option value="">Nenhum</option>
                     </select>
                 </div>
                 <div class="campo">
@@ -96,7 +106,7 @@
         </section>
 
         <section class="bloco">
-            <h2>Historico de movimentacoes</h2>
+            <h2><span class="ico" data-ico="historico"></span>Histórico de movimentações</h2>
             <table>
                 <thead>
                     <tr>
@@ -115,15 +125,17 @@
     </main>
 
     <footer class="rodape">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
     <script src="assets/js/jsQR.js"></script>
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/crise.js?v=5"></script>
-    <script src="js/chatbot.js?v=5"></script>
-    <script src="js/movimentacoes.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/crise.js?v=13"></script>
+    <script src="js/chatbot.js?v=13"></script>
+    <script src="js/movimentacoes.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

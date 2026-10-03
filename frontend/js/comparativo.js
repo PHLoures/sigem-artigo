@@ -13,20 +13,16 @@ async function carregarCardsAoVivo() {
         const qtdProximos = dados.proximosVencimento.length;
         const qtdBaixo = dados.estoqueBaixo.length;
 
-        container.innerHTML = `
-            <div class="card ${qtdVencidos > 0 ? 'alerta-vermelho' : 'alerta-verde'}">
-                <div class="card-titulo">Lotes vencidos detectados</div>
-                <div class="card-valor">${qtdVencidos}</div>
-            </div>
-            <div class="card ${qtdProximos > 0 ? 'alerta-amarelo' : 'alerta-verde'}">
-                <div class="card-titulo">Lotes perto de vencer</div>
-                <div class="card-valor">${qtdProximos}</div>
-            </div>
-            <div class="card ${qtdBaixo > 0 ? 'alerta-vermelho' : 'alerta-verde'}">
-                <div class="card-titulo">Medicamentos com estoque baixo</div>
-                <div class="card-valor">${qtdBaixo}</div>
-            </div>
-        `;
+        const cartao = (tom, ico, titulo, valor) => `
+            <div class="card ${tom}">
+                <div class="card-topo"><span class="card-icone">${icone(ico)}</span><span class="card-titulo">${titulo}</span></div>
+                <div class="card-valor">${valor}</div>
+            </div>`;
+
+        container.innerHTML =
+            cartao(qtdVencidos > 0 ? 'alerta-vermelho' : 'alerta-verde', 'calendario-x', 'Lotes vencidos detectados', qtdVencidos) +
+            cartao(qtdProximos > 0 ? 'alerta-amarelo' : 'alerta-verde', 'relogio', 'Lotes perto de vencer', qtdProximos) +
+            cartao(qtdBaixo > 0 ? 'alerta-vermelho' : 'alerta-verde', 'pacote', 'Medicamentos com estoque baixo', qtdBaixo);
     } catch (erro) {
         container.innerHTML = `<div class="mensagem mensagem-erro">${erro.message}</div>`;
     }

@@ -26,7 +26,7 @@ async function autenticar(req, res, next) {
     const cabecalho = req.headers.authorization || '';
     const token = cabecalho.startsWith('Bearer ') ? cabecalho.slice(7) : null;
     if (!token) {
-        return res.status(401).json({ erro: 'Faca login para continuar.' });
+        return res.status(401).json({ erro: 'Faça login para continuar.' });
     }
 
     try {
@@ -36,7 +36,7 @@ async function autenticar(req, res, next) {
             [hashDoToken(token)]
         );
         if (resultado.rows.length === 0) {
-            return res.status(401).json({ erro: 'Sessao expirada. Entre novamente.' });
+            return res.status(401).json({ erro: 'Sessão expirada. Entre novamente.' });
         }
         req.usuario = resultado.rows[0];
         next();
@@ -50,7 +50,7 @@ function exigirPermissao(acao) {
     return (req, res, next) => {
         const permissoes = PERMISSOES[req.usuario.perfil] || {};
         if (!permissoes[acao]) {
-            return res.status(403).json({ erro: 'Seu perfil nao tem permissao para esta acao.' });
+            return res.status(403).json({ erro: 'Seu perfil não tem permissão para esta ação.' });
         }
         next();
     };

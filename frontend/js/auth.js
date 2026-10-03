@@ -37,7 +37,7 @@ const SIGEM_SESSAO_CHAVE = 'sigem_sessao';
 // perfil a cada requisicao.
 const PERFIS = {
     farmaceutico: {
-        rotulo: 'Farmaceutico',
+        rotulo: 'Farmacêutico',
         descricao: 'Acesso completo: cadastra, movimenta estoque e gera relatorios.',
         permissoes: { editar_cadastros: true, entrada: true, saida: true, relatorios: true },
     },
@@ -73,7 +73,7 @@ function mostrarAvisoPerfil(texto) {
     if (!main) return;
     const aviso = document.createElement('div');
     aviso.className = 'aviso-perfil';
-    aviso.innerHTML = `🔒 <strong>Perfil ${perfilAtual().rotulo}:</strong> ${texto}`;
+    aviso.innerHTML = `${icone('cadeado')}<span><strong>Perfil ${perfilAtual().rotulo}:</strong> ${esc(texto)}</span>`;
     main.prepend(aviso);
 }
 
@@ -138,11 +138,18 @@ function renderizarUsuarioLogado() {
     const container = document.getElementById('usuario-logado');
     if (!container) return;
 
+    const perfil = perfilAtual();
+    const iniciais = String(sessao.nome || '?').split(' ').filter(Boolean).slice(0, 2)
+        .map(parte => parte[0]).join('').toUpperCase();
+
     container.innerHTML = `
-        <span class="usuario-nome">Ola, ${sessao.nome}</span>
-        <span class="selo-perfil selo-${perfilAtual().chave}" title="${perfilAtual().descricao}">${perfilAtual().rotulo}</span>
-        <button type="button" class="btn-tema" id="btn-tema" title="Mudar tema">🌙</button>
-        <button type="button" class="btn-sair" id="btn-sair">Sair</button>
+        <div class="usuario-avatar" aria-hidden="true">${esc(iniciais)}</div>
+        <div class="usuario-info">
+            <span class="usuario-nome">${esc(sessao.nome)}</span>
+            <span class="selo-perfil selo-${perfil.chave}" title="${esc(perfil.descricao)}">${perfil.rotulo}</span>
+        </div>
+        <button type="button" class="btn-tema" id="btn-tema" aria-label="Mudar tema"></button>
+        <button type="button" class="btn-sair" id="btn-sair" title="Sair" aria-label="Sair">${icone('sair')}</button>
     `;
 
     document.getElementById('btn-sair').addEventListener('click', encerrarSessao);

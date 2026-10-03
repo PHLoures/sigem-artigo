@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGEM - Dashboard</title>
-    <script src="js/tema.js?v=5"></script>
-    <script src="js/transicoes.js?v=5"></script>
+    <script src="js/tema.js?v=13"></script>
+    <script src="js/transicoes.js?v=13"></script>
+    <link rel="icon" type="image/png" href="assets/img/icone-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1f4d">
     <link rel="apple-touch-icon" href="assets/img/icone-192.png">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
     <script>
@@ -24,18 +26,18 @@
     <header class="topo">
         <div class="marca">
             <div class="logo-badge">
-                <img src="assets/img/logo.png" alt="Logo SIGEM" width="40" height="40">
+                <img src="assets/img/logo-sigem.png" alt="Logo SIGEM" width="40" height="40">
             </div>
             <div class="marca-texto">
-                <h1>SIGEM</h1>
-                <span>Sistema de Gestao de Medicamentos Hospitalares</span>
+                <strong class="marca-nome">SIGEM</strong>
+                <span>Sistema de Gestão de Medicamentos Hospitalares</span>
             </div>
         </div>
         <nav class="menu">
             <a href="dashboard.html" class="ativo">Dashboard</a>
             <a href="medicamentos.html">Medicamentos</a>
-            <a href="movimentacoes.html">Movimentacoes</a>
-            <a href="relatorios.html">Relatorios</a>
+            <a href="movimentacoes.html">Movimentações</a>
+            <a href="relatorios.html">Relatórios</a>
             <a href="comparativo.html">Comparativo</a>
             <a href="contexto.html">Contexto</a>
             <span id="usuario-logado"></span>
@@ -43,22 +45,33 @@
     </header>
 
     <main>
-        <div class="hero-banner">
-            <img src="assets/img/banner.png" alt="SIGEM - Mais controle, seguranca e eficiencia no gerenciamento de medicamentos">
-        </div>
+        <section class="hero">
+            <div class="hero-texto">
+                <span class="hero-chip" id="hero-status"><i class="pulso-ponto"></i><span id="hero-status-texto">Carregando o estoque...</span></span>
+                <h1 class="hero-titulo"><span id="hero-saudacao">Olá</span>, <span id="hero-nome">bem-vindo</span></h1>
+                <p id="hero-resumo">Acompanhe o estoque de medicamentos do hospital em tempo real.</p>
+                <div class="hero-acoes">
+                    <a class="btn-primario" id="hero-registrar" href="movimentacoes.html"><span data-ico="movimentacoes"></span>Registrar movimentação</a>
+                    <a class="btn-vidro" href="medicamentos.html"><span data-ico="pill"></span>Ver estoque</a>
+                </div>
+            </div>
+            <div class="hero-arte">
+                <img src="assets/img/banner.png" alt="SIGEM - Mais controle, segurança e eficiência no gerenciamento de medicamentos">
+            </div>
+        </section>
 
         <div id="mensagem-area"></div>
 
         <!-- Modo crise: simulacao para a apresentacao (nada e gravado no banco) -->
         <section class="bloco barra-crise no-print" id="bloco-crise">
             <div class="barra-crise-texto">
-                <h2 id="crise-titulo">🚨 Modo crise</h2>
+                <h2 id="crise-titulo"><span class="ico vermelho" data-ico="sirene"></span><span id="crise-titulo-texto">Modo crise</span></h2>
                 <p class="secao-explicacao" id="crise-descricao">
                     Simula um hospital em desabastecimento: o estoque despenca e o consumo
                     sobe 50%. Serve para ver como o SIGEM alerta a equipe a tempo.
                 </p>
             </div>
-            <button type="button" class="btn-crise" id="btn-crise">Simular crise</button>
+            <button type="button" class="btn-crise" id="btn-crise"><span data-ico="sirene"></span><span id="btn-crise-texto">Simular crise</span></button>
         </section>
 
         <!-- Cards de resumo -->
@@ -66,17 +79,21 @@
             <!-- preenchido via JavaScript -->
         </section>
 
-        <!-- Grafico -->
+        <!-- Graficos -->
         <section class="graficos">
-            <div class="bloco grafico-card">
-                <h2>Estoque por medicamento</h2>
-                <canvas id="grafico-estoque"></canvas>
-            </div>
+            <section class="bloco grafico-card">
+                <h2><span class="ico" data-ico="grafico"></span>Estoque por medicamento</h2>
+                <div class="grafico-area"><canvas id="grafico-estoque"></canvas></div>
+            </section>
+            <section class="bloco grafico-card">
+                <h2><span class="ico" data-ico="pizza"></span>Situação do estoque</h2>
+                <div class="grafico-area"><canvas id="grafico-situacao"></canvas></div>
+            </section>
         </section>
 
         <!-- Previsao de esgotamento -->
         <section class="bloco">
-            <h2>📉 Previsão de esgotamento de estoque</h2>
+            <h2><span class="ico" data-ico="queda"></span>Previsão de esgotamento de estoque</h2>
             <p class="secao-explicacao">
                 Estimativa de quantos dias faltam para cada medicamento acabar,
                 baseada no consumo médio (saídas) dos últimos 30 dias.
@@ -96,7 +113,7 @@
 
         <!-- Simulador "e se?" -->
         <section class="bloco" id="secao-simulador">
-            <h2>🧪 Simulador "e se?"</h2>
+            <h2><span class="ico" data-ico="frasco"></span>Simulador "e se?"</h2>
             <p class="secao-explicacao">
                 Mexa nos controles e veja como a previsão de esgotamento muda.
                 Ajuda a decidir <strong>quanto repor</strong> antes de faltar.
@@ -124,9 +141,10 @@
             </table>
         </section>
 
+        <div class="grade-2">
         <!-- Alertas: vencidos -->
         <section class="bloco" id="secao-vencidos">
-            <h2>🔴 Medicamentos vencidos</h2>
+            <h2><span class="ico vermelho" data-ico="calendario-x"></span>Medicamentos vencidos</h2>
             <table>
                 <thead>
                     <tr>
@@ -142,7 +160,7 @@
 
         <!-- Alertas: proximo do vencimento -->
         <section class="bloco" id="secao-vencimento">
-            <h2>🟠 Proximos do vencimento (30 dias)</h2>
+            <h2><span class="ico amarelo" data-ico="relogio"></span>Próximos do vencimento (30 dias)</h2>
             <table>
                 <thead>
                     <tr>
@@ -155,15 +173,16 @@
                 <tbody id="tabela-vencimento"></tbody>
             </table>
         </section>
+        </div>
 
         <!-- Alertas: estoque baixo -->
         <section class="bloco" id="secao-estoque-baixo">
-            <h2>🔴 Estoque baixo</h2>
+            <h2><span class="ico vermelho" data-ico="pacote"></span>Estoque baixo</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Medicamento</th>
-                        <th>Estoque minimo</th>
+                        <th>Estoque mínimo</th>
                         <th>Quantidade atual</th>
                     </tr>
                 </thead>
@@ -173,7 +192,7 @@
 
         <!-- Ultimas movimentacoes -->
         <section class="bloco">
-            <h2>Ultimas movimentacoes</h2>
+            <h2><span class="ico" data-ico="movimentacoes"></span>Últimas movimentações</h2>
             <table>
                 <thead>
                     <tr>
@@ -191,15 +210,17 @@
     </main>
 
     <footer class="rodape">
-        SIGEM &mdash; Sistema de Gestao de Medicamentos Hospitalares &middot; Projeto academico
+        SIGEM &mdash; Sistema de Gestão de Medicamentos Hospitalares &middot; Projeto acadêmico
     </footer>
 
     <script src="assets/js/chart.umd.min.js"></script>
-    <script src="js/auth.js?v=5"></script>
-    <script src="js/api.js?v=5"></script>
-    <script src="js/crise.js?v=5"></script>
-    <script src="js/chatbot.js?v=5"></script>
-    <script src="js/dashboard.js?v=5"></script>
-    <script src="js/instalar.js?v=5"></script>
+    <script src="js/icones.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/api.js?v=13"></script>
+    <script src="js/crise.js?v=13"></script>
+    <script src="js/chatbot.js?v=13"></script>
+    <script src="js/dashboard.js?v=13"></script>
+    <script src="js/instalar.js?v=13"></script>
+    <script src="js/visual.js?v=13"></script>
 </body>
 </html>

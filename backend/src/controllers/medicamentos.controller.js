@@ -31,7 +31,7 @@ async function buscarPorId(req, res) {
             [id]
         );
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Medicamento nao encontrado.' });
+            return res.status(404).json({ erro: 'Medicamento não encontrado.' });
         }
         res.json(resultado.rows[0]);
     } catch (erro) {
@@ -53,7 +53,7 @@ async function criar(req, res) {
     } = req.body;
 
     if (!nome || !principio_ativo || !dosagem || !forma_farmaceutica || !fabricante) {
-        return res.status(400).json({ erro: 'Preencha todos os campos obrigatorios.' });
+        return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
 
     try {
@@ -99,7 +99,7 @@ async function atualizar(req, res) {
         );
 
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Medicamento nao encontrado.' });
+            return res.status(404).json({ erro: 'Medicamento não encontrado.' });
         }
         res.json(resultado.rows[0]);
     } catch (erro) {
@@ -118,7 +118,7 @@ async function remover(req, res) {
             [id]
         );
         if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: 'Medicamento nao encontrado.' });
+            return res.status(404).json({ erro: 'Medicamento não encontrado.' });
         }
         res.json({ mensagem: 'Medicamento removido com sucesso.' });
     } catch (erro) {
@@ -128,7 +128,7 @@ async function remover(req, res) {
         // da tabela lotes. O PostgreSQL bloqueia essa exclusao.
         if (erro.code === '23503') {
             return res.status(409).json({
-                erro: 'Nao e possivel excluir: existem lotes ou movimentacoes vinculados a este medicamento.',
+                erro: 'Não é possível excluir: existem lotes ou movimentações vinculados a este medicamento.',
             });
         }
         res.status(500).json({ erro: 'Erro ao remover medicamento.' });
