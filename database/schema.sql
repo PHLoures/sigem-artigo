@@ -127,3 +127,29 @@ CREATE TABLE movimentacoes (
 CREATE INDEX idx_lotes_medicamento_id ON lotes(medicamento_id);
 CREATE INDEX idx_movimentacoes_medicamento_id ON movimentacoes(medicamento_id);
 CREATE INDEX idx_movimentacoes_lote_id ON movimentacoes(lote_id);
+
+
+-- ============================================================
+-- LOGIN (usuarios e sessoes)
+-- Estas tabelas tambem sao criadas automaticamente quando o backend
+-- liga (backend/src/database/migrar.js). Ficam aqui para documentacao.
+-- A senha NUNCA e guardada: so o hash bcrypt (senha_hash).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha_hash VARCHAR(100) NOT NULL,
+    perfil VARCHAR(20) NOT NULL CHECK (perfil IN ('farmaceutico', 'enfermeiro', 'gestor')),
+    criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sessoes (
+    id SERIAL PRIMARY KEY,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    nome VARCHAR(100) NOT NULL,
+    perfil VARCHAR(20) NOT NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+    expira_em TIMESTAMP NOT NULL
+);

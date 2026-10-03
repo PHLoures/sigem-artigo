@@ -140,3 +140,12 @@ Depois abra `http://localhost:5500/index.html` no navegador.
 | GET | /api/setores | Lista setores |
 | GET | /api/dashboard | Resumo para o dashboard |
 | GET | /api/previsao-estoque | Estimativa de dias ate o estoque esgotar, por medicamento |
+
+## Login e senha
+
+- Contas ficam na tabela `usuarios` do PostgreSQL. A senha **nunca** e guardada: so o hash bcrypt (`senha_hash`).
+- Ao entrar, o servidor cria uma sessao (tabela `sessoes`, validade de 7 dias) e devolve um token; o frontend envia o token em toda chamada (`Authorization: Bearer ...`).
+- O servidor confere o perfil (farmaceutico, enfermeiro, gestor) em cada rota - veja `backend/src/middleware/autenticacao.js`.
+- "Entrar como visitante" cria uma sessao somente leitura, sem conta.
+- As tabelas sao criadas sozinhas quando o backend liga (`backend/src/database/migrar.js`).
+- Limitacao assumida: no cadastro a propria pessoa escolhe o perfil (projeto academico). Num sistema real, um administrador atribuiria o perfil.

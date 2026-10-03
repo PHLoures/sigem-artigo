@@ -26,7 +26,7 @@ self.addEventListener('fetch', (evento) => {
     if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
     evento.respondWith(
-        fetch(req)
+        fetch(req, { cache: 'no-cache' })   // sempre confere com o servidor se ha versao nova
             .then(resposta => {
                 const copia = resposta.clone();
                 caches.open(CACHE).then(c => c.put(req, copia));

@@ -72,10 +72,25 @@ async function chamarApi(caminho, metodo = 'GET', corpo = null) {
         opcoes.body = JSON.stringify(corpo);
     }
 
+    // Se ha login, manda o "token" (a prova de que a pessoa entrou).
+    // O servidor recusa qualquer chamada sem ele.
+    const sessao = obterSessao();
+    if (sessao && sessao.token) {
+        opcoes.headers['Authorization'] = `Bearer ${sessao.token}`;
+    }
+
     iniciarCarregamento();
     try {
         const resposta = await fetch(`${API_URL}${caminho}`, opcoes);
         const dados = await resposta.json();
+
+        // 401 = login vencido ou invalido: volta para a tela de entrada.
+        // (As rotas /auth/ ficam de fora: la 401 significa "senha errada".)
+        if (resposta.status === 401 && !caminho.startsWith('/auth/')) {
+            localStorage.removeItem('sigem_sessao');
+            window.location.href = 'index.html';
+            throw new Error(dados.erro || 'Sessao expirada.');
+        }
 
         if (!resposta.ok) {
             // A API sempre devolve { erro: "mensagem" } quando algo

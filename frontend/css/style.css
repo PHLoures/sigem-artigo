@@ -1371,3 +1371,60 @@ body.modo-crise header.topo {
 }
 .btn-instalar-login:hover { background: var(--cinza-borda); }
 @media print { .btn-instalar { display: none !important; } }
+
+/* ---------- Login: abas, senha e visitante ---------- */
+.abas-login {
+    display: flex;
+    gap: 6px;
+    background: var(--cinza-fundo);
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+.aba-login {
+    flex: 1;
+    background: transparent;
+    color: var(--cinza);
+    padding: 9px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+.aba-login.ativa {
+    background: var(--superficie);
+    color: var(--texto-destaque);
+    box-shadow: var(--sombra);
+}
+.form-login[hidden] { display: none; }
+.form-login input[type="email"],
+.form-login input[type="password"],
+.form-login input[type="text"] {
+    background: var(--superficie);
+    color: var(--texto);
+    text-align: left;
+}
+.mostrar-senha {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--cinza);
+    cursor: pointer;
+}
+.mostrar-senha input {
+    width: auto;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    accent-color: var(--azul);
+}
+.link-visitante {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    background: transparent;
+    color: var(--azul);
+    font-size: 13.5px;
+    padding: 6px;
+}
+.link-visitante:hover { text-decoration: underline; }

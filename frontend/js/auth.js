@@ -12,7 +12,8 @@
 // pagina).
 //
 // Estrutura da sessao salva:
-//   { tipo: "convidado", nome: "Maria" }
+//   { tipo: "conta" | "visitante", nome: "Maria", perfil: "enfermeiro", token: "..." }
+// O "token" vem do servidor no login e e enviado em toda chamada da API.
 //
 // OBS: esta estrutura foi pensada para no futuro aceitar tambem
 // tipo: "google", com nome/email vindos do login do Google, sem
@@ -102,6 +103,15 @@ function obterSessao() {
 }
 
 function encerrarSessao() {
+    // Avisa o servidor para apagar a sessao do banco (se falhar, tudo
+    // bem: ela expira sozinha em 7 dias).
+    const sessao = obterSessao();
+    if (sessao && sessao.token && typeof API_URL !== 'undefined') {
+        fetch(`${API_URL}/auth/logout`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${sessao.token}` },
+        }).catch(() => {});
+    }
     localStorage.removeItem(SIGEM_SESSAO_CHAVE);
     navegarComTransicao('index.html');
 }
