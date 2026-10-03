@@ -428,8 +428,7 @@ a.btn-primario:hover {
     box-shadow: 0 6px 16px rgba(47, 95, 224, 0.35);
 }
 
-button.btn-secundario,
-a.btn-secundario {
+button.btn-secundario {
     background: var(--cinza-fundo);
     color: var(--texto);
     border: 1.5px solid var(--cinza-borda);
@@ -1346,47 +1345,3 @@ body.modo-crise header.topo {
 @media print {
     .barra-crise, .selo-perfil { display: none !important; }
 }
-
-
-/* ---------- Ajuda (guias em PDF) ---------- */
-.guias {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-    gap: 16px;
-    margin-top: 16px;
-}
-.guia-card {
-    background: var(--cinza-fundo);
-    border: 1px solid var(--cinza-borda);
-    border-radius: var(--raio);
-    padding: 20px;
-    min-width: 0;
-    animation: pop 0.4s ease backwards;
-}
-.guia-card:nth-child(2) { animation-delay: 0.08s; }
-.guia-card h3 { margin: 10px 0 6px; color: var(--texto-destaque); font-size: 16px; }
-.guia-card p { margin: 0 0 14px; color: var(--cinza); font-size: 14px; }
-.guia-icone {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--azul); color: #ffffff;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-}
-a.guia-botao {
-    display: inline-block;
-    text-decoration: none;
-    padding: 11px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-}
-.link-ajuda {
-    display: block;
-    margin-top: 16px;
-    text-align: center;
-    font-size: 13.5px;
-    color: var(--azul);
-    text-decoration: none;
-}
-.link-ajuda:hover { text-decoration: underline; }
-.rodape a { color: inherit; text-decoration: underline; }
