@@ -1148,7 +1148,9 @@ input[type="range"]:active::-webkit-slider-thumb {
     transform: scale(1.2);
 }
 
-input[type="range"]:focus {
+input[type="range"]:focus,
+input[type="range"]:focus-visible {
+    outline: none;
     box-shadow: none;
 }
 

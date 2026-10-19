@@ -212,7 +212,7 @@ async function responderPergunta(perguntaOriginal) {
             } else {
                 const itens = comDados
                     .slice(0, 3)
-                    .map(p => `${esc(p.nome)}: esgota em ${Number(p.dias_ate_esgotar)} dias`)
+                    .map(p => `${esc(p.nome)}: esgota em ${Math.round(Number(p.dias_ate_esgotar))} dias`)
                     .join('<br>');
                 respostas.push(`📉 Previsão (mais urgentes primeiro):<br>${itens}`);
             }

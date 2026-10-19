@@ -41,7 +41,7 @@ async function carregarDashboard() {
 //   > 30 dias  -> verde (tranquilo)
 function badgePrevisao(dias) {
     if (dias === null) return `<span class="badge badge-azul">Sem dados suficientes</span>`;
-    const arredondado = Math.round(dias * 10) / 10;
+    const arredondado = Math.round(dias);
     if (dias <= 7) return `<span class="badge badge-vermelho">Esgota em ${arredondado} dias</span>`;
     if (dias <= 30) return `<span class="badge badge-amarelo">Esgota em ${arredondado} dias</span>`;
     return `<span class="badge badge-verde">Esgota em ${arredondado} dias</span>`;
