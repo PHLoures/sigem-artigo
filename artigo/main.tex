@@ -14,6 +14,8 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
 \usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 
@@ -34,7 +36,7 @@
   \end{figure}%
 }
 
-\title{\textbf{A precariedade dos hospitais no Brasil e o SIGEM: um sistema web de gestão de medicamentos hospitalares}}
+\title{\textbf{SIGEM: sistema web de gestão de medicamentos hospitalares como resposta à precariedade dos hospitais públicos no Brasil}}
 \author{Pedro Henrique Santos Loures}
 \date{Novembro de 2026}
 
@@ -43,21 +45,21 @@
 \maketitle
 
 \begin{abstract}
-\noindent A saúde pública é um direito garantido pela Constituição Federal de 1988, mas a rede hospitalar do Sistema Único de Saúde (SUS) enfrenta dificuldades estruturais que comprometem o atendimento à população, como superlotação, falta de leitos, escassez de profissionais e falta de medicamentos e insumos. Este artigo discute a precariedade dos hospitais públicos brasileiros a partir de pesquisa bibliográfica e documental e, como resposta prática a uma parte desse problema, apresenta o desenvolvimento do SIGEM (Sistema de Gestão de Medicamentos Hospitalares). O SIGEM é uma aplicação web que controla medicamentos por lote e data de validade, registra entradas e saídas por setor, emite alertas de estoque baixo e de vencimento, estima em quantos dias cada medicamento se esgota e permite simular cenários de consumo e reposição. O sistema foi construído com HTML, CSS e JavaScript, servidor em Node.js e banco de dados PostgreSQL, e foi verificado por meio de testes funcionais. Os resultados indicam que uma ferramenta simples de controle e previsão pode apoiar a gestão do estoque, embora não substitua os investimentos estruturais de que a rede pública necessita.
+\noindent A falta de medicamentos e de insumos é um dos problemas recorrentes nos hospitais públicos brasileiros, ao lado da superlotação e da escassez de leitos e de profissionais. Este artigo apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos em ambiente hospitalar. O sistema controla os medicamentos por lote e data de validade, registra entradas e saídas por setor, emite alertas de estoque baixo e de vencimento, estima em quantos dias cada medicamento se esgota, permite simular cenários de consumo e reposição, mantém a rastreabilidade de cada lote e gera relatórios. O acesso é feito por contas com três perfis de usuário, com permissões diferentes. O SIGEM foi construído com HTML, CSS e JavaScript, servidor em Node.js e banco de dados PostgreSQL, a partir de requisitos levantados em pesquisa bibliográfica e documental sobre a precariedade hospitalar, e foi verificado por meio de testes funcionais com dados fictícios. Os resultados indicam que uma ferramenta simples de controle e previsão pode apoiar a gestão do estoque e antecipar situações de falta e de vencimento, embora não substitua os investimentos estruturais de que a rede pública necessita.
 
 \medskip
-\noindent\textbf{Palavras-chave:} saúde pública; hospitais públicos; gestão de medicamentos; controle de estoque; sistema web.
+\noindent\textbf{Palavras-chave:} gestão de medicamentos; controle de estoque; sistema web; hospitais públicos; saúde pública.
 \end{abstract}
 
 \section{Introdução}
 
-Apesar de o SUS ser reconhecido como um dos maiores sistemas públicos de saúde do mundo, sua capacidade de atender integralmente a população brasileira é frequentemente colocada em xeque pela precariedade observada em parte dos hospitais públicos. Superlotação, filas de espera prolongadas, falta de leitos e dificuldades relacionadas à disponibilidade de profissionais, equipamentos e medicamentos são problemas que comprometem a qualidade e a eficiência do atendimento.
+Entre os recursos necessários para o funcionamento de um hospital, os medicamentos estão entre os mais sensíveis: a falta de um item pode interromper um tratamento, e um lote vencido representa dinheiro público desperdiçado. Para que isso não aconteça, os responsáveis pelo estoque precisam saber, a qualquer momento, quais medicamentos estão disponíveis, em quais lotes, com qual validade, quais estão próximos do nível mínimo e para qual setor cada unidade foi destinada. Quando esse controle é feito apenas de forma manual, em ambientes com muitos produtos e movimentações frequentes, o processo se torna trabalhoso e sujeito a erros de registro.
 
-Esse cenário não é resultado de um único fator isolado, mas da combinação de problemas estruturais acumulados ao longo do tempo. Entre eles estão as dificuldades de financiamento, a distribuição desigual dos profissionais de saúde, as diferenças regionais na oferta de serviços e as limitações da atenção básica. Auditorias do Tribunal de Contas da União também registram, entre os problemas recorrentes dos hospitais públicos, a falta de medicamentos e insumos (BRASIL, 2014).
+Esse problema faz parte de um quadro maior. Apesar de o SUS ser reconhecido como um dos maiores sistemas públicos de saúde do mundo, parte dos hospitais públicos convive com superlotação, falta de leitos, carência de profissionais e falta de medicamentos e insumos, como registram auditorias do Tribunal de Contas da União (BRASIL, 2014). Levantamento recente contabilizou 33.104 relatos de irregularidade no fornecimento de medicamentos apenas no primeiro trimestre de 2026 (BIORED BRASIL, 2026).
 
-Entre os diversos recursos necessários para o funcionamento de uma unidade hospitalar estão os medicamentos. O controle adequado desses produtos é importante para que os responsáveis pelo estoque consigam identificar quais medicamentos estão disponíveis, quais estão próximos do nível mínimo, quais estão perto do vencimento e quais estão em falta. Quando esse controle é feito exclusivamente de forma manual, em ambientes com grande quantidade de produtos e movimentações frequentes, o processo se torna mais trabalhoso e mais sujeito a erros de registro.
+Diante desse contexto, este trabalho apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos. O sistema reúne o cadastro de medicamentos e lotes, o registro de entradas e saídas, alertas automáticos, uma previsão de esgotamento baseada no consumo, um simulador de cenários, a rastreabilidade de cada lote e relatórios.
 
-Diante desse contexto, este trabalho tem dois propósitos ligados entre si. O primeiro é compreender, com base em dados oficiais e estudos acadêmicos, as principais causas da precariedade hospitalar no Brasil. O segundo é apresentar o desenvolvimento do SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web criada como proposta de apoio ao controle do estoque de medicamentos, que é uma das frentes em que a tecnologia da informação pode contribuir.
+O artigo está organizado da seguinte forma: após a justificativa, os objetivos e a metodologia, o referencial teórico situa o problema da precariedade hospitalar e da gestão de medicamentos; em seguida, a seção de desenvolvimento descreve os requisitos, a arquitetura, as telas e os testes do sistema; por fim, são apresentadas as considerações finais.
 
 \section{Justificativa}
 
@@ -89,7 +91,7 @@ Propor um sistema de gestão de medicamentos hospitalares (SIGEM) como solução
 
 Este trabalho foi desenvolvido em duas etapas complementares.
 
-A primeira etapa caracteriza-se como pesquisa exploratória e descritiva, de abordagem qualitativa, realizada por meio de pesquisa bibliográfica e documental. A escolha se justifica pela natureza do problema, que exige a análise e o cruzamento de dados já produzidos por órgãos oficiais e pela comunidade científica. Foram considerados relatórios do Tribunal de Contas da União (TCU), dados do Instituto Brasileiro de Geografia e Estatística (IBGE), informações do Ministério da Saúde, levantamentos de entidades da área e artigos publicados em periódicos científicos, especialmente os disponíveis na base SciELO. As informações foram organizadas por eixos temáticos: financiamento do SUS, infraestrutura e superlotação, distribuição de profissionais, atenção primária e abastecimento de medicamentos.
+A primeira etapa caracteriza-se como pesquisa exploratória e descritiva, de abordagem qualitativa, realizada por meio de pesquisa bibliográfica e documental. A escolha se justifica pela natureza do problema, que exige a análise e o cruzamento de dados já produzidos por órgãos oficiais e pela comunidade científica. Foram considerados relatórios do Tribunal de Contas da União (TCU), dados do Instituto Brasileiro de Geografia e Estatística (IBGE), informações do Ministério da Saúde, levantamentos de entidades da área e artigos publicados em periódicos científicos, especialmente os disponíveis na base SciELO. As informações foram organizadas em dois blocos: o quadro geral da precariedade hospitalar e o abastecimento e a gestão de medicamentos. Dessa etapa resultaram os requisitos do sistema.
 
 A segunda etapa consistiu no desenvolvimento do software, seguindo um processo incremental, em que o sistema é construído em versões sucessivas, cada uma acrescentando funcionalidades à anterior (SOMMERVILLE, 2011). As etapas foram organizadas da seguinte maneira:
 
@@ -109,61 +111,115 @@ Como limitações do estudo, destacam-se a dependência de dados secundários na
 
 \section{Referencial teórico}
 
-A revisão foi organizada em cinco eixos: financiamento do SUS, infraestrutura e superlotação hospitalar, distribuição de profissionais de saúde, atenção primária e desigualdades regionais e, por fim, abastecimento e gestão de medicamentos.
+O referencial está organizado em duas partes. A primeira resume o quadro geral da precariedade dos hospitais públicos, que é o contexto do trabalho. A segunda trata do abastecimento e da gestão de medicamentos, que é o problema específico enfrentado pelo sistema desenvolvido.
 
-\subsection{Financiamento do Sistema Único de Saúde}
+\subsection{A precariedade dos hospitais públicos}
 
-O financiamento é um dos elementos centrais para compreender as dificuldades estruturais do SUS. Vieira et al. (2019) discutem o processo de subfinanciamento do sistema e destacam os efeitos da Emenda Constitucional n. 95/2016 sobre o orçamento federal da saúde. Segundo os autores, a limitação das despesas públicas agravou um problema que já existia anteriormente, dificultando a ampliação dos recursos destinados às necessidades de saúde da população.
+O financiamento é um dos elementos centrais para compreender as dificuldades do SUS. Vieira et al. (2019) discutem o subfinanciamento do sistema e os efeitos da Emenda Constitucional n. 95/2016 sobre o orçamento federal da saúde, e Ocké-Reis e Benevides (2022) destacam que o sistema já enfrentava subfinanciamento crônico antes da pandemia de Covid-19. A disponibilidade de recursos influencia diretamente a manutenção da infraestrutura, a contratação de profissionais e a aquisição de equipamentos e medicamentos.
 
-Ocké-Reis e Benevides (2022) analisaram o financiamento federal do SUS durante a pandemia de Covid-19 e destacaram que o sistema enfrentava um contexto de subfinanciamento crônico antes mesmo da emergência sanitária. Os autores observaram que a ampliação dos recursos durante a pandemia ocorreu por meio de medidas extraordinárias, não representando necessariamente uma solução permanente.
+Quanto à infraestrutura, auditorias do Tribunal de Contas da União identificaram insuficiência de leitos, superlotação de emergências, carência de profissionais, falta de medicamentos e insumos e equipamentos ausentes ou inadequados em hospitais públicos de diferentes estados (BRASIL, 2014). Segundo o Conselho Federal de Medicina, o Brasil perdeu cerca de 25 mil leitos de internação do SUS entre 2010 e 2023 (CFM, [2024?]), e levantamento divulgado pela Agência Brasil apontou que 93\% dos municípios de fronteira não possuíam leito de UTI (AGÊNCIA BRASIL, 2018). Oliveira et al. (2019) também identificaram problemas recorrentes na estrutura física de unidades de emergência de hospitais públicos.
 
-Esses estudos permitem observar que a precariedade hospitalar não pode ser atribuída exclusivamente a problemas administrativos de unidades individuais. A disponibilidade de recursos influencia diretamente a manutenção da infraestrutura, a aquisição de equipamentos e medicamentos, a contratação de profissionais e a expansão dos serviços.
+A distribuição dos profissionais é desigual. Póvoa e Andrade (2006) identificaram concentração de médicos nas regiões mais desenvolvidas, dados do IBGE mostram diferenças expressivas na quantidade de médicos e enfermeiros por habitante entre os estados (IBGE, 2020), e Russo et al. (2021) verificaram que o Programa Mais Médicos reduziu essa desigualdade na atenção básica, sem eliminá-la.
 
-\subsection{Infraestrutura hospitalar e superlotação}
+Por fim, a atenção primária, organizada prioritariamente pela Estratégia Saúde da Família (BRASIL, 2025), influencia a demanda que chega aos hospitais, e sua oferta também varia entre as regiões (ALBUQUERQUE et al., 2017).
 
-Auditorias realizadas pelo Tribunal de Contas da União identificaram problemas relacionados à insuficiência de leitos, superlotação de emergências, carência de profissionais, falta de medicamentos e insumos, equipamentos ausentes ou inadequados e problemas na estrutura física de hospitais públicos (BRASIL, 2014). O relatório demonstra que esses problemas possuem caráter sistêmico e aparecem em diferentes localidades do país.
-
-A oferta de leitos também diminuiu. Segundo levantamento do Conselho Federal de Medicina, o Brasil perdeu cerca de 25 mil leitos de internação do SUS entre 2010 e 2023 (CFM, [2024?]). Em áreas mais afastadas a situação é mais grave: levantamento divulgado pela Agência Brasil apontou que 93\% dos municípios de fronteira não possuíam leito de UTI (AGÊNCIA BRASIL, 2018).
-
-Estudos acadêmicos também abordam a estrutura física dos serviços de urgência e emergência. Oliveira et al. (2019), ao analisarem unidades de emergência de hospitais públicos da Grande Florianópolis, identificaram problemas recorrentes relacionados à configuração dos espaços e ao funcionamento dessas unidades. A literatura indica, portanto, que a superlotação não deve ser compreendida apenas como consequência de um número elevado de pacientes, mas também da insuficiência de leitos, da organização dos serviços e da disponibilidade de profissionais e de recursos.
-
-\subsection{Distribuição dos profissionais de saúde}
-
-A distribuição dos profissionais não ocorre de maneira uniforme pelo território brasileiro. Póvoa e Andrade (2006) analisaram a distribuição geográfica dos médicos no Brasil e identificaram concentração nas regiões mais desenvolvidas, influenciada por fatores relacionados à formação profissional e às oportunidades existentes em determinados estados.
-
-Dados do IBGE também evidenciam diferenças expressivas na quantidade de médicos e enfermeiros disponíveis por habitante entre as unidades federativas (IBGE, 2020). Russo et al. (2021) verificaram que o Programa Mais Médicos contribuiu para tornar a distribuição de médicos da atenção básica mais igualitária entre 2012 e 2016, embora tenham permanecido diferenças relevantes entre estados e municípios.
-
-Esses resultados sugerem que aumentar o número absoluto de profissionais não é suficiente. É necessário considerar também sua distribuição territorial e as condições de trabalho oferecidas, o que inclui a disponibilidade de materiais e medicamentos para o atendimento.
-
-\subsection{Atenção primária e desigualdades regionais}
-
-A atenção primária representa uma das principais portas de entrada da população no SUS. Segundo o Ministério da Saúde, a Estratégia Saúde da Família constitui o modelo prioritário para a organização da Atenção Primária à Saúde (BRASIL, 2025). Vieira et al. (2019) defendem a priorização da atenção básica como parte da organização da rede, pois um sistema com maior capacidade de prevenção e acompanhamento pode evitar que determinadas demandas cheguem desnecessariamente aos serviços de urgência.
-
-Entretanto, a oferta de serviços apresenta diferenças entre as regiões brasileiras. Albuquerque et al. (2017), ao analisarem as desigualdades regionais na saúde entre 2000 e 2016, observaram avanços nas condições socioeconômicas e na oferta de serviços, mas também limitações persistentes para a universalização do sistema.
+Em conjunto, esses estudos mostram que a precariedade hospitalar é multifatorial e depende, em grande parte, de financiamento e de políticas públicas. Nenhuma ferramenta isolada resolve o problema. Há, porém, dimensões em que a organização da informação traz ganho direto, e a gestão de medicamentos é uma delas.
 
 \subsection{Abastecimento e gestão de medicamentos}
 
-A falta de medicamentos aparece nos diagnósticos oficiais como um dos componentes da precariedade hospitalar (BRASIL, 2014) e continua presente em levantamentos recentes. No primeiro trimestre de 2026 foram registrados 33.104 relatos de irregularidade no fornecimento de medicamentos, envolvendo 58 medicamentos diferentes (BIORED BRASIL, 2026).
+A falta de medicamentos aparece nos diagnósticos oficiais como um dos componentes da precariedade hospitalar (BRASIL, 2014) e continua presente em levantamentos recentes: no primeiro trimestre de 2026 foram registrados 33.104 relatos de irregularidade no fornecimento, envolvendo 58 medicamentos diferentes (BIORED BRASIL, 2026).
 
-Parte desse problema depende de orçamento, compra e distribuição, que estão fora do alcance de uma unidade hospitalar. Outra parte, porém, está ligada ao controle interno do estoque: saber quanto há de cada medicamento, em quais lotes, com qual validade, qual é o ritmo de consumo e para qual setor cada unidade foi destinada. Sem esse controle, medicamentos podem vencer sem serem usados e a falta só é percebida quando o produto já acabou.
+O desabastecimento tem causas em dois níveis. O primeiro é externo à unidade hospitalar: orçamento, processos de compra e distribuição. O segundo é interno e diz respeito ao controle do próprio estoque. Nesse nível, quatro informações são decisivas:
 
-É nesse ponto que um sistema de informação pode contribuir. Ao registrar cada lote e cada movimentação, o sistema permite emitir alertas antes do vencimento, avisar quando o estoque fica abaixo do mínimo, estimar a data de esgotamento a partir do consumo e manter a rastreabilidade de cada lote.
+\begin{itemize}
+  \item \textbf{Quantidade e nível mínimo:} saber quanto há de cada medicamento e quando o estoque fica abaixo do mínimo aceitável;
+  \item \textbf{Lote e validade:} um mesmo medicamento chega em lotes com datas de validade diferentes; sem o controle por lote, unidades vencem sem serem usadas;
+  \item \textbf{Ritmo de consumo:} a quantidade em estoque só tem significado quando comparada ao consumo; cem unidades podem durar meses ou poucos dias;
+  \item \textbf{Destino:} registrar para qual setor foi cada unidade permite rastrear um lote e prestar contas do que foi consumido.
+\end{itemize}
 
-\subsection{Síntese}
+Quando essas informações ficam dispersas em anotações e planilhas, a falta só é percebida quando o medicamento já acabou, e o vencimento, quando o lote já está perdido. Um sistema de informação atua exatamente nesse ponto: ao registrar cada lote e cada movimentação, torna possível avisar antes do vencimento, alertar quando o estoque fica abaixo do mínimo, estimar a data de esgotamento a partir do consumo e manter o histórico de cada lote.
 
-A análise dos estudos selecionados demonstra que a precariedade dos hospitais públicos brasileiros possui caráter multifatorial. Há convergência quanto à influência de fatores estruturais, como financiamento insuficiente, infraestrutura inadequada, distribuição desigual de profissionais e diferenças regionais na oferta de serviços. Não existe uma única causa responsável pelo problema, e nenhuma ferramenta isolada é capaz de resolvê-lo. A gestão de medicamentos, contudo, é uma dimensão em que a organização da informação traz ganho direto, e por isso foi escolhida como foco do software desenvolvido neste trabalho.
+Essas quatro necessidades orientaram os requisitos do SIGEM, descritos na seção seguinte.
 
 \section{Desenvolvimento do software}
 
 Esta seção descreve o SIGEM, sistema desenvolvido como parte prática deste trabalho. O sistema está publicado em \url{https://sigem-frontend.onrender.com} e seu código-fonte está disponível em \url{https://github.com/PHLoures/sigem-artigo}.
 
+\subsection{Requisitos do sistema}
+
+A partir das necessidades identificadas no referencial teórico, foram definidos os requisitos funcionais do sistema, isto é, o que ele deve fazer:
+
+\begin{enumerate}[label=RF\arabic*.,leftmargin=1.6cm]
+  \item Cadastrar, editar e excluir medicamentos, com estoque mínimo para cada um;
+  \item Cadastrar lotes de cada medicamento, com quantidade e data de validade;
+  \item Registrar entradas e saídas de estoque por lote, informando o setor de destino e o motivo;
+  \item Impedir a saída de uma quantidade maior que a disponível no lote;
+  \item Alertar sobre medicamentos com estoque abaixo do mínimo, lotes próximos do vencimento e lotes vencidos;
+  \item Estimar em quantos dias cada medicamento se esgota, com base no consumo recente;
+  \item Simular cenários de aumento de consumo e de reposição de estoque;
+  \item Apresentar o histórico completo de cada lote (rastreabilidade);
+  \item Gerar relatórios de movimentações, com filtros e exportação;
+  \item Controlar o acesso por contas de usuário com perfis e permissões diferentes.
+\end{enumerate}
+
+Também foram definidos requisitos não funcionais, que tratam de como o sistema deve se comportar:
+
+\begin{enumerate}[label=RNF\arabic*.,leftmargin=1.9cm]
+  \item Funcionar no navegador, sem necessidade de instalação, inclusive em telas de celular;
+  \item Manter os dados centralizados em um banco de dados, acessível a todos os usuários autorizados;
+  \item Proteger as senhas, que não podem ser armazenadas em texto legível;
+  \item Conferir as permissões no servidor, e não apenas na interface.
+\end{enumerate}
+
 \subsection{Arquitetura e tecnologias}
 
-O SIGEM é dividido em três partes. A interface, que é a parte vista pelo usuário, foi construída com HTML, CSS e JavaScript, sem o uso de \textit{frameworks} (MDN WEB DOCS, 2026). O servidor foi construído em Node.js com a biblioteca Express e é responsável por receber os pedidos da interface, conferir o acesso e as permissões e consultar o banco de dados (NODE.JS, 2026; EXPRESS, 2026). Os dados são armazenados em um banco de dados relacional PostgreSQL (POSTGRESQL, 2026). Os gráficos são desenhados com a biblioteca Chart.js (CHART.JS, 2026). As três partes foram publicadas na internet por meio do serviço de hospedagem Render.
+O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetura}. A interface, que é a parte vista pelo usuário, foi construída com HTML, CSS e JavaScript, sem o uso de \textit{frameworks} (MDN WEB DOCS, 2026). O servidor foi construído em Node.js com a biblioteca Express e é responsável por receber os pedidos da interface, conferir o acesso e as permissões e consultar o banco de dados (NODE.JS, 2026; EXPRESS, 2026). Os dados são armazenados em um banco de dados relacional PostgreSQL (POSTGRESQL, 2026). Os gráficos são desenhados com a biblioteca Chart.js (CHART.JS, 2026). As três partes foram publicadas na internet por meio do serviço de hospedagem Render.
+
+\begin{figure}[H]
+  \centering
+  \caption{Arquitetura do SIGEM}
+  \label{fig:arquitetura}
+  \begin{tikzpicture}[
+      caixa/.style={draw, rounded corners=4pt, thick, align=center, minimum width=3.8cm, minimum height=1.9cm, font=\small, fill=black!4},
+      seta/.style={-{Stealth[length=3mm]}, thick}]
+    \node[caixa] (int) {\textbf{Interface}\\HTML, CSS e JavaScript\\(navegador do usuário)};
+    \node[caixa, right=1.9cm of int] (srv) {\textbf{Servidor}\\Node.js e Express\\(acesso e regras)};
+    \node[caixa, right=1.9cm of srv] (bd) {\textbf{Banco de dados}\\PostgreSQL\\(estoque e contas)};
+    \draw[seta] ([yshift=3mm]int.east) -- node[above, font=\scriptsize]{pedidos} ([yshift=3mm]srv.west);
+    \draw[seta] ([yshift=-3mm]srv.west) -- node[below, font=\scriptsize]{respostas} ([yshift=-3mm]int.east);
+    \draw[seta] ([yshift=3mm]srv.east) -- node[above, font=\scriptsize]{consultas} ([yshift=3mm]bd.west);
+    \draw[seta] ([yshift=-3mm]bd.west) -- node[below, font=\scriptsize]{dados} ([yshift=-3mm]srv.east);
+  \end{tikzpicture}
+  \par\smallskip
+  {\small Fonte: elaborado pelo autor (2026).}
+\end{figure}
 
 \subsection{Banco de dados}
 
-O banco de dados possui quatro tabelas principais. A tabela de \textbf{medicamentos} guarda nome, princípio ativo, dosagem, forma farmacêutica, fabricante e estoque mínimo. A tabela de \textbf{lotes} guarda, para cada medicamento, o número do lote, a quantidade e a data de validade. A tabela de \textbf{setores} lista os setores do hospital. A tabela de \textbf{movimentações} registra cada entrada e cada saída, com lote, quantidade, setor de destino, motivo e data. Duas outras tabelas, de \textbf{usuários} e de \textbf{sessões}, dão suporte ao controle de acesso.
+O banco de dados possui quatro tabelas principais, representadas na Figura~\ref{fig:tabelas}. A tabela de \textbf{medicamentos} guarda nome, princípio ativo, dosagem, forma farmacêutica, fabricante e estoque mínimo. A tabela de \textbf{lotes} guarda, para cada medicamento, o número do lote, a quantidade e a data de validade. A tabela de \textbf{setores} lista os setores do hospital. A tabela de \textbf{movimentações} registra cada entrada e cada saída, com lote, quantidade, setor de destino, motivo e data. Duas outras tabelas, de \textbf{usuários} e de \textbf{sessões}, dão suporte ao controle de acesso.
+
+\begin{figure}[H]
+  \centering
+  \caption{Tabelas do banco de dados e seus relacionamentos}
+  \label{fig:tabelas}
+  \begin{tikzpicture}[
+      tab/.style={draw, rounded corners=3pt, thick, align=left, font=\scriptsize, fill=black!4, inner sep=5pt, text width=3.5cm},
+      rel/.style={-{Stealth[length=2.5mm]}, thick}]
+    \node[tab] (med) {\textbf{medicamentos}\\nome, princípio ativo,\\dosagem, forma, fabricante,\\estoque mínimo};
+    \node[tab, right=1.15cm of med] (lot) {\textbf{lotes}\\medicamento, número do lote,\\quantidade, data de validade};
+    \node[tab, right=1.15cm of lot] (mov) {\textbf{movimentações}\\medicamento, lote, setor,\\tipo, quantidade, motivo, data};
+    \node[tab, below=1.1cm of mov] (set) {\textbf{setores}\\nome};
+    \node[tab, below=1.1cm of med] (usu) {\textbf{usuários}\\nome, e-mail, \textit{hash} da senha,\\perfil};
+    \node[tab, below=1.1cm of lot] (ses) {\textbf{sessões}\\usuário, código de acesso,\\validade};
+    \draw[rel] (med) -- node[above, font=\tiny]{1 : N} (lot);
+    \draw[rel] (lot) -- node[above, font=\tiny]{1 : N} (mov);
+    \draw[rel] (set) -- node[right, font=\tiny]{1 : N} (mov);
+    \draw[rel] (usu) -- node[above, font=\tiny]{1 : N} (ses);
+  \end{tikzpicture}
+  \par\smallskip
+  {\small Fonte: elaborado pelo autor (2026).}
+\end{figure}
 
 O controle por lote é o que permite acompanhar a validade: um mesmo medicamento pode ter vários lotes, e cada um vence em uma data diferente. O registro de uma saída é feito dentro de uma transação do banco de dados, de modo que a quantidade do lote e o histórico sejam atualizados juntos; se a quantidade pedida for maior que a disponível no lote, a operação é recusada.
 
@@ -270,7 +326,7 @@ O SIGEM possui limitações decorrentes do escopo acadêmico do projeto. Os test
 
 A pesquisa bibliográfica realizada demonstra que a precariedade dos hospitais públicos brasileiros é um problema complexo e multifatorial, que envolve financiamento, infraestrutura, disponibilidade e distribuição de profissionais, organização da atenção primária e desigualdades regionais. Não se trata do resultado de falhas administrativas isoladas, mas de problemas que envolvem a organização e o financiamento de toda a rede de atenção.
 
-Dentro desse quadro, o trabalho escolheu uma frente específica, a gestão de medicamentos, e desenvolveu o SIGEM como proposta de apoio. Os objetivos estabelecidos foram atendidos: os problemas de gestão de medicamentos foram identificados a partir da literatura e de levantamentos recentes; os requisitos do sistema foram definidos; o sistema foi construído com cadastro, controle de lotes e de validade, movimentação por setor e alertas automáticos; o modelo de previsão de esgotamento foi aplicado; e o funcionamento foi verificado por testes funcionais.
+Dentro desse quadro, o trabalho escolheu uma frente específica, a gestão de medicamentos, e desenvolveu o SIGEM como proposta de apoio. O sistema reúne em um só lugar as quatro informações que o controle de estoque exige: quantidade, validade por lote, ritmo de consumo e destino de cada unidade. Os objetivos estabelecidos foram atendidos: os problemas de gestão de medicamentos foram identificados a partir da literatura e de levantamentos recentes; os requisitos do sistema foram definidos; o sistema foi construído com cadastro, controle de lotes e de validade, movimentação por setor e alertas automáticos; o modelo de previsão de esgotamento foi aplicado; e o funcionamento foi verificado por testes funcionais.
 
 O sistema não resolve a precariedade hospitalar, que depende de investimento e de políticas públicas. O que ele mostra é que informação organizada permite agir antes que o medicamento vença ou falte, e que essa parte do problema pode ser enfrentada com tecnologia de baixo custo.
 
