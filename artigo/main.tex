@@ -14,9 +14,10 @@
 \usepackage{enumitem}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{xltabular}
 \usepackage{amsmath}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes.multipart,shapes.geometric,fit}
 \usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 
@@ -25,6 +26,7 @@
 \usepackage{array}
 
 \onehalfspacing
+\setlength{\emergencystretch}{2em}
 \setlength{\parindent}{1.25cm}
 \captionsetup{font=small,labelfont=bf,labelsep=endash,justification=centering}
 \setlist{nosep,leftmargin=1.5cm}
@@ -54,6 +56,21 @@
   \end{figure}%
 }
 
+% Ator (boneco) do diagrama de casos de uso.
+% Uso, dentro de um tikzpicture: \ator{(x,y)}{nome}{Rotulo}{lado}
+% lado = 1 (linhas saem pela direita) ou -1 (linhas saem pela esquerda)
+\newcommand{\ator}[4]{%
+  \begin{scope}[shift={#1}]
+    \draw[thick] (0,0.62) circle (0.17);
+    \draw[thick] (0,0.45) -- (0,-0.12);
+    \draw[thick] (-0.3,0.25) -- (0.3,0.25);
+    \draw[thick] (0,-0.12) -- (-0.22,-0.52);
+    \draw[thick] (0,-0.12) -- (0.22,-0.52);
+    \node[font=\small, below, align=center] at (0,-0.55) {#3};
+    \coordinate (#2) at ({#4*0.34},0.25);
+  \end{scope}%
+}
+
 \begin{document}
 \thispagestyle{empty}
 
@@ -71,7 +88,7 @@
 \noindent\textbf{RESUMO}
 
 \smallskip
-\noindent A falta de medicamentos e de insumos é um dos problemas recorrentes nos hospitais públicos brasileiros, ao lado da superlotação e da escassez de leitos e de profissionais. Este artigo apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos em ambiente hospitalar. O sistema controla os medicamentos por lote e data de validade, registra entradas e saídas por setor, emite alertas de estoque baixo e de vencimento, estima em quantos dias cada medicamento se esgota, permite simular cenários de consumo e reposição, mantém a rastreabilidade de cada lote e gera relatórios. O acesso é feito por contas com três perfis de usuário, com permissões diferentes. O SIGEM foi construído com HTML, CSS e JavaScript, servidor em Node.js e banco de dados PostgreSQL, a partir de requisitos levantados em pesquisa bibliográfica e documental sobre a precariedade hospitalar, e foi verificado por meio de testes funcionais com dados fictícios. Os resultados indicam que uma ferramenta simples de controle e previsão pode apoiar a gestão do estoque e antecipar situações de falta e de vencimento, embora não substitua os investimentos estruturais de que a rede pública necessita.
+\noindent A falta de medicamentos e de insumos é um dos problemas recorrentes nos hospitais públicos brasileiros, ao lado da superlotação e da escassez de leitos e de profissionais. Este artigo apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos em ambiente hospitalar. Trata-se de uma pesquisa aplicada, que combinou pesquisa bibliográfica e documental, usada no levantamento dos requisitos, com o desenvolvimento incremental do sistema. O SIGEM controla os medicamentos por lote e data de validade, impede a dispensação de lotes vencidos, registra entradas e saídas por setor, emite alertas de estoque baixo e de vencimento, estima em quantos dias cada medicamento se esgota, permite simular cenários de consumo e reposição, mantém a rastreabilidade de cada lote e gera relatórios. O acesso é feito por contas com três perfis de usuário, cujas permissões são conferidas pelo servidor. O sistema foi construído com HTML, CSS e JavaScript, servidor em Node.js e banco de dados PostgreSQL, e foi verificado por 26 casos de teste funcionais, executados com dados fictícios, todos com o resultado esperado. Os resultados indicam que uma ferramenta simples de controle e previsão pode apoiar a gestão do estoque e antecipar situações de falta e de vencimento, embora não substitua os investimentos estruturais de que a rede pública necessita.
 
 \medskip
 \noindent\textbf{Palavras-chave}: Gestão de Medicamentos. Controle de Estoque. Sistema \textit{Web}. Hospitais Públicos. Saúde Pública.
@@ -81,21 +98,21 @@
 
 \section{Introdução}
 
-Entre os recursos necessários para o funcionamento de um hospital, os medicamentos estão entre os mais sensíveis: a falta de um item pode interromper um tratamento, e um lote vencido representa dinheiro público desperdiçado. Para que isso não aconteça, os responsáveis pelo estoque precisam saber, a qualquer momento, quais medicamentos estão disponíveis, em quais lotes, com qual validade, quais estão próximos do nível mínimo e para qual setor cada unidade foi destinada. Quando esse controle é feito apenas de forma manual, em ambientes com muitos produtos e movimentações frequentes, o processo se torna trabalhoso e sujeito a erros de registro.
+Entre os recursos necessários para o funcionamento de um hospital, os medicamentos estão entre os mais sensíveis: a falta de um item pode interromper um tratamento, e um lote vencido, além de representar dinheiro público desperdiçado, não pode ser usado com segurança. Para que isso não aconteça, os responsáveis pelo estoque precisam saber, a qualquer momento, quais medicamentos estão disponíveis, em quais lotes, com qual validade, quais estão próximos do nível mínimo e para qual setor cada unidade foi destinada. Quando esse controle é feito apenas de forma manual, em ambientes com muitos produtos e movimentações frequentes, o processo se torna trabalhoso e sujeito a erros de registro.
 
-Esse problema faz parte de um quadro maior. Apesar de o SUS ser reconhecido como um dos maiores sistemas públicos de saúde do mundo, parte dos hospitais públicos convive com superlotação, falta de leitos, carência de profissionais e falta de medicamentos e insumos, como registram auditorias do Tribunal de Contas da União (Brasil, 2014). Levantamento recente contabilizou 33.104 relatos de irregularidade no fornecimento de medicamentos apenas no primeiro trimestre de 2026 (Biored Brasil, 2026).
+Esse problema faz parte de um quadro maior. Apesar de o Sistema Único de Saúde (SUS) ser reconhecido como um dos maiores sistemas públicos de saúde do mundo, parte dos hospitais públicos convive com superlotação, falta de leitos, carência de profissionais e falta de medicamentos e insumos, como constatou o Tribunal de Contas da União (TCU) em fiscalização realizada em 116 hospitais públicos de todo o país (Brasil, 2014). O desabastecimento continua atual: apenas no primeiro trimestre de 2026, o Movimento Medicamento no Tempo Certo registrou 33.104 relatos de irregularidades e de desabastecimento de medicamentos no SUS (Torres, 2026).
 
-Diante desse contexto, este trabalho apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos. O sistema reúne o cadastro de medicamentos e lotes, o registro de entradas e saídas, alertas automáticos, uma previsão de esgotamento baseada no consumo, um simulador de cenários, a rastreabilidade de cada lote e relatórios.
+Diante desse contexto, este trabalho apresenta o SIGEM (Sistema de Gestão de Medicamentos Hospitalares), uma aplicação web desenvolvida para apoiar o controle do estoque de medicamentos. O sistema reúne o cadastro de medicamentos e lotes, o registro de entradas e saídas, alertas automáticos, o bloqueio da dispensação de lotes vencidos, uma previsão de esgotamento baseada no consumo, um simulador de cenários, a rastreabilidade de cada lote e relatórios.
 
-O artigo está organizado da seguinte forma: após a justificativa, os objetivos e a metodologia, o referencial teórico situa o problema da precariedade hospitalar e da gestão de medicamentos; em seguida, a seção de desenvolvimento descreve os requisitos, a arquitetura, as telas e os testes do sistema; por fim, são apresentadas as considerações finais.
+O artigo está organizado da seguinte forma: após a justificativa, os objetivos e a metodologia, o referencial teórico situa o problema da precariedade hospitalar e da gestão de medicamentos; em seguida, a seção de desenvolvimento descreve os requisitos, a modelagem, a arquitetura, as telas e os testes do sistema; por fim, são apresentadas as considerações finais.
 
 \section{Justificativa}
 
 O tema da precariedade dos hospitais públicos brasileiros é de grande relevância acadêmica e social, pois a saúde é um direito constitucional que afeta diretamente a qualidade de vida e a segurança da população. Compreender as fragilidades estruturais do SUS contribui tanto para o debate acadêmico sobre financiamento e gestão de políticas públicas quanto para a discussão social sobre o acesso universal à saúde.
 
-Embora existam diferentes causas para esses problemas, a organização e o gerenciamento dos recursos disponíveis também são aspectos relevantes para o funcionamento dos serviços de saúde. No caso dos medicamentos, o problema é concreto: levantamento do Movimento Medicamento no Tempo Certo registrou 33.104 relatos de irregularidade no fornecimento de medicamentos no primeiro trimestre de 2026, envolvendo 58 medicamentos (Biored Brasil, 2026). Um sistema informatizado pode auxiliar nessa atividade ao centralizar as informações, avisar com antecedência sobre vencimentos e níveis baixos de estoque e registrar para qual setor foi cada unidade retirada.
+Embora existam diferentes causas para esses problemas, a organização e o gerenciamento dos recursos disponíveis também são aspectos relevantes para o funcionamento dos serviços de saúde. O levantamento do TCU mostra que a informatização dos hospitais públicos é insuficiente: 11\% dos 116 hospitais visitados não possuíam sistema informatizado, e 87\% dos que possuíam relataram problemas na área de tecnologia da informação, entre eles a inadequação dos sistemas ao atendimento prestado e a dificuldade de utilizá-los. O tribunal concluiu que, na maioria dos hospitais visitados, a tecnologia da informação não oferecia o suporte adequado à prestação dos serviços (Brasil, 2014, p. 204). No caso dos medicamentos, um sistema informatizado simples e acessível pode auxiliar ao centralizar as informações, avisar com antecedência sobre vencimentos e níveis baixos de estoque e registrar para qual setor foi cada unidade retirada.
 
-O desenvolvimento do SIGEM também se justifica academicamente por possibilitar a aplicação prática de conhecimentos da área de Ciência da Computação, especialmente os relacionados ao desenvolvimento web, à modelagem de banco de dados, à segurança de acesso e à criação de interfaces para usuários.
+O desenvolvimento do SIGEM também se justifica academicamente por possibilitar a aplicação prática de conhecimentos da área de Ciência da Computação, especialmente os relacionados à engenharia de requisitos, ao desenvolvimento web, à modelagem de banco de dados, à segurança de acesso, ao teste de software e à criação de interfaces para usuários.
 
 A proposta não pretende solucionar os problemas estruturais dos hospitais públicos brasileiros, que dependem de financiamento e de políticas públicas. O que se busca é desenvolver uma ferramenta que auxilie especificamente no controle de medicamentos, estabelecendo uma relação entre um problema observado na sociedade e uma possível contribuição da tecnologia da informação.
 
@@ -109,7 +126,7 @@ Propor um sistema de gestão de medicamentos hospitalares (SIGEM) como solução
 
 \begin{itemize}
   \item Identificar os principais problemas relacionados à gestão de medicamentos em hospitais públicos brasileiros, a partir de dados e indicadores de precariedade hospitalar;
-  \item Caracterizar os requisitos funcionais necessários para um sistema de controle de estoque, validade e movimentação de medicamentos hospitalares;
+  \item Caracterizar os requisitos funcionais e não funcionais necessários para um sistema de controle de estoque, validade e movimentação de medicamentos hospitalares;
   \item Construir um sistema web (SIGEM) com funcionalidades de cadastro, controle de lotes, movimentação de estoque e alertas automáticos de vencimento;
   \item Aplicar um modelo de previsão de esgotamento de estoque baseado no histórico de consumo, como mecanismo preventivo ao desabastecimento;
   \item Avaliar a viabilidade do sistema proposto como ferramenta de apoio à gestão hospitalar, por meio de testes funcionais.
@@ -117,25 +134,27 @@ Propor um sistema de gestão de medicamentos hospitalares (SIGEM) como solução
 
 \section{Metodologia}
 
-Este trabalho foi desenvolvido em duas etapas complementares.
+Quanto à natureza, este trabalho é uma pesquisa aplicada, pois produz conhecimento voltado à aplicação prática, dirigido à solução de um problema específico (Prodanov; Freitas, 2013, p. 51). Quanto aos objetivos, é exploratória e descritiva: busca reunir informações sobre um problema ainda pouco organizado e descrever suas características (Prodanov; Freitas, 2013, p. 51--52). A abordagem é qualitativa (Prodanov; Freitas, 2013, p. 70), e o trabalho foi desenvolvido em duas etapas complementares.
 
-A primeira etapa caracteriza-se como pesquisa exploratória e descritiva, de abordagem qualitativa, realizada por meio de pesquisa bibliográfica e documental. A escolha se justifica pela natureza do problema, que exige a análise e o cruzamento de dados já produzidos por órgãos oficiais e pela comunidade científica. Foram considerados relatórios do Tribunal de Contas da União (TCU), dados do Instituto Brasileiro de Geografia e Estatística (IBGE), informações do Ministério da Saúde, levantamentos de entidades da área e artigos publicados em periódicos científicos, especialmente os disponíveis na base SciELO. As informações foram organizadas em dois blocos: o quadro geral da precariedade hospitalar e o abastecimento e a gestão de medicamentos. Dessa etapa resultaram os requisitos do sistema.
+A primeira etapa consistiu em pesquisa bibliográfica, feita a partir de material já publicado, como livros e artigos científicos, e em pesquisa documental, baseada em documentos que ainda não haviam recebido tratamento analítico, como relatórios de órgãos públicos (Prodanov; Freitas, 2013, p. 54--55). Foram considerados relatórios do Tribunal de Contas da União (TCU), dados do Instituto Brasileiro de Geografia e Estatística (IBGE), normas e informações do Ministério da Saúde, levantamentos de entidades da área e artigos publicados em periódicos científicos, especialmente os disponíveis na base SciELO. As informações foram organizadas em dois blocos: o quadro geral da precariedade hospitalar e o abastecimento e a gestão de medicamentos. Dessa etapa resultaram os requisitos do sistema.
 
 A segunda etapa consistiu no desenvolvimento do software, seguindo um processo incremental, em que o sistema é construído em versões sucessivas, cada uma acrescentando funcionalidades à anterior (Sommerville, 2011). As etapas foram organizadas da seguinte maneira:
 
 \begin{enumerate}
-  \item Identificação do problema relacionado ao controle de medicamentos e levantamento dos requisitos;
-  \item Modelagem do banco de dados (medicamentos, lotes, setores e movimentações);
+  \item Identificação do problema e levantamento dos requisitos funcionais e não funcionais;
+  \item Elaboração do diagrama de casos de uso e do modelo do banco de dados (diagrama entidade-relacionamento);
   \item Construção do servidor e das rotas de cadastro, consulta e movimentação;
   \item Construção das telas do sistema e do painel de indicadores (\textit{dashboard});
   \item Implementação dos alertas de estoque baixo e de vencimento;
   \item Implementação dos relatórios, da previsão de esgotamento e do simulador de cenários;
   \item Implementação do acesso com conta, senha e perfis de usuário;
   \item Publicação do sistema na internet;
-  \item Realização de testes funcionais das principais funcionalidades.
+  \item Execução de testes funcionais derivados dos requisitos.
 \end{enumerate}
 
-Como limitações do estudo, destacam-se a dependência de dados secundários na etapa bibliográfica e o fato de o sistema ter sido testado com dados fictícios, e não em um hospital em funcionamento.
+Os casos de teste foram derivados da especificação do sistema, em um processo de teste de caixa-preta, no qual se observam apenas as entradas e as saídas, sem considerar o código interno (Sommerville, 2011). Cada requisito funcional recebeu ao menos um caso de teste, com o resultado esperado, assim como os requisitos não funcionais que podem ser verificados dessa forma. Todos os casos foram automatizados, por meio de requisições diretas ao servidor, de consultas ao banco de dados e de um navegador controlado por programa.
+
+Como limitações do estudo, destacam-se a dependência de dados secundários na etapa bibliográfica e o fato de o sistema ter sido testado com dados fictícios, em ambiente local, e não em um hospital em funcionamento.
 
 \section{Referencial teórico}
 
@@ -143,25 +162,27 @@ O referencial está organizado em duas partes. A primeira resume o quadro geral 
 
 \subsection{A precariedade dos hospitais públicos}
 
-O financiamento é um dos elementos centrais para compreender as dificuldades do SUS. Vieira et al. (2019) discutem o subfinanciamento do sistema e os efeitos da Emenda Constitucional n. 95/2016 sobre o orçamento federal da saúde, e Ocké-Reis e Benevides (2022) destacam que o sistema já enfrentava subfinanciamento crônico antes da pandemia de Covid-19. A disponibilidade de recursos influencia diretamente a manutenção da infraestrutura, a contratação de profissionais e a aquisição de equipamentos e medicamentos.
+O financiamento é um dos elementos centrais para compreender as dificuldades do SUS. Funcia (2019) discute o subfinanciamento do sistema e os efeitos negativos da Emenda Constitucional n. 95/2016 sobre o orçamento federal da saúde. Funcia et al. (2022, p. 263) mostram que a pandemia de Covid-19 chegou ao Brasil em um contexto de subfinanciamento crônico do SUS e caracterizam a execução federal dos recursos destinados ao seu enfrentamento como ``reativa e retardatária''. A disponibilidade de recursos influencia diretamente a manutenção da infraestrutura, a contratação de profissionais e a aquisição de equipamentos e medicamentos.
 
-Quanto à infraestrutura, auditorias do Tribunal de Contas da União identificaram insuficiência de leitos, superlotação de emergências, carência de profissionais, falta de medicamentos e insumos e equipamentos ausentes ou inadequados em hospitais públicos de diferentes estados (Brasil, 2014). Segundo o Conselho Federal de Medicina, o Brasil perdeu cerca de 25 mil leitos de internação do SUS entre 2010 e 2023 (CFM, [2024?]), e levantamento divulgado pela Agência Brasil apontou que 93\% dos municípios de fronteira não possuíam leito de UTI (Agência Brasil, 2018). Oliveira et al. (2019) também identificaram problemas recorrentes na estrutura física de unidades de emergência de hospitais públicos.
+Quanto à infraestrutura, a fiscalização do Tribunal de Contas da União em 116 hospitais federais, estaduais e municipais de todas as unidades da federação identificou superlotação das emergências, insuficiência de leitos, carência de profissionais, falta de medicamentos e insumos, problemas com equipamentos e inadequação da estrutura física (Brasil, 2014). Segundo o Conselho Federal de Medicina [CFM] (2024), o Brasil perdeu cerca de 25 mil leitos de internação do SUS entre 2010 e 2023, e levantamento divulgado pela Agência Brasil (2018) apontou que 93\% dos municípios de fronteira não possuíam leito de Unidade de Terapia Intensiva (UTI). Cavalcanti et al. (2019), ao avaliarem seis unidades de urgência e emergência de hospitais públicos da Grande Florianópolis, identificaram problemas recorrentes, como o subdimensionamento de ambientes e a inadequação do leiaute às atividades realizadas.
 
-A distribuição dos profissionais é desigual. Póvoa e Andrade (2006) identificaram concentração de médicos nas regiões mais desenvolvidas, dados do IBGE mostram diferenças expressivas na quantidade de médicos e enfermeiros por habitante entre os estados (IBGE, 2020), e Russo et al. (2021) verificaram que o Programa Mais Médicos reduziu essa desigualdade na atenção básica, sem eliminá-la.
+A distribuição dos profissionais é desigual. Póvoa e Andrade (2006) identificaram concentração de médicos nas regiões mais desenvolvidas, e dados do IBGE mostram diferenças expressivas na quantidade de médicos e enfermeiros por habitante entre os estados (IBGE, 2020). Russo (2021) verificou que, entre 2012 e 2016, o Programa Mais Médicos tornou mais igualitária a distribuição dos médicos da atenção básica, com redução de 11\% no coeficiente de Gini, sem, contudo, eliminar as diferenças entre os estados.
 
-Por fim, a atenção primária, organizada prioritariamente pela Estratégia Saúde da Família (Brasil, 2025), influencia a demanda que chega aos hospitais, e sua oferta também varia entre as regiões (Albuquerque et al., 2017).
+Por fim, a atenção primária, organizada prioritariamente pela Estratégia Saúde da Família (Brasil, 2025), influencia a demanda que chega aos hospitais, e Funcia (2019) defende priorizá-la como ordenadora da rede de atenção à saúde. Sua oferta, porém, também varia entre as regiões do país (Albuquerque et al., 2017).
 
 Em conjunto, esses estudos mostram que a precariedade hospitalar é multifatorial e depende, em grande parte, de financiamento e de políticas públicas. Nenhuma ferramenta isolada resolve o problema. Há, porém, dimensões em que a organização da informação traz ganho direto, e a gestão de medicamentos é uma delas.
 
 \subsection{Abastecimento e gestão de medicamentos}
 
-A falta de medicamentos aparece nos diagnósticos oficiais como um dos componentes da precariedade hospitalar (Brasil, 2014) e continua presente em levantamentos recentes: no primeiro trimestre de 2026 foram registrados 33.104 relatos de irregularidade no fornecimento, envolvendo 58 medicamentos diferentes (Biored Brasil, 2026).
+A falta de medicamentos aparece nos diagnósticos oficiais como um dos componentes da precariedade hospitalar. Na fiscalização do TCU, apenas 26 dos 116 hospitais visitados afirmaram que a falta de medicamentos e insumos nunca restringia a realização de procedimentos; nos outros 90 (78\%), essa restrição ocorria sempre, muitas vezes ou poucas vezes (Brasil, 2014, p. 100). O problema continua presente em levantamentos recentes: no primeiro trimestre de 2026, foram registrados 33.104 relatos de irregularidades e de desabastecimento, envolvendo 58 componentes da assistência farmacêutica (Torres, 2026).
+
+Para o TCU, o controle de medicamentos e insumos deve se apoiar em ``rotinas e sistemas dinâmicos e interconectados'' (Brasil, 2014, p. 100), capazes de acompanhar continuamente as aquisições, o estoque, a distribuição e o consumo; falhas nessas rotinas geram risco de desabastecimento, restringem procedimentos e colocam em risco a vida dos pacientes. No plano normativo, a Portaria GM/MS n. 4.283/2010, que estabelece as diretrizes para os serviços de farmácia nos hospitais, define como objetivos da gestão da farmácia hospitalar garantir o abastecimento, a dispensação, o acesso, o controle, a rastreabilidade e o uso racional de medicamentos, e recomenda o acompanhamento dessas atividades por meio de indicadores de gestão e logísticos (Brasil, 2010).
 
 O desabastecimento tem causas em dois níveis. O primeiro é externo à unidade hospitalar: orçamento, processos de compra e distribuição. O segundo é interno e diz respeito ao controle do próprio estoque. Nesse nível, quatro informações são decisivas:
 
 \begin{itemize}
   \item \textbf{Quantidade e nível mínimo:} saber quanto há de cada medicamento e quando o estoque fica abaixo do mínimo aceitável;
-  \item \textbf{Lote e validade:} um mesmo medicamento chega em lotes com datas de validade diferentes; sem o controle por lote, unidades vencem sem serem usadas;
+  \item \textbf{Lote e validade:} um mesmo medicamento chega em lotes com datas de validade diferentes; sem o controle por lote, unidades vencem sem serem usadas, e unidades vencidas podem acabar sendo dispensadas;
   \item \textbf{Ritmo de consumo:} a quantidade em estoque só tem significado quando comparada ao consumo; cem unidades podem durar meses ou poucos dias;
   \item \textbf{Destino:} registrar para qual setor foi cada unidade permite rastrear um lote e prestar contas do que foi consumido.
 \end{itemize}
@@ -172,11 +193,11 @@ Essas quatro necessidades orientaram os requisitos do SIGEM, descritos na seçã
 
 \section{Desenvolvimento do software}
 
-Esta seção descreve o SIGEM, sistema desenvolvido como parte prática deste trabalho. O sistema está publicado em \url{https://sigem-frontend.onrender.com} e seu código-fonte está disponível em \url{https://github.com/PHLoures/sigem-artigo}.
+Esta seção descreve o SIGEM, sistema desenvolvido como parte prática deste trabalho. O sistema está publicado em \url{https://sigem-frontend.onrender.com} e seu código-fonte está disponível em \url{https://github.com/PHLoures/sigem-artigo}. As telas apresentadas foram capturadas do sistema em funcionamento, com dados fictícios.
 
 \subsection{Requisitos do sistema}
 
-A partir das necessidades identificadas no referencial teórico, foram definidos os requisitos do sistema. Os requisitos funcionais, que descrevem o que o sistema deve fazer, são apresentados na Tabela~\ref{tb:rf}. Os requisitos não funcionais, que tratam de como o sistema deve se comportar, são apresentados na Tabela~\ref{tb:rnf}.
+A partir das necessidades identificadas no referencial teórico, foram definidos os requisitos do sistema. Os requisitos funcionais descrevem os serviços que o sistema deve oferecer, e os não funcionais, as restrições e qualidades com que esses serviços devem ser prestados (Sommerville, 2011). Os requisitos funcionais são apresentados na Tabela~\ref{tb:rf}, e os não funcionais, na Tabela~\ref{tb:rnf}.
 
 \begin{table}[H]
   \centering
@@ -197,6 +218,7 @@ A partir das necessidades identificadas no referencial teórico, foram definidos
     RF08 & Apresentar o histórico completo de cada lote (rastreabilidade) \\ \hline
     RF09 & Gerar relatórios de movimentações, com filtros e exportação \\ \hline
     RF10 & Controlar o acesso por contas de usuário com perfis e permissões diferentes \\ \hline
+    RF11 & Impedir a saída (dispensação) de lotes vencidos \\ \hline
   \end{tabularx}
   \par\smallskip
   {\small Fonte: Autoria própria (2026).}
@@ -215,14 +237,45 @@ A partir das necessidades identificadas no referencial teórico, foram definidos
     RNF02 & Manter os dados centralizados em um banco de dados, acessível aos usuários autorizados \\ \hline
     RNF03 & Proteger as senhas, que não podem ser armazenadas em texto legível \\ \hline
     RNF04 & Conferir as permissões no servidor, e não apenas na interface \\ \hline
+    RNF05 & Impedir a execução de código malicioso inserido nos campos de texto \\ \hline
   \end{tabularx}
   \par\smallskip
   {\small Fonte: Autoria própria (2026).}
 \end{table}
 
+As quatro necessidades identificadas no referencial teórico estão cobertas pelos requisitos: quantidade e nível mínimo (RF01 e RF05), lote e validade (RF02, RF05 e RF11), ritmo de consumo (RF06 e RF07) e destino de cada unidade (RF03 e RF08).
+
+A Figura~\ref{fig:casos} apresenta o diagrama de casos de uso do SIGEM, que mostra, do ponto de vista de cada perfil de usuário, quais funcionalidades ele pode utilizar (Sommerville, 2011). O farmacêutico tem acesso a todas as funcionalidades; o enfermeiro registra apenas saídas, além de consultar o estoque; e o gestor, assim como o visitante, apenas consulta as informações e gera relatórios.
+
+\begin{figure}[H]
+  \centering
+  \caption{Diagrama de casos de uso do SIGEM}
+  \label{fig:casos}
+  \begin{tikzpicture}[
+      caso/.style={ellipse, draw, thick, fill=black!4, minimum width=6cm, minimum height=1.3cm, font=\small, align=center, inner sep=0pt},
+      lig/.style={thin}]
+    \node[caso] (c1) at (0,0)    {Cadastrar medicamentos\\e lotes};
+    \node[caso] (c2) at (0,-1.6) {Registrar entrada};
+    \node[caso] (c3) at (0,-3.2) {Registrar saída};
+    \node[caso] (c4) at (0,-4.8) {Consultar painel, alertas,\\previsão e simulador};
+    \node[caso] (c5) at (0,-6.4) {Consultar estoque e\\histórico dos lotes};
+    \node[caso] (c6) at (0,-8.0) {Gerar relatórios};
+    \node[draw, thick, rounded corners=4pt, fit=(c1)(c6), inner sep=8pt,
+          label={[font=\small\bfseries]above:SIGEM}] {};
+    \ator{(-6.2,-4.3)}{farm}{Farmacêutico}{1}
+    \ator{(6.2,-2.7)}{enf}{Enfermeiro}{-1}
+    \ator{(6.2,-7.1)}{gest}{Gestor ou\\visitante}{-1}
+    \foreach \caso in {c1,c2,c3,c4,c5,c6} \draw[lig] (farm) -- (\caso.west);
+    \foreach \caso in {c3,c4,c5} \draw[lig] (enf) -- (\caso.east);
+    \foreach \caso in {c4,c5,c6} \draw[lig] (gest) -- (\caso.east);
+  \end{tikzpicture}
+  \par\smallskip
+  {\small Fonte: Autoria própria (2026).}
+\end{figure}
+
 \subsection{Arquitetura e tecnologias}
 
-O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetura}. A interface, que é a parte vista pelo usuário, foi construída com HTML, CSS e JavaScript, sem o uso de \textit{frameworks} (MDN Web Docs, 2026). O servidor foi construído em Node.js com a biblioteca Express e é responsável por receber os pedidos da interface, conferir o acesso e as permissões e consultar o banco de dados (Node.js, 2026; Express, 2026). Os dados são armazenados em um banco de dados relacional PostgreSQL (PostgreSQL, 2026). Os gráficos são desenhados com a biblioteca Chart.js (Chart.js, 2026). As três partes foram publicadas na internet por meio do serviço de hospedagem Render.
+O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetura}. A interface, que é a parte vista pelo usuário, foi construída com HTML, CSS e JavaScript, sem o uso de \textit{frameworks} (MDN Web Docs, 2026). O servidor foi construído em Node.js com a biblioteca Express e é responsável por receber os pedidos da interface, conferir o acesso e as permissões e consultar o banco de dados (Node.js, 2026; Express, 2026). Os dados são armazenados em um banco de dados relacional PostgreSQL (PostgreSQL, 2026). Os gráficos são desenhados com a biblioteca Chart.js (Chart.js, 2026). As três partes foram publicadas na internet por meio do serviço de hospedagem Render (Render, 2026).
 
 \begin{figure}[H]
   \centering
@@ -245,59 +298,64 @@ O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetur
 
 \subsection{Banco de dados}
 
-O banco de dados possui quatro tabelas principais, representadas na Figura~\ref{fig:tabelas}. A tabela de \textbf{medicamentos} guarda nome, princípio ativo, dosagem, forma farmacêutica, fabricante e estoque mínimo. A tabela de \textbf{lotes} guarda, para cada medicamento, o número do lote, a quantidade e a data de validade. A tabela de \textbf{setores} lista os setores do hospital. A tabela de \textbf{movimentações} registra cada entrada e cada saída, com lote, quantidade, setor de destino, motivo e data. Duas outras tabelas, de \textbf{usuários} e de \textbf{sessões}, dão suporte ao controle de acesso.
+Para representar a estrutura do banco de dados, foi elaborado um Diagrama Entidade-Relacionamento (DER), modelo proposto por Chen (1976) para descrever os dados de uma aplicação e as relações entre eles. O DER do SIGEM é apresentado na Figura~\ref{fig:der}. A tabela de \textbf{medicamentos} guarda nome, princípio ativo, dosagem, forma farmacêutica, fabricante e estoque mínimo. A tabela de \textbf{lotes} guarda, para cada medicamento, o número do lote, a quantidade e a data de validade. A tabela de \textbf{setores} lista os setores do hospital. A tabela de \textbf{movimentações} registra cada entrada e cada saída, com lote, quantidade, setor de destino, motivo e data. As tabelas de \textbf{usuários} e de \textbf{sessões} dão suporte ao controle de acesso.
 
 \begin{figure}[H]
   \centering
-  \caption{Tabelas do banco de dados e seus relacionamentos}
-  \label{fig:tabelas}
+  \caption{Diagrama Entidade-Relacionamento (DER) do SIGEM}
+  \label{fig:der}
   \begin{tikzpicture}[
-      tab/.style={draw, rounded corners=3pt, thick, align=left, font=\scriptsize, fill=black!4, inner sep=5pt, text width=3.5cm},
-      rel/.style={-{Stealth[length=2.5mm]}, thick}]
-    \node[tab] (med) {\textbf{medicamentos}\\nome, princípio ativo,\\dosagem, forma, fabricante,\\estoque mínimo};
-    \node[tab, right=1.15cm of med] (lot) {\textbf{lotes}\\medicamento, número do lote,\\quantidade, data de validade};
-    \node[tab, right=1.15cm of lot] (mov) {\textbf{movimentações}\\medicamento, lote, setor,\\tipo, quantidade, motivo, data};
-    \node[tab, below=1.1cm of mov] (set) {\textbf{setores}\\nome};
-    \node[tab, below=1.1cm of med] (usu) {\textbf{usuários}\\nome, e-mail, \textit{hash} da senha,\\perfil};
-    \node[tab, below=1.1cm of lot] (ses) {\textbf{sessões}\\usuário, código de acesso,\\validade};
-    \draw[rel] (med) -- node[above, font=\tiny]{1 : N} (lot);
-    \draw[rel] (lot) -- node[above, font=\tiny]{1 : N} (mov);
-    \draw[rel] (set) -- node[right, font=\tiny]{1 : N} (mov);
-    \draw[rel] (usu) -- node[above, font=\tiny]{1 : N} (ses);
+      ent/.style={rectangle split, rectangle split parts=2, draw, thick, rounded corners=2pt,
+                  rectangle split part fill={black!10,white}, rectangle split part align={center,left},
+                  font=\scriptsize\ttfamily, text width=3.65cm, inner sep=3.5pt, anchor=north},
+      rel/.style={thick},
+      card/.style={font=\scriptsize}]
+    \node[ent] (med) at (0,0) {\textbf{medicamentos}\nodepart{two}id (PK)\\nome\\principio\_ativo\\dosagem\\forma\_farmaceutica\\fabricante\\estoque\_minimo};
+    \node[ent] (lot) at (5.15,0) {\textbf{lotes}\nodepart{two}id (PK)\\medicamento\_id (FK)\\numero\_lote\\quantidade\\data\_validade};
+    \node[ent] (mov) at (10.3,0) {\textbf{movimentacoes}\nodepart{two}id (PK)\\medicamento\_id (FK)\\lote\_id (FK)\\setor\_id (FK)\\tipo\\quantidade\\motivo\\data\_movimentacao};
+    \node[ent] (usu) at (0,-4.55) {\textbf{usuarios}\nodepart{two}id (PK)\\nome\\email\\senha\_hash\\perfil};
+    \node[ent] (ses) at (5.15,-4.55) {\textbf{sessoes}\nodepart{two}id (PK)\\usuario\_id (FK)\\token\_hash\\perfil\\expira\_em};
+    \node[ent] (set) at (10.3,-4.55) {\textbf{setores}\nodepart{two}id (PK)\\nome};
+    \draw[rel] ([yshift=-0.95cm]med.north east) -- node[card, pos=0.15, above]{1} node[card, pos=0.85, above]{N} ([yshift=-0.95cm]lot.north west);
+    \draw[rel] ([yshift=-0.95cm]lot.north east) -- node[card, pos=0.15, above]{1} node[card, pos=0.85, above]{N} ([yshift=-0.95cm]mov.north west);
+    \draw[rel] (set.north) -- node[card, pos=0.15, right]{1} node[card, pos=0.85, right]{N} (mov.south);
+    \draw[rel] ([yshift=-0.95cm]usu.north east) -- node[card, pos=0.15, above]{1} node[card, pos=0.85, above]{N} ([yshift=-0.95cm]ses.north west);
+    \draw[rel] (med.north) -- ++(0,0.45) -| node[card, pos=0.03, above]{1} node[card, pos=0.97, right]{N} (mov.north);
   \end{tikzpicture}
   \par\smallskip
   {\small Fonte: Autoria própria (2026).}
 \end{figure}
 
-O controle por lote é o que permite acompanhar a validade: um mesmo medicamento pode ter vários lotes, e cada um vence em uma data diferente. O registro de uma saída é feito dentro de uma transação do banco de dados, de modo que a quantidade do lote e o histórico sejam atualizados juntos; se a quantidade pedida for maior que a disponível no lote, a operação é recusada.
+O controle por lote é o que permite acompanhar a validade: um mesmo medicamento pode ter vários lotes, e cada um vence em uma data diferente. O registro de uma movimentação é feito dentro de uma transação do banco de dados, de modo que a quantidade do lote e o histórico sejam atualizados juntos. A operação é recusada se a quantidade pedida for maior que a disponível no lote, se o lote não pertencer ao medicamento informado ou, no caso de uma saída, se o lote estiver vencido, o que impede a dispensação de medicamento fora da validade.
 
 \subsection{Acesso e perfis de usuário}
 
-O acesso ao sistema é feito por conta com e-mail e senha, como mostra a Figura~\ref{fig:login}. As senhas não são armazenadas: o banco guarda apenas o \textit{hash} de cada senha, gerado com o algoritmo bcrypt, conforme recomendação da OWASP para armazenamento de senhas (OWASP, 2026). Depois de um número de tentativas erradas seguidas, o acesso é bloqueado temporariamente.
+O acesso ao sistema é feito por conta com e-mail e senha, como mostra a Figura~\ref{fig:login}. As senhas não são armazenadas: o banco guarda apenas o \textit{hash} de cada senha, gerado com o algoritmo bcrypt, conforme recomendação do Open Worldwide Application Security Project (OWASP) para armazenamento de senhas (OWASP, 2026). Depois de oito tentativas de entrada erradas seguidas, novas tentativas com o mesmo e-mail são bloqueadas por até 15 minutos.
 
 \figura{fig-login.jpg}{fig:login}{Tela de entrada do SIGEM}{0.95}
 
-Cada conta possui um de três perfis, com permissões diferentes: o \textbf{farmacêutico} tem acesso completo (cadastra, movimenta o estoque e gera relatórios); o \textbf{enfermeiro} consulta o estoque e registra apenas saídas; e o \textbf{gestor} tem acesso somente de leitura, incluindo os relatórios. Essas permissões são conferidas pelo servidor a cada pedido, e não apenas na interface. Há também a entrada como visitante, que é somente de leitura.
+Cada conta possui um de três perfis, com permissões diferentes: o \textbf{farmacêutico} tem acesso completo (cadastra, movimenta o estoque e gera relatórios); o \textbf{enfermeiro} consulta o estoque e registra apenas saídas; e o \textbf{gestor} tem acesso somente de leitura, incluindo os relatórios. Essas permissões são conferidas pelo servidor a cada pedido, e não apenas na interface. Há também a entrada como visitante, que é somente de leitura. Além disso, todo texto vindo do banco de dados é tratado antes de ser exibido, de modo que um código digitado em um campo, como o nome de um medicamento, aparece como texto e não é executado pelo navegador.
 
 \subsection{Painel de indicadores}
 
-Após a entrada, o usuário é direcionado ao painel de indicadores (\textit{dashboard}), apresentado na Figura~\ref{fig:dashboard}. O painel mostra o número de medicamentos cadastrados, o total de unidades em estoque e três alertas: medicamentos com estoque abaixo do mínimo, lotes que vencem nos próximos 30 dias e lotes já vencidos. Dois gráficos complementam a visão geral: o estoque de cada medicamento, com destaque em vermelho para os que estão abaixo do mínimo, e a proporção entre medicamentos com estoque normal e com estoque baixo.
+Após a entrada, o usuário é direcionado ao painel de indicadores (\textit{dashboard}), apresentado na Figura~\ref{fig:dashboard}. O painel mostra o número de medicamentos cadastrados, o total de unidades em estoque e três alertas: medicamentos com estoque abaixo do mínimo, lotes que vencem nos próximos 30 dias e lotes já vencidos. Dois gráficos complementam a visão geral: o estoque de cada medicamento, com destaque em vermelho para os que estão abaixo do mínimo, e a proporção entre medicamentos com estoque normal e com estoque baixo. Os totais de estoque consideram apenas os lotes dentro da validade, pois unidades vencidas não podem ser usadas; os lotes vencidos aparecem separadamente, no alerta correspondente.
 
 \figura{fig-dashboard.jpg}{fig:dashboard}{Painel de indicadores do SIGEM, com alertas e gráficos de estoque}{0.88}
 
 \subsection{Previsão de esgotamento e simulador de cenários}
 
-Para atuar de forma preventiva, o sistema estima em quantos dias o estoque de cada medicamento se esgota. O cálculo usa o consumo médio diário dos últimos 30 dias:
+Para atuar de forma preventiva, o sistema estima em quantos dias o estoque de cada medicamento se esgota. O cálculo, apresentado na Equação~(\ref{eq:previsao}), usa o estoque válido e o consumo médio diário dos últimos 30 dias:
 
 \begin{equation}
-  \text{dias até esgotar} = \frac{\text{estoque atual}}{\text{saídas dos últimos 30 dias} \div 30}
+  \label{eq:previsao}
+  \text{dias até esgotar} = \frac{\text{estoque válido atual}}{\text{saídas dos últimos 30 dias} \div 30}
 \end{equation}
 
-O resultado é apresentado em uma tabela com indicação por cores, como mostra a Figura~\ref{fig:previsao}: vermelho quando o esgotamento é previsto para até 7 dias, amarelo para até 30 dias e verde acima disso. Quando o medicamento não teve saídas no período, o sistema informa que não há dados suficientes, em vez de apresentar uma estimativa sem base.
+Por exemplo, um medicamento com 100 unidades válidas em estoque e 30 saídas nos últimos 30 dias consome, em média, uma unidade por dia; a previsão, portanto, é de 100 dias. O resultado é apresentado em uma tabela com indicação por cores, como mostra a Figura~\ref{fig:previsao}: vermelho quando o esgotamento é previsto para até 7 dias, amarelo para até 30 dias e verde acima disso. Quando o medicamento não teve saídas no período, o sistema informa que não há dados suficientes, em vez de apresentar uma estimativa sem base; quando o medicamento teve saídas, mas não tem mais estoque válido, informa que não há estoque válido.
 
 \figura{fig-previsao.jpg}{fig:previsao}{Previsão de esgotamento de estoque por medicamento}{0.88}
 
-O simulador de cenários, apresentado na Figura~\ref{fig:simulador}, permite alterar duas variáveis hipotéticas, o consumo e a reposição de estoque, e recalcula a previsão na hora. No exemplo da figura, com o consumo dobrado, um medicamento passa a ter esgotamento previsto para menos de 7 dias. O recurso apoia a decisão sobre quanto repor antes que a falta aconteça.
+O simulador de cenários, apresentado na Figura~\ref{fig:simulador}, permite alterar duas variáveis hipotéticas, o consumo e a reposição de estoque, e recalcula a previsão na hora. No exemplo da figura, com o consumo dobrado, a previsão de esgotamento de cada medicamento cai pela metade: a da Azitromicina, por exemplo, passa de 20 para 10 dias. O recurso apoia a decisão sobre quanto repor antes que a falta aconteça.
 
 \figura{fig-simulador.jpg}{fig:simulador}{Simulador de cenários de consumo e reposição}{0.88}
 
@@ -311,13 +369,13 @@ Para cada lote, o sistema apresenta uma linha do tempo com tudo o que aconteceu 
 
 \figura{fig-historico.jpg}{fig:historico}{Linha do tempo (rastreabilidade) de um lote}{0.6}
 
-O sistema também gera um QR Code para cada lote (Figura~\ref{fig:qrcode}). Ao ser lido pela câmera na tela de movimentações, o código abre o formulário de saída com aquele lote já selecionado, o que agiliza o registro no balcão da farmácia.
+O sistema também gera um QR Code para cada lote (Figura~\ref{fig:qrcode}). Ao ser lido pela câmera na tela de movimentações, o código abre o formulário de saída com aquele lote já selecionado, o que agiliza o registro no balcão da farmácia. Se o lote estiver vencido, o sistema avisa que ele não pode ser dispensado.
 
 \figura{fig-qrcode.jpg}{fig:qrcode}{QR Code gerado para um lote}{0.4}
 
 \subsection{Movimentações}
 
-A tela de movimentações, apresentada na Figura~\ref{fig:movimentacoes}, registra as entradas e as saídas de estoque. Em cada registro são informados o medicamento, o lote, o tipo, a quantidade, o setor de destino e o motivo. O histórico é exibido logo abaixo do formulário e é atualizado a cada registro.
+A tela de movimentações, apresentada na Figura~\ref{fig:movimentacoes}, registra as entradas e as saídas de estoque. Em cada registro são informados o medicamento, o lote, o tipo, a quantidade, o setor de destino e o motivo; na lista de lotes, os vencidos aparecem identificados. O histórico é exibido logo abaixo do formulário e é atualizado a cada registro.
 
 \figura{fig-movimentacoes.jpg}{fig:movimentacoes}{Tela de registro e histórico de movimentações}{0.88}
 
@@ -339,47 +397,62 @@ A interface se adapta a telas pequenas. No celular, o menu passa a ser uma barra
 
 \subsection{Testes funcionais}
 
-O sistema foi verificado por meio de testes funcionais, em que cada funcionalidade é executada e o resultado obtido é comparado com o esperado. A Tabela~\ref{qd:testes} resume os principais casos.
+A Tabela~\ref{tb:testes} apresenta os 26 casos de teste funcionais, organizados pelo requisito que verificam. Os testes foram executados em 24 de novembro de 2026, em ambiente local, com dados fictícios criados para esse fim e removidos ao final. Todos os casos apresentaram o resultado esperado.
 
-\begin{table}[H]
-  \centering
-  \caption{Principais testes funcionais realizados}
-  \label{qd:testes}
-  \small
-  \renewcommand{\arraystretch}{1.35}
-  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
-    \hline
-    \textbf{CASO TESTADO} & \textbf{RESULTADO OBTIDO} \\ \hline
-    
-    Acesso ao sistema sem estar conectado & Pedido recusado pelo servidor \\ \hline
-    Entrada com senha incorreta & Acesso negado, com mensagem de erro \\ \hline
-    Criação de conta com e-mail já cadastrado & Cadastro recusado \\ \hline
-    Saída com quantidade maior que a disponível no lote & Operação recusada, com aviso da quantidade disponível \\ \hline
-    Enfermeiro tentando cadastrar medicamento ou registrar entrada & Operação recusada por falta de permissão \\ \hline
-    Enfermeiro tentando acessar os relatórios & Acesso recusado \\ \hline
-    Visitante tentando alterar dados & Operação recusada \\ \hline
-    Lote com data de validade vencida & Lote exibido no alerta de vencidos \\ \hline
-    Medicamento sem saídas nos últimos 30 dias & Previsão exibida como ``sem dados suficientes'' \\ \hline
-    Alteração do consumo no simulador & Previsão recalculada e medicamentos críticos atualizados \\ \hline
-    
-  \end{tabularx}
-  \par\smallskip
-  {\small Fonte: Autoria própria (2026).}
-\end{table}
+{\small
+\renewcommand{\arraystretch}{1.3}
+\begin{xltabular}{\textwidth}{|l|>{\raggedright\arraybackslash}X|l|>{\raggedright\arraybackslash}X|}
+  \caption{Casos de teste funcionais executados}\label{tb:testes}\\
+  \hline
+  \textbf{ID} & \textbf{CASO DE TESTE} & \textbf{REQ.} & \textbf{RESULTADO OBTIDO} \\ \hline
+  \endfirsthead
+  \hline
+  \textbf{ID} & \textbf{CASO DE TESTE} & \textbf{REQ.} & \textbf{RESULTADO OBTIDO} \\ \hline
+  \endhead
+  \multicolumn{4}{c}{\small Fonte: Autoria própria (2026).} \\
+  \endlastfoot
+  CT01 & Cadastro e edição de medicamento pelo farmacêutico & RF01 & Medicamento salvo com os dados editados \\ \hline
+  CT02 & Exclusão de medicamento com lotes e de medicamento sem lotes & RF01 & Com lotes: exclusão recusada; sem lotes: medicamento excluído \\ \hline
+  CT03 & Cadastro de lotes com quantidade e validade & RF02 & Lotes salvos e listados no medicamento \\ \hline
+  CT04 & Entrada de 20 unidades em um lote com 100 & RF03 & Quantidade do lote passou para 120 \\ \hline
+  CT05 & Saída de 30 unidades, com setor e motivo & RF03 & Quantidade passou para 90; saída registrada no histórico com setor e motivo \\ \hline
+  CT06 & Movimentação com lote que pertence a outro medicamento & RF03 & Operação recusada \\ \hline
+  CT07 & Abertura do endereço contido no QR Code de um lote & RF03 & Formulário de saída aberto com o lote já selecionado \\ \hline
+  CT08 & Saída maior que a quantidade disponível no lote & RF04 & Operação recusada, com aviso; quantidade inalterada \\ \hline
+  CT09 & Lote vencido, lote que vence em 10 dias e medicamento abaixo do mínimo & RF05 & Cada item exibido no alerta correspondente \\ \hline
+  CT10 & Previsão com 100 unidades válidas, um lote vencido e 30 saídas em 30 dias & RF06 & Esgotamento previsto para 100 dias; lote vencido desconsiderado \\ \hline
+  CT11 & Previsão de medicamento sem saídas nos últimos 30 dias & RF06 & Exibido ``sem dados suficientes'' \\ \hline
+  CT12 & Simulação com consumo aumentado em 100\% & RF07 & Previsão do cenário reduzida de 100 para 50 dias \\ \hline
+  CT13 & Consulta do histórico de um lote & RF08 & Entrada e saída exibidas em ordem, com setor e motivo \\ \hline
+  CT14 & Relatório filtrado por tipo, medicamento e período & RF09 & Somente a saída correspondente listada \\ \hline
+  CT15 & Acesso ao servidor sem estar conectado & RF10 & Pedido recusado \\ \hline
+  CT16 & Entrada com senha incorreta & RF10 & Acesso negado, com mensagem de erro \\ \hline
+  CT17 & Criação de conta com e-mail já cadastrado & RF10 & Cadastro recusado \\ \hline
+  CT18 & Nove tentativas de entrada erradas seguidas & RF10 & Nona tentativa bloqueada temporariamente \\ \hline
+  CT19 & Enfermeiro: cadastrar medicamento, registrar entrada e registrar saída & RF10, RNF04 & Cadastro e entrada recusados; saída aceita \\ \hline
+  CT20 & Enfermeiro acessando os relatórios & RF10, RNF04 & Acesso recusado \\ \hline
+  CT21 & Gestor: registrar movimentação e acessar relatórios & RF10, RNF04 & Movimentação recusada; relatórios liberados \\ \hline
+  CT22 & Visitante: alterar dados e consultar o painel & RF10, RNF04 & Alteração recusada; consulta liberada \\ \hline
+  CT23 & Saída de um lote vencido & RF11 & Operação recusada, com aviso; quantidade inalterada \\ \hline
+  CT24 & Uso das seis telas principais em celular (375 pixels de largura) & RNF01 & Telas sem rolagem lateral e com o menu inferior visível \\ \hline
+  CT25 & Consulta da senha gravada no banco de dados & RNF03 & Apenas o \textit{hash} bcrypt armazenado, nunca a senha \\ \hline
+  CT26 & Nome de medicamento contendo código HTML & RNF05 & Nome exibido como texto, sem executar o código \\ \hline
+\end{xltabular}
+}
 
 \subsection{Limitações}
 
-O SIGEM possui limitações decorrentes do escopo acadêmico do projeto. Os testes foram feitos com dados fictícios, e o sistema não foi avaliado por profissionais em um hospital em funcionamento. No cadastro, o próprio usuário escolhe o seu perfil; em uso real, essa atribuição caberia a um administrador. A previsão de esgotamento usa uma média simples de consumo e não considera sazonalidade. O sistema também não contempla controle de fornecedores e de compras, integração com prontuários ou com sistemas oficiais de saúde.
+O SIGEM possui limitações decorrentes do escopo acadêmico do projeto. Os testes foram feitos com dados fictícios, e o sistema não foi avaliado por profissionais em um hospital em funcionamento. No cadastro, o próprio usuário escolhe o seu perfil; em uso real, essa atribuição caberia a um administrador. A previsão de esgotamento usa uma média simples de consumo e não considera sazonalidade. Lotes vencidos deixam de contar como estoque, mas o sistema ainda não possui um registro específico para o seu descarte. O sistema também não contempla controle de fornecedores e de compras, integração com prontuários ou com sistemas oficiais de saúde. Por fim, a publicação utiliza o plano gratuito do serviço de hospedagem, que tem limitações de desempenho e de disponibilidade.
 
 \section{Considerações finais}
 
-A pesquisa bibliográfica realizada demonstra que a precariedade dos hospitais públicos brasileiros é um problema complexo e multifatorial, que envolve financiamento, infraestrutura, disponibilidade e distribuição de profissionais, organização da atenção primária e desigualdades regionais. Não se trata do resultado de falhas administrativas isoladas, mas de problemas que envolvem a organização e o financiamento de toda a rede de atenção.
+A pesquisa bibliográfica e documental realizada demonstra que a precariedade dos hospitais públicos brasileiros é um problema complexo e multifatorial, que envolve financiamento, infraestrutura, disponibilidade e distribuição de profissionais, organização da atenção primária e desigualdades regionais. Não se trata do resultado de falhas administrativas isoladas, mas de problemas que envolvem a organização e o financiamento de toda a rede de atenção.
 
-Dentro desse quadro, o trabalho escolheu uma frente específica, a gestão de medicamentos, e desenvolveu o SIGEM como proposta de apoio. O sistema reúne em um só lugar as quatro informações que o controle de estoque exige: quantidade, validade por lote, ritmo de consumo e destino de cada unidade. Os objetivos estabelecidos foram atendidos: os problemas de gestão de medicamentos foram identificados a partir da literatura e de levantamentos recentes; os requisitos do sistema foram definidos; o sistema foi construído com cadastro, controle de lotes e de validade, movimentação por setor e alertas automáticos; o modelo de previsão de esgotamento foi aplicado; e o funcionamento foi verificado por testes funcionais.
+Dentro desse quadro, o trabalho escolheu uma frente específica, a gestão de medicamentos, e desenvolveu o SIGEM como proposta de apoio. O sistema reúne em um só lugar as quatro informações que o controle de estoque exige: quantidade, validade por lote, ritmo de consumo e destino de cada unidade, aproximando-se, em pequena escala, dos sistemas capazes de acompanhar o estoque, a distribuição e o consumo de medicamentos defendidos pelo TCU (Brasil, 2014). Os objetivos estabelecidos foram atendidos: os problemas de gestão de medicamentos foram identificados a partir da literatura e de levantamentos recentes; os requisitos funcionais e não funcionais foram definidos; o sistema foi construído com cadastro, controle de lotes e de validade, movimentação por setor e alertas automáticos; o modelo de previsão de esgotamento foi aplicado; e o funcionamento foi verificado por 26 casos de teste funcionais, todos com o resultado esperado.
 
 O sistema não resolve a precariedade hospitalar, que depende de investimento e de políticas públicas. O que ele mostra é que informação organizada permite agir antes que o medicamento vença ou falte, e que essa parte do problema pode ser enfrentada com tecnologia de baixo custo.
 
-Como trabalhos futuros, propõe-se validar o sistema com profissionais de farmácia hospitalar, atribuir perfis por meio de um administrador, aprimorar o modelo de previsão para considerar variações sazonais de consumo e integrar o sistema ao processo de compras.
+Como trabalhos futuros, propõe-se validar o sistema com profissionais de farmácia hospitalar, atribuir perfis por meio de um administrador, registrar o descarte de lotes vencidos, aprimorar o modelo de previsão para considerar variações sazonais de consumo e integrar o sistema ao processo de compras.
 
 \section*{REFERÊNCIAS}
 
@@ -391,19 +464,27 @@ Como trabalhos futuros, propõe-se validar o sistema com profissionais de farmá
 
 AGÊNCIA BRASIL. \textbf{Na fronteira, 22\% dos municípios não têm leito de internação e 93\% estão sem UTI}. Brasília, DF, 2018. Disponível em: \url{https://agenciabrasil.ebc.com.br/geral/noticia/2018-04/na-fonteira-22-dos-municipios-nao-tem-leito-de-internacao-e-93-estao-sem-uti}. Acesso em: 10 nov. 2026.
 
-ALBUQUERQUE, Mariana Vercesi de et al. Desigualdades regionais na saúde: mudanças observadas no Brasil de 2000 a 2016. \textbf{Ciência \& Saúde Coletiva}, v. 22, n. 4, p. 1055--1064, 2017.
+ALBUQUERQUE, Mariana Vercesi de et al. Desigualdades regionais na saúde: mudanças observadas no Brasil de 2000 a 2016. \textbf{Ciência \& Saúde Coletiva}, Rio de Janeiro, v. 22, n. 4, p. 1055--1064, 2017.
 
-BIORED BRASIL. \textbf{Falta de medicamentos nas farmácias de alto custo expõe crise no acesso a tratamentos no SUS no início de 2026}. 2026. Disponível em: \url{https://www.bioredbrasil.com.br/falta-de-medicamentos-nas-farmacias-de-alto-custo-expoe-crise-no-acesso-a-tratamentos-no-sus-no-inicio-de-2026/}. Acesso em: 10 nov. 2026.
+BRASIL. Ministério da Saúde. \textbf{Portaria n. 4.283, de 30 de dezembro de 2010}. Aprova as diretrizes e estratégias para organização, fortalecimento e aprimoramento das ações e serviços de farmácia no âmbito dos hospitais. Brasília, DF: Ministério da Saúde, 2010. Disponível em: \url{https://bvsms.saude.gov.br/bvs/saudelegis/gm/2010/prt4283_30_12_2010.html}. Acesso em: 24 nov. 2026.
 
 BRASIL. Ministério da Saúde. \textbf{Estratégia Saúde da Família}. Brasília, DF: Ministério da Saúde, 2025. Disponível em: \url{https://www.gov.br/saude/pt-br/composicao/saps/esf/}. Acesso em: 31 ago. 2026.
 
-BRASIL. Tribunal de Contas da União. \textbf{Saúde: fiscalização do TCU apresenta diagnóstico sobre a situação da saúde pública brasileira}. Brasília, DF: TCU, 2014.
+BRASIL. Tribunal de Contas da União. \textbf{Saúde}. Brasília, DF: TCU, 2014. 248 p. (Relatório Sistêmico de Fiscalização). Disponível em: \url{https://portal.tcu.gov.br/data/files/B1/20/29/03/75A1F6107AD96FE6F18818A8/Fisc_Saude_2013.PDF}. Acesso em: 24 nov. 2026.
+
+CAVALCANTI, Patrícia Biasi et al. Avaliação pós-ocupação de unidades de emergência hospitalares de Florianópolis: problemas recorrentes e possíveis soluções. \textbf{Ambiente Construído}, Porto Alegre, v. 19, n. 2, p. 171--186, abr./jun. 2019. DOI: \url{https://doi.org/10.1590/s1678-86212019000200315}.
 
 CHART.JS. \textbf{Chart.js documentation}. 2026. Disponível em: \url{https://www.chartjs.org/docs/latest/}. Acesso em: 10 nov. 2026.
 
-CONSELHO FEDERAL DE MEDICINA (CFM). \textbf{Em 13 anos, Brasil perde 25 mil leitos de internação do SUS}. Brasília, DF, [2024?]. Disponível em: \url{https://portal.cfm.org.br/noticias/em-13-anos-brasil-perde-25-mil-leitos-de-internacao-do-sus/}. Acesso em: 10 nov. 2026.
+CHEN, Peter Pin-Shan. The entity-relationship model: toward a unified view of data. \textbf{ACM Transactions on Database Systems}, New York, v. 1, n. 1, p. 9--36, mar. 1976. DOI: \url{https://doi.org/10.1145/320434.320440}.
 
-EXPRESS. \textbf{Express: framework web para Node.js}. 2026. Disponível em: \url{https://expressjs.com/}. Acesso em: 10 nov. 2026.
+CONSELHO FEDERAL DE MEDICINA [CFM]. \textbf{Em 13 anos, Brasil perde 25 mil leitos de internação do SUS}. Brasília, DF: CFM, 26 abr. 2024. Disponível em: \url{https://portal.cfm.org.br/noticias/em-13-anos-brasil-perde-25-mil-leitos-de-internacao-do-sus/}. Acesso em: 24 nov. 2026.
+
+EXPRESS. \textbf{Express}: Node.js web application framework. 2026. Disponível em: \url{https://expressjs.com/}. Acesso em: 10 nov. 2026.
+
+FUNCIA, Francisco Rózsa. Subfinanciamento e orçamento federal do SUS: referências preliminares para a alocação adicional de recursos. \textbf{Ciência \& Saúde Coletiva}, Rio de Janeiro, v. 24, n. 12, p. 4405--4415, dez. 2019. DOI: \url{https://doi.org/10.1590/1413-812320182412.25892019}.
+
+FUNCIA, Francisco; BRESCIANI, Luís Paulo; BENEVIDES, Rodrigo; OCKÉ-REIS, Carlos Octávio. Análise do financiamento federal do Sistema Único de Saúde para o enfrentamento da Covid-19. \textbf{Saúde em Debate}, Rio de Janeiro, v. 46, n. 133, p. 263--276, abr./jun. 2022. DOI: \url{https://doi.org/10.1590/0103-1104202213301}.
 
 IBGE. \textbf{IBGE divulga distribuição de UTIs, respiradores, médicos e enfermeiros}. Agência de Notícias IBGE, 2020. Disponível em: \url{https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/27614-ibge-divulga-distribuicao-de-utis-respiradores-medicos-e-enfermeiros}. Acesso em: 31 ago. 2026.
 
@@ -411,21 +492,21 @@ MDN WEB DOCS. \textbf{Tecnologia web para desenvolvedores}. Mozilla, 2026. Dispo
 
 NODE.JS. \textbf{Node.js documentation}. OpenJS Foundation, 2026. Disponível em: \url{https://nodejs.org/docs/latest/api/}. Acesso em: 10 nov. 2026.
 
-OCKÉ-REIS, Carlos Octávio; BENEVIDES, Rodrigo Pucci de Sá e. Financiamento federal do SUS para o enfrentamento da pandemia de Covid-19. \textbf{Saúde em Debate}, v. 46, n. 133, p. 263--276, 2022.
-
-OLIVEIRA, et al. Avaliação pós-ocupação de unidades de emergência hospitalares de Florianópolis: problemas recorrentes e possíveis soluções. \textbf{Ambiente Construído}, 2019.
-
 OWASP. \textbf{Password Storage Cheat Sheet}. OWASP Cheat Sheet Series, 2026. Disponível em: \url{https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html}. Acesso em: 10 nov. 2026.
 
 POSTGRESQL. \textbf{PostgreSQL documentation}. The PostgreSQL Global Development Group, 2026. Disponível em: \url{https://www.postgresql.org/docs/}. Acesso em: 10 nov. 2026.
 
-PÓVOA, Luciano; ANDRADE, Mônica Viegas. Distribuição geográfica dos médicos no Brasil: uma análise a partir de um modelo de escolha locacional. \textbf{Cadernos de Saúde Pública}, v. 22, n. 8, p. 1555--1564, 2006.
+PÓVOA, Luciano; ANDRADE, Mônica Viegas. Distribuição geográfica dos médicos no Brasil: uma análise a partir de um modelo de escolha locacional. \textbf{Cadernos de Saúde Pública}, Rio de Janeiro, v. 22, n. 8, p. 1555--1564, 2006.
 
-RUSSO, Letícia Xander et al. Effect of More Doctors (Mais Médicos) Program on geographic distribution of primary care physicians. \textbf{Ciência \& Saúde Coletiva}, v. 26, n. 4, p. 1585--1594, 2021.
+PRODANOV, Cleber Cristiano; FREITAS, Ernani Cesar de. \textbf{Metodologia do trabalho científico}: métodos e técnicas da pesquisa e do trabalho acadêmico. 2. ed. Novo Hamburgo: Feevale, 2013.
+
+RENDER. \textbf{Render documentation}. 2026. Disponível em: \url{https://render.com/docs}. Acesso em: 24 nov. 2026.
+
+RUSSO, Letícia Xander. Efeito do Programa Mais Médicos na distribuição geográfica dos médicos na atenção básica. \textbf{Ciência \& Saúde Coletiva}, Rio de Janeiro, v. 26, n. 4, p. 1585--1594, abr. 2021. DOI: \url{https://doi.org/10.1590/1413-81232021264.26932020}.
 
 SOMMERVILLE, Ian. \textbf{Engenharia de software}. 9. ed. São Paulo: Pearson Prentice Hall, 2011.
 
-VIEIRA, Fabíola Sulpino et al. Subfinanciamento e orçamento federal do SUS: referências preliminares para a alocação adicional de recursos. \textbf{Ciência \& Saúde Coletiva}, v. 24, n. 12, 2019.
+TORRES, Priscila. Falta de medicamentos nas farmácias de alto custo expõe crise no acesso a tratamentos no SUS no início de 2026. \textbf{Biored Brasil}, [\textit{s. l.}], 23 abr. 2026. Disponível em: \url{https://www.bioredbrasil.com.br/falta-de-medicamentos-nas-farmacias-de-alto-custo-expoe-crise-no-acesso-a-tratamentos-no-sus-no-inicio-de-2026/}. Acesso em: 24 nov. 2026.
 
 \endgroup
 

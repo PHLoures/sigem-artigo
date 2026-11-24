@@ -8,6 +8,8 @@
 //   consumo_medio_diario = total de SAIDAS nos ultimos 30 dias / 30
 //   dias_ate_esgotar = estoque_atual / consumo_medio_diario
 //
+// estoque_atual considera so os lotes ainda dentro da validade.
+//
 // Se o medicamento nao teve nenhuma saida nos ultimos 30 dias,
 // nao da pra calcular uma media de consumo - nesse caso
 // devolvemos "null" (o frontend mostra "sem dados suficientes").
@@ -25,8 +27,10 @@ async function previsaoEstoque(req, res) {
                 GROUP BY medicamento_id
             ),
             estoque_atual AS (
+                -- so lotes ainda validos: unidade vencida nao pode ser usada
                 SELECT medicamento_id, COALESCE(SUM(quantidade), 0) AS estoque
                 FROM lotes
+                WHERE data_validade >= CURRENT_DATE
                 GROUP BY medicamento_id
             )
             SELECT

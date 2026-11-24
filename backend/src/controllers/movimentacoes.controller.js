@@ -73,7 +73,9 @@ async function criar(req, res) {
         //    movimentacoes simultaneas leiam o mesmo estoque
         //    "antigo" ao mesmo tempo (condicao de corrida).
         const loteResultado = await client.query(
-            'SELECT quantidade FROM lotes WHERE id = $1 FOR UPDATE',
+            `SELECT quantidade, medicamento_id, data_validade,
+                    data_validade < CURRENT_DATE AS vencido
+             FROM lotes WHERE id = $1 FOR UPDATE`,
             [lote_id]
         );
 
@@ -82,7 +84,22 @@ async function criar(req, res) {
             return res.status(404).json({ erro: 'Lote não encontrado.' });
         }
 
-        const quantidadeAtual = loteResultado.rows[0].quantidade;
+        const lote = loteResultado.rows[0];
+        const quantidadeAtual = lote.quantidade;
+
+        // O lote precisa ser do medicamento informado (senao o
+        // historico ficaria registrado no medicamento errado).
+        if (Number(lote.medicamento_id) !== Number(medicamento_id)) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ erro: 'O lote informado não pertence a este medicamento.' });
+        }
+
+        // Seguranca do paciente: lote vencido nao pode ser dispensado.
+        if (tipo === 'SAIDA' && lote.vencido) {
+            await client.query('ROLLBACK');
+            const validade = new Date(lote.data_validade).toLocaleDateString('pt-BR');
+            return res.status(400).json({ erro: `Lote vencido em ${validade}: não pode ser dispensado.` });
+        }
 
         if (tipo === 'SAIDA' && quantidade > quantidadeAtual) {
             await client.query('ROLLBACK');

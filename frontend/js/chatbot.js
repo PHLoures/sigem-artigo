@@ -165,8 +165,12 @@ async function responderPergunta(perguntaOriginal) {
 
         for (const medicamento of medicamentosCitados) {
             const lotes = await chamarApi(`/lotes/medicamento/${medicamento.id}`);
-            const estoqueReal = lotes.reduce((soma, l) => soma + l.quantidade, 0);
-            const totalEstoque = estoqueReal;
+            // Conta so os lotes dentro da validade (mesma regra do dashboard)
+            const agora = new Date();
+            const hoje = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            const totalEstoque = lotes
+                .filter(l => formatarDataInput(l.data_validade) >= hoje)
+                .reduce((soma, l) => soma + l.quantidade, 0);
             const status = totalEstoque <= medicamento.estoque_minimo
                 ? '<span class="badge badge-vermelho">Estoque baixo</span>'
                 : '<span class="badge badge-verde">Estoque normal</span>';
@@ -212,7 +216,9 @@ async function responderPergunta(perguntaOriginal) {
             } else {
                 const itens = comDados
                     .slice(0, 3)
-                    .map(p => `${esc(p.nome)}: esgota em ${Math.round(Number(p.dias_ate_esgotar))} dias`)
+                    .map(p => Number(p.dias_ate_esgotar) <= 0
+                        ? `${esc(p.nome)}: sem estoque válido`
+                        : `${esc(p.nome)}: esgota em ${Math.round(Number(p.dias_ate_esgotar))} dias`)
                     .join('<br>');
                 respostas.push(`📉 Previsão (mais urgentes primeiro):<br>${itens}`);
             }

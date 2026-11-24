@@ -50,6 +50,13 @@ selectMedicamento.addEventListener('change', () => {
     carregarLotesDoMedicamento(selectMedicamento.value);
 });
 
+// Compara a validade do lote com a data de hoje (no fuso local).
+function loteVencido(lote) {
+    const agora = new Date();
+    const hoje = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    return formatarDataInput(lote.data_validade) < hoje;
+}
+
 async function carregarLotesDoMedicamento(medicamentoId) {
     try {
         const lotes = await chamarApi(`/lotes/medicamento/${medicamentoId}`);
@@ -57,8 +64,10 @@ async function carregarLotesDoMedicamento(medicamentoId) {
             selectLote.innerHTML = '<option value="">Nenhum lote cadastrado</option>';
             return;
         }
+        // Lotes vencidos aparecem marcados: o servidor nao aceita
+        // saida (dispensacao) de lote vencido.
         selectLote.innerHTML = lotes
-            .map(l => `<option value="${l.id}">${esc(l.numero_lote)} (disponível: ${l.quantidade})</option>`)
+            .map(l => `<option value="${l.id}">${esc(l.numero_lote)} (disponível: ${l.quantidade})${loteVencido(l) ? ' — VENCIDO' : ''}</option>`)
             .join('');
     } catch (erro) {
         mostrarMensagem(erro.message, 'erro');
@@ -153,6 +162,14 @@ async function selecionarLotePorId(loteId) {
         // - por isso ja deixamos o tipo pre-selecionado em SAIDA.
         document.getElementById('mov-tipo').value = 'SAIDA';
         document.getElementById('mov-quantidade').focus();
+
+        if (loteVencido(lote)) {
+            mostrarMensagem(
+                `Atenção: o lote ${esc(lote.numero_lote)} (${esc(lote.medicamento_nome)}) está vencido e não pode ser dispensado.`,
+                'erro'
+            );
+            return;
+        }
 
         mostrarMensagem(
             `Lote ${esc(lote.numero_lote)} (${esc(lote.medicamento_nome)}) selecionado via QR Code.`,

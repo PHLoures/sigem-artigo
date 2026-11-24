@@ -18,19 +18,23 @@ async function resumo(req, res) {
             'SELECT COUNT(*) AS total FROM medicamentos'
         );
 
-        // Soma de todas as quantidades de todos os lotes = total
-        // de unidades fisicas em estoque no hospital.
+        // Soma das quantidades dos lotes AINDA VALIDOS = unidades que
+        // podem de fato ser usadas. Lotes vencidos nao contam como
+        // estoque: aparecem separados, na lista de vencidos.
         const totalEstoqueResultado = await pool.query(
-            'SELECT COALESCE(SUM(quantidade), 0) AS total FROM lotes'
+            'SELECT COALESCE(SUM(quantidade), 0) AS total FROM lotes WHERE data_validade >= CURRENT_DATE'
         );
 
-        // Medicamentos com estoque baixo: soma dos lotes de cada
-        // medicamento <= estoque_minimo dele.
+        // Medicamentos com estoque baixo: soma dos lotes validos de
+        // cada medicamento <= estoque_minimo dele. A condicao de
+        // validade fica no JOIN (e nao no WHERE) para que um
+        // medicamento sem nenhum lote valido continue aparecendo,
+        // com quantidade 0.
         const estoqueBaixoResultado = await pool.query(`
             SELECT m.id, m.nome, m.estoque_minimo,
                    COALESCE(SUM(l.quantidade), 0) AS quantidade_total
             FROM medicamentos m
-            LEFT JOIN lotes l ON l.medicamento_id = m.id
+            LEFT JOIN lotes l ON l.medicamento_id = m.id AND l.data_validade >= CURRENT_DATE
             GROUP BY m.id, m.nome, m.estoque_minimo
             HAVING COALESCE(SUM(l.quantidade), 0) <= m.estoque_minimo
             ORDER BY m.nome
@@ -72,12 +76,12 @@ async function resumo(req, res) {
 
         // ---------- Dados para o GRAFICO do dashboard ----------
 
-        // Quantidade total em estoque de CADA medicamento (todos,
+        // Quantidade valida em estoque de CADA medicamento (todos,
         // nao so os com estoque baixo) - usado no grafico de barras.
         const estoquePorMedicamentoResultado = await pool.query(`
             SELECT m.nome, COALESCE(SUM(l.quantidade), 0) AS quantidade_total
             FROM medicamentos m
-            LEFT JOIN lotes l ON l.medicamento_id = m.id
+            LEFT JOIN lotes l ON l.medicamento_id = m.id AND l.data_validade >= CURRENT_DATE
             GROUP BY m.id, m.nome
             ORDER BY m.nome
         `);
