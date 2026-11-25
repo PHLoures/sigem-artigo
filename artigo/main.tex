@@ -24,9 +24,18 @@
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{array}
+\usepackage{placeins}
 
 \onehalfspacing
 \setlength{\emergencystretch}{2em}
+% Figuras e tabelas podem ocupar os espacos livres da pagina (evita buracos em branco)
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
 \setlength{\parindent}{1.25cm}
 \captionsetup{font=small,labelfont=bf,labelsep=endash,justification=centering}
 \setlist{nosep,leftmargin=1.5cm}
@@ -46,7 +55,7 @@
 % Figura: nome e legenda acima, fonte abaixo.
 % Uso: \figura{arquivo}{rotulo}{legenda}{largura}
 \newcommand{\figura}[4]{%
-  \begin{figure}[H]
+  \begin{figure}[!htbp]
     \centering
     \caption{#3}
     \label{#2}
@@ -199,12 +208,12 @@ Esta seção descreve o SIGEM, sistema desenvolvido como parte prática deste tr
 
 A partir das necessidades identificadas no referencial teórico, foram definidos os requisitos do sistema. Os requisitos funcionais descrevem os serviços que o sistema deve oferecer, e os não funcionais, as restrições e qualidades com que esses serviços devem ser prestados (Sommerville, 2011). Os requisitos funcionais são apresentados na Tabela~\ref{tb:rf}, e os não funcionais, na Tabela~\ref{tb:rnf}.
 
-\begin{table}[H]
+\begin{table}[!htbp]
   \centering
   \caption{Requisitos Funcionais (RF) do SIGEM}
   \label{tb:rf}
   \small
-  \renewcommand{\arraystretch}{1.35}
+  \renewcommand{\arraystretch}{1.15}
   \begin{tabularx}{\textwidth}{|l|X|}
     \hline
     \textbf{ID} & \textbf{DESCRIÇÃO} \\ \hline
@@ -224,12 +233,12 @@ A partir das necessidades identificadas no referencial teórico, foram definidos
   {\small Fonte: Autoria própria (2026).}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!htbp]
   \centering
   \caption{Requisitos Não Funcionais (RNF) do SIGEM}
   \label{tb:rnf}
   \small
-  \renewcommand{\arraystretch}{1.35}
+  \renewcommand{\arraystretch}{1.15}
   \begin{tabularx}{\textwidth}{|l|X|}
     \hline
     \textbf{ID} & \textbf{DESCRIÇÃO} \\ \hline
@@ -247,24 +256,24 @@ As quatro necessidades identificadas no referencial teórico estão cobertas pel
 
 A Figura~\ref{fig:casos} apresenta o diagrama de casos de uso do SIGEM, que mostra, do ponto de vista de cada perfil de usuário, quais funcionalidades ele pode utilizar (Sommerville, 2011). O farmacêutico tem acesso a todas as funcionalidades; o enfermeiro registra apenas saídas, além de consultar o estoque; e o gestor, assim como o visitante, apenas consulta as informações e gera relatórios.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
   \centering
   \caption{Diagrama de casos de uso do SIGEM}
   \label{fig:casos}
   \begin{tikzpicture}[
-      caso/.style={ellipse, draw, thick, fill=black!4, minimum width=6cm, minimum height=1.3cm, font=\small, align=center, inner sep=0pt},
+      caso/.style={ellipse, draw, thick, fill=black!4, minimum width=6cm, minimum height=1.25cm, font=\small, align=center, inner sep=0pt},
       lig/.style={thin}]
     \node[caso] (c1) at (0,0)    {Cadastrar medicamentos\\e lotes};
-    \node[caso] (c2) at (0,-1.6) {Registrar entrada};
-    \node[caso] (c3) at (0,-3.2) {Registrar saída};
-    \node[caso] (c4) at (0,-4.8) {Consultar painel, alertas,\\previsão e simulador};
-    \node[caso] (c5) at (0,-6.4) {Consultar estoque e\\histórico dos lotes};
-    \node[caso] (c6) at (0,-8.0) {Gerar relatórios};
+    \node[caso] (c2) at (0,-1.45) {Registrar entrada};
+    \node[caso] (c3) at (0,-2.9) {Registrar saída};
+    \node[caso] (c4) at (0,-4.35) {Consultar painel, alertas,\\previsão e simulador};
+    \node[caso] (c5) at (0,-5.8) {Consultar estoque e\\histórico dos lotes};
+    \node[caso] (c6) at (0,-7.25) {Gerar relatórios};
     \node[draw, thick, rounded corners=4pt, fit=(c1)(c6), inner sep=8pt,
           label={[font=\small\bfseries]above:SIGEM}] {};
-    \ator{(-6.2,-4.3)}{farm}{Farmacêutico}{1}
-    \ator{(6.2,-2.7)}{enf}{Enfermeiro}{-1}
-    \ator{(6.2,-7.1)}{gest}{Gestor ou\\visitante}{-1}
+    \ator{(-6.2,-3.9)}{farm}{Farmacêutico}{1}
+    \ator{(6.2,-2.4)}{enf}{Enfermeiro}{-1}
+    \ator{(6.2,-6.4)}{gest}{Gestor ou\\visitante}{-1}
     \foreach \caso in {c1,c2,c3,c4,c5,c6} \draw[lig] (farm) -- (\caso.west);
     \foreach \caso in {c3,c4,c5} \draw[lig] (enf) -- (\caso.east);
     \foreach \caso in {c4,c5,c6} \draw[lig] (gest) -- (\caso.east);
@@ -277,7 +286,7 @@ A Figura~\ref{fig:casos} apresenta o diagrama de casos de uso do SIGEM, que most
 
 O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetura}. A interface, que é a parte vista pelo usuário, foi construída com HTML, CSS e JavaScript, sem o uso de \textit{frameworks} (MDN Web Docs, 2026). O servidor foi construído em Node.js com a biblioteca Express e é responsável por receber os pedidos da interface, conferir o acesso e as permissões e consultar o banco de dados (Node.js, 2026; Express, 2026). Os dados são armazenados em um banco de dados relacional PostgreSQL (PostgreSQL, 2026). Os gráficos são desenhados com a biblioteca Chart.js (Chart.js, 2026). As três partes foram publicadas na internet por meio do serviço de hospedagem Render (Render, 2026).
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
   \centering
   \caption{Arquitetura do SIGEM}
   \label{fig:arquitetura}
@@ -300,7 +309,7 @@ O SIGEM é dividido em três partes, representadas na Figura~\ref{fig:arquitetur
 
 Para representar a estrutura do banco de dados, foi elaborado um Diagrama Entidade-Relacionamento (DER), modelo proposto por Chen (1976) para descrever os dados de uma aplicação e as relações entre eles. O DER do SIGEM é apresentado na Figura~\ref{fig:der}. A tabela de \textbf{medicamentos} guarda nome, princípio ativo, dosagem, forma farmacêutica, fabricante e estoque mínimo. A tabela de \textbf{lotes} guarda, para cada medicamento, o número do lote, a quantidade e a data de validade. A tabela de \textbf{setores} lista os setores do hospital. A tabela de \textbf{movimentações} registra cada entrada e cada saída, com lote, quantidade, setor de destino, motivo e data. As tabelas de \textbf{usuários} e de \textbf{sessões} dão suporte ao controle de acesso.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
   \centering
   \caption{Diagrama Entidade-Relacionamento (DER) do SIGEM}
   \label{fig:der}
@@ -332,7 +341,7 @@ O controle por lote é o que permite acompanhar a validade: um mesmo medicamento
 
 O acesso ao sistema é feito por conta com e-mail e senha, como mostra a Figura~\ref{fig:login}. As senhas não são armazenadas: o banco guarda apenas o \textit{hash} de cada senha, gerado com o algoritmo bcrypt, conforme recomendação do Open Worldwide Application Security Project (OWASP) para armazenamento de senhas (OWASP, 2026). Depois de oito tentativas de entrada erradas seguidas, novas tentativas com o mesmo e-mail são bloqueadas por até 15 minutos.
 
-\figura{fig-login.jpg}{fig:login}{Tela de entrada do SIGEM}{0.95}
+\figura{fig-login.jpg}{fig:login}{Tela de entrada do SIGEM}{0.8}
 
 Cada conta possui um de três perfis, com permissões diferentes: o \textbf{farmacêutico} tem acesso completo (cadastra, movimenta o estoque e gera relatórios); o \textbf{enfermeiro} consulta o estoque e registra apenas saídas; e o \textbf{gestor} tem acesso somente de leitura, incluindo os relatórios. Essas permissões são conferidas pelo servidor a cada pedido, e não apenas na interface. Há também a entrada como visitante, que é somente de leitura. Além disso, todo texto vindo do banco de dados é tratado antes de ser exibido, de modo que um código digitado em um campo, como o nome de um medicamento, aparece como texto e não é executado pelo navegador.
 
@@ -340,7 +349,27 @@ Cada conta possui um de três perfis, com permissões diferentes: o \textbf{farm
 
 Após a entrada, o usuário é direcionado ao painel de indicadores (\textit{dashboard}), apresentado na Figura~\ref{fig:dashboard}. O painel mostra o número de medicamentos cadastrados, o total de unidades em estoque e três alertas: medicamentos com estoque abaixo do mínimo, lotes que vencem nos próximos 30 dias e lotes já vencidos. Dois gráficos complementam a visão geral: o estoque de cada medicamento, com destaque em vermelho para os que estão abaixo do mínimo, e a proporção entre medicamentos com estoque normal e com estoque baixo. Os totais de estoque consideram apenas os lotes dentro da validade, pois unidades vencidas não podem ser usadas; os lotes vencidos aparecem separadamente, no alerta correspondente.
 
-\figura{fig-dashboard.jpg}{fig:dashboard}{Painel de indicadores do SIGEM, com alertas e gráficos de estoque}{0.88}
+O painel também se adapta a telas pequenas: no celular, os indicadores se reorganizam e o menu passa a ser uma barra fixa na parte inferior da tela, como mostra a Figura~\ref{fig:celular}. O sistema pode, ainda, ser instalado na tela inicial do aparelho como um aplicativo.
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}[t]{0.64\textwidth}
+    \centering
+    \caption{Painel de indicadores do SIGEM, com alertas e gráficos de estoque}
+    \label{fig:dashboard}
+    \includegraphics[width=\textwidth]{imagens/fig-dashboard.jpg}
+    \par\smallskip
+    {\small Fonte: Autoria própria (2026).}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \centering
+    \caption{Painel do SIGEM em tela de celular}
+    \label{fig:celular}
+    \includegraphics[width=0.86\textwidth]{imagens/fig-celular.jpg}
+    \par\smallskip
+    {\small Fonte: Autoria própria (2026).}
+  \end{minipage}
+\end{figure}
 
 \subsection{Previsão de esgotamento e simulador de cenários}
 
@@ -353,54 +382,67 @@ Para atuar de forma preventiva, o sistema estima em quantos dias o estoque de ca
 
 Por exemplo, um medicamento com 100 unidades válidas em estoque e 30 saídas nos últimos 30 dias consome, em média, uma unidade por dia; a previsão, portanto, é de 100 dias. O resultado é apresentado em uma tabela com indicação por cores, como mostra a Figura~\ref{fig:previsao}: vermelho quando o esgotamento é previsto para até 7 dias, amarelo para até 30 dias e verde acima disso. Quando o medicamento não teve saídas no período, o sistema informa que não há dados suficientes, em vez de apresentar uma estimativa sem base; quando o medicamento teve saídas, mas não tem mais estoque válido, informa que não há estoque válido.
 
-\figura{fig-previsao.jpg}{fig:previsao}{Previsão de esgotamento de estoque por medicamento}{0.88}
+\figura{fig-previsao.jpg}{fig:previsao}{Previsão de esgotamento de estoque por medicamento}{0.85}
 
 O simulador de cenários, apresentado na Figura~\ref{fig:simulador}, permite alterar duas variáveis hipotéticas, o consumo e a reposição de estoque, e recalcula a previsão na hora. No exemplo da figura, com o consumo dobrado, a previsão de esgotamento de cada medicamento cai pela metade: a da Azitromicina, por exemplo, passa de 20 para 10 dias. O recurso apoia a decisão sobre quanto repor antes que a falta aconteça.
 
-\figura{fig-simulador.jpg}{fig:simulador}{Simulador de cenários de consumo e reposição}{0.88}
+\figura{fig-simulador.jpg}{fig:simulador}{Simulador de cenários de consumo e reposição}{0.8}
 
 \subsection{Medicamentos, lotes e rastreabilidade}
 
 A tela de medicamentos, mostrada na Figura~\ref{fig:medicamentos}, reúne o cadastro de medicamentos e de lotes. Somente o perfil farmacêutico pode cadastrar, editar e excluir; os demais perfis apenas consultam.
 
-\figura{fig-medicamentos.jpg}{fig:medicamentos}{Tela de cadastro e listagem de medicamentos}{0.88}
+\figura{fig-medicamentos.jpg}{fig:medicamentos}{Tela de cadastro e listagem de medicamentos}{0.72}
 
 Para cada lote, o sistema apresenta uma linha do tempo com tudo o que aconteceu com ele: cadastro, entradas, saídas com setor e motivo, e a data de validade, como mostra a Figura~\ref{fig:historico}. Esse histórico é o que garante a rastreabilidade do lote.
 
-\figura{fig-historico.jpg}{fig:historico}{Linha do tempo (rastreabilidade) de um lote}{0.6}
-
 O sistema também gera um QR Code para cada lote (Figura~\ref{fig:qrcode}). Ao ser lido pela câmera na tela de movimentações, o código abre o formulário de saída com aquele lote já selecionado, o que agiliza o registro no balcão da farmácia. Se o lote estiver vencido, o sistema avisa que ele não pode ser dispensado.
 
-\figura{fig-qrcode.jpg}{fig:qrcode}{QR Code gerado para um lote}{0.4}
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}[t]{0.52\textwidth}
+    \centering
+    \caption{Linha do tempo (rastreabilidade) de um lote}
+    \label{fig:historico}
+    \includegraphics[width=0.92\textwidth]{imagens/fig-historico.jpg}
+    \par\smallskip
+    {\small Fonte: Autoria própria (2026).}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.44\textwidth}
+    \centering
+    \caption{QR Code gerado para um lote}
+    \label{fig:qrcode}
+    \includegraphics[width=0.82\textwidth]{imagens/fig-qrcode.jpg}
+    \par\smallskip
+    {\small Fonte: Autoria própria (2026).}
+  \end{minipage}
+\end{figure}
 
 \subsection{Movimentações}
 
 A tela de movimentações, apresentada na Figura~\ref{fig:movimentacoes}, registra as entradas e as saídas de estoque. Em cada registro são informados o medicamento, o lote, o tipo, a quantidade, o setor de destino e o motivo; na lista de lotes, os vencidos aparecem identificados. O histórico é exibido logo abaixo do formulário e é atualizado a cada registro.
 
-\figura{fig-movimentacoes.jpg}{fig:movimentacoes}{Tela de registro e histórico de movimentações}{0.88}
+\figura{fig-movimentacoes.jpg}{fig:movimentacoes}{Tela de registro e histórico de movimentações}{0.72}
 
 \subsection{Relatórios}
 
 A tela de relatórios, mostrada na Figura~\ref{fig:relatorios}, permite filtrar o histórico por período, tipo de movimentação e medicamento. O resultado pode ser exportado em planilha (CSV) ou em PDF; o relatório em PDF inclui totais de entradas e saídas, o medicamento mais movimentado e as saídas por setor.
 
-\figura{fig-relatorios.jpg}{fig:relatorios}{Tela de relatórios com filtros e exportação}{0.88}
+\figura{fig-relatorios.jpg}{fig:relatorios}{Tela de relatórios com filtros e exportação}{0.72}
 
 \subsection{Outros recursos}
 
 O sistema possui ainda uma página que compara o funcionamento da farmácia com e sem o controle informatizado (Figura~\ref{fig:comparativo}), uma página de contexto com os dados sobre a precariedade hospitalar e suas fontes, um assistente que responde a perguntas sobre o estoque por palavras-chave e o modo escuro.
 
-\figura{fig-comparativo.jpg}{fig:comparativo}{Página comparativa: farmácia sem e com o SIGEM}{0.88}
+\figura{fig-comparativo.jpg}{fig:comparativo}{Página comparativa: farmácia sem e com o SIGEM}{0.72}
 
-A interface se adapta a telas pequenas. No celular, o menu passa a ser uma barra fixa na parte inferior da tela, como mostra a Figura~\ref{fig:celular}, e o sistema pode ser instalado na tela inicial do aparelho como um aplicativo.
-
-\figura{fig-celular.jpg}{fig:celular}{Painel do SIGEM em tela de celular}{0.36}
-
+\FloatBarrier
 \subsection{Testes funcionais}
 
 A Tabela~\ref{tb:testes} apresenta os 26 casos de teste funcionais, organizados pelo requisito que verificam. Os testes foram executados em 24 de novembro de 2026, em ambiente local, com dados fictícios criados para esse fim e removidos ao final. Todos os casos apresentaram o resultado esperado.
 
-{\small
-\renewcommand{\arraystretch}{1.3}
+{\footnotesize
+\renewcommand{\arraystretch}{1.12}
 \begin{xltabular}{\textwidth}{|l|>{\raggedright\arraybackslash}X|l|>{\raggedright\arraybackslash}X|}
   \caption{Casos de teste funcionais executados}\label{tb:testes}\\
   \hline
@@ -411,32 +453,32 @@ A Tabela~\ref{tb:testes} apresenta os 26 casos de teste funcionais, organizados 
   \endhead
   \multicolumn{4}{c}{\small Fonte: Autoria própria (2026).} \\
   \endlastfoot
-  CT01 & Cadastro e edição de medicamento pelo farmacêutico & RF01 & Medicamento salvo com os dados editados \\ \hline
-  CT02 & Exclusão de medicamento com lotes e de medicamento sem lotes & RF01 & Com lotes: exclusão recusada; sem lotes: medicamento excluído \\ \hline
-  CT03 & Cadastro de lotes com quantidade e validade & RF02 & Lotes salvos e listados no medicamento \\ \hline
-  CT04 & Entrada de 20 unidades em um lote com 100 & RF03 & Quantidade do lote passou para 120 \\ \hline
-  CT05 & Saída de 30 unidades, com setor e motivo & RF03 & Quantidade passou para 90; saída registrada no histórico com setor e motivo \\ \hline
-  CT06 & Movimentação com lote que pertence a outro medicamento & RF03 & Operação recusada \\ \hline
-  CT07 & Abertura do endereço contido no QR Code de um lote & RF03 & Formulário de saída aberto com o lote já selecionado \\ \hline
-  CT08 & Saída maior que a quantidade disponível no lote & RF04 & Operação recusada, com aviso; quantidade inalterada \\ \hline
-  CT09 & Lote vencido, lote que vence em 10 dias e medicamento abaixo do mínimo & RF05 & Cada item exibido no alerta correspondente \\ \hline
-  CT10 & Previsão com 100 unidades válidas, um lote vencido e 30 saídas em 30 dias & RF06 & Esgotamento previsto para 100 dias; lote vencido desconsiderado \\ \hline
-  CT11 & Previsão de medicamento sem saídas nos últimos 30 dias & RF06 & Exibido ``sem dados suficientes'' \\ \hline
-  CT12 & Simulação com consumo aumentado em 100\% & RF07 & Previsão do cenário reduzida de 100 para 50 dias \\ \hline
-  CT13 & Consulta do histórico de um lote & RF08 & Entrada e saída exibidas em ordem, com setor e motivo \\ \hline
-  CT14 & Relatório filtrado por tipo, medicamento e período & RF09 & Somente a saída correspondente listada \\ \hline
-  CT15 & Acesso ao servidor sem estar conectado & RF10 & Pedido recusado \\ \hline
-  CT16 & Entrada com senha incorreta & RF10 & Acesso negado, com mensagem de erro \\ \hline
+  CT01 & Cadastro e edição de medicamento & RF01 & Dados salvos e editados \\ \hline
+  CT02 & Exclusão de medicamento com e sem lotes & RF01 & Com lotes: recusada; sem lotes: excluído \\ \hline
+  CT03 & Cadastro de lotes com quantidade e validade & RF02 & Lotes salvos e listados \\ \hline
+  CT04 & Entrada de 20 unidades em lote com 100 & RF03 & Lote passou para 120 unidades \\ \hline
+  CT05 & Saída de 30 unidades, com setor e motivo & RF03 & Lote passou para 90; saída no histórico \\ \hline
+  CT06 & Movimentação com lote de outro medicamento & RF03 & Recusada \\ \hline
+  CT07 & Abertura do endereço do QR Code de um lote & RF03 & Saída aberta com o lote já selecionado \\ \hline
+  CT08 & Saída maior que a quantidade do lote & RF04 & Recusada; quantidade inalterada \\ \hline
+  CT09 & Lote vencido, lote a vencer e estoque baixo & RF05 & Cada item no alerta correspondente \\ \hline
+  CT10 & Previsão: 100 unidades válidas e 30 saídas em 30 dias & RF06 & 100 dias; lote vencido desconsiderado \\ \hline
+  CT11 & Previsão sem saídas nos últimos 30 dias & RF06 & ``Sem dados suficientes'' \\ \hline
+  CT12 & Simulação com consumo aumentado em 100\% & RF07 & Previsão de 100 para 50 dias \\ \hline
+  CT13 & Consulta do histórico de um lote & RF08 & Entrada e saída em ordem, com setor e motivo \\ \hline
+  CT14 & Relatório filtrado por tipo, medicamento e período & RF09 & Somente a saída correspondente \\ \hline
+  CT15 & Acesso ao servidor sem estar conectado & RF10 & Recusado \\ \hline
+  CT16 & Entrada com senha incorreta & RF10 & Acesso negado, com mensagem \\ \hline
   CT17 & Criação de conta com e-mail já cadastrado & RF10 & Cadastro recusado \\ \hline
-  CT18 & Nove tentativas de entrada erradas seguidas & RF10 & Nona tentativa bloqueada temporariamente \\ \hline
-  CT19 & Enfermeiro: cadastrar medicamento, registrar entrada e registrar saída & RF10, RNF04 & Cadastro e entrada recusados; saída aceita \\ \hline
-  CT20 & Enfermeiro acessando os relatórios & RF10, RNF04 & Acesso recusado \\ \hline
-  CT21 & Gestor: registrar movimentação e acessar relatórios & RF10, RNF04 & Movimentação recusada; relatórios liberados \\ \hline
-  CT22 & Visitante: alterar dados e consultar o painel & RF10, RNF04 & Alteração recusada; consulta liberada \\ \hline
-  CT23 & Saída de um lote vencido & RF11 & Operação recusada, com aviso; quantidade inalterada \\ \hline
-  CT24 & Uso das seis telas principais em celular (375 pixels de largura) & RNF01 & Telas sem rolagem lateral e com o menu inferior visível \\ \hline
-  CT25 & Consulta da senha gravada no banco de dados & RNF03 & Apenas o \textit{hash} bcrypt armazenado, nunca a senha \\ \hline
-  CT26 & Nome de medicamento contendo código HTML & RNF05 & Nome exibido como texto, sem executar o código \\ \hline
+  CT18 & Nove tentativas de entrada erradas seguidas & RF10 & Nona tentativa bloqueada \\ \hline
+  CT19 & Enfermeiro: cadastro, entrada e saída & RF10, RNF04 & Cadastro e entrada recusados; saída aceita \\ \hline
+  CT20 & Enfermeiro acessando os relatórios & RF10, RNF04 & Recusado \\ \hline
+  CT21 & Gestor: movimentação e relatórios & RF10, RNF04 & Movimentação recusada; relatórios liberados \\ \hline
+  CT22 & Visitante: alteração de dados e consulta & RF10, RNF04 & Alteração recusada; consulta liberada \\ \hline
+  CT23 & Saída de um lote vencido & RF11 & Recusada; quantidade inalterada \\ \hline
+  CT24 & Seis telas principais em celular (375 pixels) & RNF01 & Sem rolagem lateral; menu inferior visível \\ \hline
+  CT25 & Consulta da senha gravada no banco & RNF03 & Apenas o \textit{hash} bcrypt armazenado \\ \hline
+  CT26 & Nome de medicamento com código HTML & RNF05 & Exibido como texto, sem executar o código \\ \hline
 \end{xltabular}
 }
 
@@ -444,6 +486,7 @@ A Tabela~\ref{tb:testes} apresenta os 26 casos de teste funcionais, organizados 
 
 O SIGEM possui limitações decorrentes do escopo acadêmico do projeto. Os testes foram feitos com dados fictícios, e o sistema não foi avaliado por profissionais em um hospital em funcionamento. No cadastro, o próprio usuário escolhe o seu perfil; em uso real, essa atribuição caberia a um administrador. A previsão de esgotamento usa uma média simples de consumo e não considera sazonalidade. Lotes vencidos deixam de contar como estoque, mas o sistema ainda não possui um registro específico para o seu descarte. O sistema também não contempla controle de fornecedores e de compras, integração com prontuários ou com sistemas oficiais de saúde. Por fim, a publicação utiliza o plano gratuito do serviço de hospedagem, que tem limitações de desempenho e de disponibilidade.
 
+\FloatBarrier
 \section{Considerações finais}
 
 A pesquisa bibliográfica e documental realizada demonstra que a precariedade dos hospitais públicos brasileiros é um problema complexo e multifatorial, que envolve financiamento, infraestrutura, disponibilidade e distribuição de profissionais, organização da atenção primária e desigualdades regionais. Não se trata do resultado de falhas administrativas isoladas, mas de problemas que envolvem a organização e o financiamento de toda a rede de atenção.
@@ -458,7 +501,7 @@ Como trabalhos futuros, propõe-se validar o sistema com profissionais de farmá
 
 \begingroup
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{10pt}
+\setlength{\parskip}{12pt}
 \singlespacing
 \raggedright
 
